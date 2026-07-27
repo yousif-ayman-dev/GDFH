@@ -80,9 +80,9 @@ class Project extends Model
     }
 
     public function attachments(): MorphMany
-{
-    return $this->morphMany(Attachment::class, 'attachable');
-}
+    {
+        return $this->morphMany(Attachment::class, 'attachable');
+    }
 
     public function reviews(): HasMany
     {
