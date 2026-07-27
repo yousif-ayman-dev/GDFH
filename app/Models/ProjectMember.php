@@ -5,27 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TeamMember extends Model
+class ProjectMember extends Model
 {
     protected $fillable = [
-        'team_id',
+        'project_id',
         'user_id',
         'role',
         'status',
-        'joined_at',
         'invited_by',
+        'joined_at',
+        'left_at',
     ];
 
     protected function casts(): array
     {
         return [
             'joined_at' => 'datetime',
+            'left_at' => 'datetime',
         ];
     }
 
-    public function team(): BelongsTo
+    public function project(): BelongsTo
     {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(Project::class);
     }
 
     public function user(): BelongsTo

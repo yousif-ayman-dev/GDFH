@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('team_members', function (Blueprint $table) {
+        Schema::create('project_members', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('team_id')
+            $table->foreignId('project_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
@@ -21,32 +21,38 @@ return new class extends Migration
 
             $table->enum('role', [
                 'owner',
-                'manager',
+                'project_manager',
+                'team_leader',
                 'member',
+                'viewer',
             ])->default('member');
 
             $table->enum('status', [
                 'pending',
                 'active',
                 'suspended',
+                'left',
             ])->default('active');
-
-            $table->timestamp('joined_at')->nullable();
 
             $table->foreignId('invited_by')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
 
+            $table->timestamp('joined_at')->nullable();
+            $table->timestamp('left_at')->nullable();
+
             $table->timestamps();
 
-            $table->unique(['team_id', 'user_id']);
-            $table->index(['team_id', 'status']);
+            $table->unique(['project_id', 'user_id']);
+
+            $table->index(['project_id', 'status']);
+            $table->index(['user_id', 'status']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('team_members');
+        Schema::dropIfExists('project_members');
     }
 };

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,32 +15,17 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -51,17 +37,78 @@ class User extends Authenticatable
     /**
      * Projects owned by the user.
      */
-    public function projects(): HasMany
+    public function ownedProjects(): HasMany
     {
-        return $this->hasMany(Project::class);
+        return $this->hasMany(Project::class, 'owner_id');
     }
 
     /**
-     * Team memberships belonging to the user.
+     * Project membership records for the user.
+     */
+    public function projectMemberships(): HasMany
+    {
+        return $this->hasMany(ProjectMember::class);
+    }
+
+    /**
+     * Projects where the user is a member.
+     */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Project::class,
+            'project_members'
+        )
+        ->withPivot([
+            'role',
+            'status',
+            'invited_by',
+            'joined_at',
+            'left_at',
+        ])
+        ->withTimestamps();
+    }
+
+    /**
+     * Teams owned by the user.
+     */
+    public function ownedTeams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'owner_id');
+    }
+
+    /**
+     * Team membership records for the user.
      */
     public function teamMemberships(): HasMany
     {
         return $this->hasMany(TeamMember::class);
+    }
+
+    /**
+     * Teams where the user is a member.
+     */
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Team::class,
+            'team_members'
+        )
+        ->withPivot([
+            'role',
+            'status',
+            'joined_at',
+            'invited_by',
+        ])
+        ->withTimestamps();
+    }
+
+    /**
+     * Tasks created by the user.
+     */
+    public function createdTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'created_by');
     }
 
     /**
@@ -83,16 +130,20 @@ class User extends Authenticatable
     /**
      * Reviews created by the user.
      */
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(Review::class);
-    }
+    public function reviewsWritten(): HasMany
+{
+    return $this->hasMany(Review::class, 'reviewer_id');
+}
 
+public function reviewsReceived(): HasMany
+{
+    return $this->hasMany(Review::class, 'reviewee_id');
+}
     /**
      * Comments created by the user.
      */
     public function comments(): HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class, 'user_id');
     }
 }

@@ -6,28 +6,36 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
 
-$table->foreignId('project_id')
-    ->constrained()
-    ->cascadeOnDelete();
+            $table->foreignId('owner_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
 
-$table->string('name');
-$table->text('description')->nullable();
+            $table->string('name');
+            $table->text('description')->nullable();
 
-$table->timestamps();
+            $table->string('slug')->unique();
+
+            $table->enum('type', [
+                'permanent',
+                'project_based',
+            ])->default('permanent');
+
+            $table->enum('visibility', [
+                'private',
+                'public',
+            ])->default('private');
+
+            $table->timestamps();
+
+            $table->index(['type', 'visibility']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('teams');

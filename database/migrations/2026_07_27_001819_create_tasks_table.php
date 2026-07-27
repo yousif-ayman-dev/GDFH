@@ -6,47 +6,65 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-           $table->id();
+            $table->id();
 
-$table->foreignId('project_id')
-    ->constrained()
-    ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-$table->foreignId('assigned_to')
-    ->nullable()
-    ->constrained('users')
-    ->nullOnDelete();
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
-$table->string('title');
-$table->text('description')->nullable();
+            $table->foreignId('assigned_to')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
-$table->enum('status', [
-    'pending',
-    'in_progress',
-    'completed'
-])->default('pending');
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('tasks')
+                ->nullOnDelete();
 
-$table->enum('priority', [
-    'low',
-    'medium',
-    'high'
-])->default('medium');
+            $table->string('title');
+            $table->text('description')->nullable();
 
-$table->date('due_date')->nullable();
+            $table->enum('status', [
+                'todo',
+                'in_progress',
+                'in_review',
+                'completed',
+                'cancelled',
+            ])->default('todo');
 
-$table->timestamps();
+            $table->enum('priority', [
+                'low',
+                'medium',
+                'high',
+                'urgent',
+            ])->default('medium');
+
+            $table->timestamp('start_at')->nullable();
+            $table->timestamp('due_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+
+            $table->unsignedInteger('estimated_minutes')->nullable();
+
+            $table->unsignedInteger('sort_order')->default(0);
+
+            $table->timestamps();
+
+            $table->index(['project_id', 'status']);
+            $table->index(['project_id', 'priority']);
+            $table->index(['assigned_to', 'status']);
+            $table->index(['parent_id', 'sort_order']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tasks');

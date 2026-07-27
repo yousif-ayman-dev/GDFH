@@ -4,21 +4,35 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Attachment extends Model
 {
     protected $fillable = [
-        'project_id',
         'uploaded_by',
-        'file_name',
-        'file_path',
-        'file_type',
-        'file_size',
+        'attachable_type',
+        'attachable_id',
+        'original_name',
+        'stored_name',
+        'disk',
+        'path',
+        'mime_type',
+        'extension',
+        'size',
+        'checksum',
+        'visibility',
     ];
 
-    public function project(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Project::class);
+        return [
+            'size' => 'integer',
+        ];
+    }
+
+    public function attachable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     public function uploadedBy(): BelongsTo
