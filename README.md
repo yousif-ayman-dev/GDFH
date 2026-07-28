@@ -1,59 +1,223 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# GDFH Project
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+GDFH is a web application developed using Laravel as part of an academic software development project.
 
-## About Laravel
+This repository contains the current development stage of the system.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Current Development Stage
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The current version includes:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- User authentication
+- User registration and login
+- User profile management
+- Project creation
+- Project listing and viewing
+- Project editing
+- Project deletion
+- Project ownership authorization
+- Project member management
+- Adding members to projects
+- Updating project member roles and statuses
+- Removing project members
+- Validation and authorization rules
+- Automated feature tests
 
-## Learning Laravel
+At the time this stage was completed, the automated test suite passed:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```text
+57 tests passed
+183 assertions
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Technologies
 
-## Laravel Sponsors
+The project is built using:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- Laravel 12
+- PHP 8.2+
+- SQLite
+- Laravel Breeze
+- Blade
+- Tailwind CSS
+- Vite
+- Node.js / NPM
 
-### Premium Partners
+Development environment used:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```text
+PHP 8.2.12
+Laravel 12.64.0
+Node.js 24.18.0
+```
 
-## Contributing
+Exact development versions are not necessarily required as long as the project dependencies are supported.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Project Setup
 
-## Code of Conduct
+### 1. Extract the Project
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Extract the ZIP file to any directory.
 
-## Security Vulnerabilities
+Example:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```text
+C:\Projects\GDFH
+```
 
-## License
+Open a terminal inside the project directory.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 2. Install PHP Dependencies
+
+If the `vendor` directory is already included in the provided package, this step may not be necessary.
+
+Otherwise run:
+
+```bash
+composer install
+```
+
+Composer must be installed on the computer.
+
+### 3. Install JavaScript Dependencies
+
+If the `node_modules` directory is already included in the provided package, this step may not be necessary.
+
+Otherwise run:
+
+```bash
+npm install
+```
+
+### 4. Create the Environment File
+
+Copy:
+
+```text
+.env.example
+```
+
+and create:
+
+```text
+.env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 5. Generate Application Key
+
+Run:
+
+```bash
+php artisan key:generate
+```
+
+### 6. Create SQLite Database
+
+Create an empty file named:
+
+```text
+database.sqlite
+```
+
+inside:
+
+```text
+database/
+```
+
+On Windows PowerShell:
+
+```powershell
+New-Item database/database.sqlite -ItemType File
+```
+
+The default `.env.example` is configured to use SQLite:
+
+```env
+DB_CONNECTION=sqlite
+```
+
+### 7. Run Database Migrations
+
+Run:
+
+```bash
+php artisan migrate
+```
+
+This will create the required database tables.
+
+### 8. Build Front-End Assets
+
+Run:
+
+```bash
+npm run build
+```
+
+Alternatively, during development:
+
+```bash
+npm run dev
+```
+
+Keep the development process running if `npm run dev` is used.
+
+### 9. Start Laravel
+
+Run:
+
+```bash
+php artisan serve
+```
+
+Laravel should display a local address similar to:
+
+```text
+http://127.0.0.1:8000
+```
+
+Open that address in a web browser.
+
+## Running Automated Tests
+
+To verify the implemented functionality:
+
+```bash
+php artisan test
+```
+
+At the completion of this development stage, the expected result was:
+
+```text
+Tests: 57 passed (183 assertions)
+```
+
+## Important Notes
+
+This package represents a development-stage version of the project and is not the final release.
+
+If `vendor` and `node_modules` are included in the provided ZIP file, the project dependencies are already present. However, running `composer install` and `npm install` may still be appropriate if the project is moved to a different development environment.
+
+The `.env` file is intentionally not included because environment configuration may differ between computers.
+
+SQLite is used for the current development environment, so no MySQL server configuration is required for the default setup.
+
+## Development Status
+
+Completed in this stage:
+
+- Authentication
+- Project CRUD
+- Project authorization
+- Project member backend management
+- Validation
+- Feature testing
+
+Further interface development and additional system modules are still in progress.
