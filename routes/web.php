@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TeamMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -42,6 +43,21 @@ Route::middleware('auth')->group(function () {
     )->name('projects.members.destroy');
 
     Route::resource('teams', TeamController::class);
+
+    Route::post(
+        '/teams/{team}/members',
+        [TeamMemberController::class, 'store']
+    )->name('teams.members.store');
+
+    Route::patch(
+        '/teams/{team}/members/{member}',
+        [TeamMemberController::class, 'update']
+    )->name('teams.members.update');
+
+    Route::delete(
+        '/teams/{team}/members/{member}',
+        [TeamMemberController::class, 'destroy']
+    )->name('teams.members.destroy');
 });
 
 require __DIR__.'/auth.php';

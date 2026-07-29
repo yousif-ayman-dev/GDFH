@@ -34,7 +34,6 @@ class TeamController extends Controller
         $team = Team::create([
             ...$data,
             'owner_id' => Auth::id(),
-            'slug' => Str::slug($data['name']) . '-' . Str::lower(Str::random(6)),
         ]);
 
         return redirect()
@@ -68,14 +67,6 @@ class TeamController extends Controller
         $this->ensureOwner($team);
 
         $data = $request->validated();
-
-        if (
-            isset($data['name']) &&
-            $data['name'] !== $team->name
-        ) {
-            $data['slug'] =
-                Str::slug($data['name']) . '-' . Str::lower(Str::random(6));
-        }
 
         $team->update($data);
 
