@@ -109,6 +109,24 @@ class TaskCrudTest extends TestCase
         $this->assertNotSame('Wrong', $task->title);
     }
 
+    public function test_task_parent_must_belong_to_same_project(): void
+    {
+        $owner = User::factory()->create();
+        $project = $this->createProject($owner);
+        $otherProject = $this->createProject($owner, 'Other Project');
+        $otherParent = $this->createTask($otherProject, $owner, 'Other Parent');
+
+        $response = $this->actingAs($owner)->from(route('projects.tasks.create', $project))->post(route('projects.tasks.store', $project), [
+            'title' => 'Child Task',
+            'parent_id' => $otherParent->id,
+            'status' => 'todo',
+            'priority' => 'medium',
+        ]);
+
+        $response->assertRedirect(route('projects.tasks.create', $project));
+        $response->assertSessionHasErrors('parent_id');
+    }
+
     public function test_owner_can_delete_task(): void
     {
         $owner = User::factory()->create();
@@ -134,13 +152,13 @@ class TaskCrudTest extends TestCase
         ]);
     }
 
-    private function createTask(Project $project, User $user): Task
+    private function createTask(Project $project, User $user, string $title = 'Initial Task'): Task
     {
         return Task::create([
             'project_id' => $project->id,
             'created_by' => $user->id,
             'assigned_to' => $user->id,
-            'title' => 'Initial Task',
+            'title' => $title,
             'description' => 'Task used for task tests.',
             'status' => 'todo',
             'priority' => 'medium',

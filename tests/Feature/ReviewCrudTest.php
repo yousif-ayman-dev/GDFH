@@ -69,6 +69,29 @@ class ReviewCrudTest extends TestCase
         ]);
     }
 
+    public function test_duplicate_review_for_same_project_and_users_is_rejected(): void
+    {
+        $reviewer = User::factory()->create();
+        $reviewee = User::factory()->create();
+        $project = $this->createProject($reviewer);
+
+        Review::create([
+            'project_id' => $project->id,
+            'reviewer_id' => $reviewer->id,
+            'reviewee_id' => $reviewee->id,
+            'rating' => 4,
+            'status' => 'published',
+        ]);
+
+        $response = $this->actingAs($reviewer)->from(route('projects.reviews.create', $project))->post(route('projects.reviews.store', $project), [
+            'reviewee_id' => $reviewee->id,
+            'rating' => 5,
+        ]);
+
+        $response->assertRedirect(route('projects.reviews.create', $project));
+        $response->assertSessionHasErrors('reviewee_id');
+    }
+
     public function test_unauthorized_user_cannot_delete_review(): void
     {
         $reviewer = User::factory()->create();
