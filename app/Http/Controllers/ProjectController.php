@@ -47,6 +47,11 @@ class ProjectController extends Controller
     {
         $this->ensureOwner($project);
 
+        $project->load([
+            'owner',
+            'memberRecords.user',
+        ]);
+
         return view('projects.show', compact('project'));
     }
 

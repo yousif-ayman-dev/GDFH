@@ -27,6 +27,20 @@
       </div>
       @endif
 
+      @if ($errors->any())
+      <div class="mb-6 p-4 bg-red-100 text-red-800 rounded-lg">
+        <p class="font-semibold">
+          Please fix the following errors:
+        </p>
+
+        <ul class="mt-2 list-disc list-inside text-sm">
+          @foreach ($errors->all() as $error)
+          <li>{{ $error }}</li>
+          @endforeach
+        </ul>
+      </div>
+      @endif
+
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6">
 
@@ -57,6 +71,16 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+
+            <div>
+              <p class="text-sm text-gray-500">Owner</p>
+              <p class="mt-1 font-medium text-gray-900">
+                {{ $project->owner->name }}
+              </p>
+              <p class="text-sm text-gray-500">
+                {{ $project->owner->email }}
+              </p>
+            </div>
 
             <div>
               <p class="text-sm text-gray-500">Budget Type</p>
@@ -112,6 +136,184 @@
 
           </div>
 
+          {{-- Project Members --}}
+          <div class="mt-10 pt-6 border-t">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Project Members
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                  Add members and manage their roles and status.
+                </p>
+              </div>
+
+              <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700">
+                {{ $project->memberRecords->count() }}
+                {{ $project->memberRecords->count() === 1 ? 'Member' : 'Members' }}
+              </span>
+            </div>
+
+            {{-- Add Member --}}
+            <div class="mt-6 p-4 border rounded-lg bg-gray-50">
+              <h4 class="font-semibold text-gray-900">
+                Add Member
+              </h4>
+
+              <form method="POST" action="{{ route('projects.members.store', $project) }}"
+                class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                @csrf
+
+                <div>
+                  <label for="user_id" class="block text-sm font-medium text-gray-700">
+                    User ID
+                  </label>
+
+                  <input id="user_id" name="user_id" type="number" min="1" value="{{ old('user_id') }}" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                  <label for="role" class="block text-sm font-medium text-gray-700">
+                    Role
+                  </label>
+
+                  <select id="role" name="role" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="project_manager" @selected(old('role')==='project_manager' )>
+                      Project Manager
+                    </option>
+
+                    <option value="team_leader" @selected(old('role')==='team_leader' )>
+                      Team Leader
+                    </option>
+
+                    <option value="member" @selected(old('role', 'member' )==='member' )>
+                      Member
+                    </option>
+
+                    <option value="viewer" @selected(old('role')==='viewer' )>
+                      Viewer
+                    </option>
+                  </select>
+                </div>
+
+                <div class="flex items-end">
+                  <button type="submit"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 transition">
+                    Add Member
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {{-- Members List --}}
+            <div class="mt-6 space-y-4">
+
+              @forelse ($project->memberRecords as $memberRecord)
+              <div class="p-4 border rounded-lg">
+
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+                  <div>
+                    <p class="font-semibold text-gray-900">
+                      {{ $memberRecord->user->name }}
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                      {{ $memberRecord->user->email }}
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-400">
+                      User ID: {{ $memberRecord->user_id }}
+                    </p>
+                  </div>
+
+                  <form method="POST" action="{{ route('projects.members.update', [$project, $memberRecord]) }}"
+                    class="flex flex-col sm:flex-row gap-3">
+                    @csrf
+                    @method('PATCH')
+
+                    <select name="role"
+                      class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+                      <option value="project_manager" @selected($memberRecord->role === 'project_manager')>
+                        Project Manager
+                      </option>
+
+                      <option value="team_leader" @selected($memberRecord->role === 'team_leader')>
+                        Team Leader
+                      </option>
+
+                      <option value="member" @selected($memberRecord->role === 'member')>
+                        Member
+                      </option>
+
+                      <option value="viewer" @selected($memberRecord->role === 'viewer')>
+                        Viewer
+                      </option>
+                    </select>
+
+                    <select name="status"
+                      class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+                      <option value="pending" @selected($memberRecord->status === 'pending')>
+                        Pending
+                      </option>
+
+                      <option value="active" @selected($memberRecord->status === 'active')>
+                        Active
+                      </option>
+
+                      <option value="suspended" @selected($memberRecord->status === 'suspended')>
+                        Suspended
+                      </option>
+
+                      <option value="left" @selected($memberRecord->status === 'left')>
+                        Left
+                      </option>
+                    </select>
+
+                    <button type="submit"
+                      class="inline-flex justify-center items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 transition">
+                      Update
+                    </button>
+                  </form>
+                </div>
+
+                <div class="mt-4 pt-4 border-t flex items-center justify-between gap-4">
+                  <div class="text-sm text-gray-500">
+                    Joined:
+                    {{ $memberRecord->joined_at
+                                                ? $memberRecord->joined_at->format('M d, Y')
+                                                : 'Not specified' }}
+                  </div>
+
+                  <form method="POST" action="{{ route('projects.members.destroy', [$project, $memberRecord]) }}"
+                    onsubmit="return confirm('Remove this member from the project?');">
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800">
+                      Remove Member
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+              @empty
+              <div class="p-6 text-center border rounded-lg bg-gray-50">
+                <p class="text-gray-500">
+                  No members have been added to this project yet.
+                </p>
+              </div>
+              @endforelse
+
+            </div>
+          </div>
+
+          {{-- Danger Zone --}}
           <div class="mt-10 pt-6 border-t">
             <h3 class="text-lg font-semibold text-gray-900">
               Danger Zone
