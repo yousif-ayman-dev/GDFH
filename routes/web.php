@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -39,6 +40,8 @@ Route::middleware('auth')->group(function () {
         '/projects/{project}/members/{member}',
         [ProjectMemberController::class, 'destroy']
     )->name('projects.members.destroy');
+
+    Route::resource('teams', TeamController::class);
 });
 
 require __DIR__.'/auth.php';
