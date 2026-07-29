@@ -1,3 +1,179 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+|--------------------------------------------------------------------------
+| GDFH Design System
+|--------------------------------------------------------------------------
+| Mineral × Copper
+| Arabic-first / RTL-ready / Light & Dark
+*/
+
+@layer base {
+     :root {
+        /* Surfaces */
+        --color-background: 246 244 241;
+        --color-surface: 255 255 255;
+        --color-surface-soft: 239 235 230;
+        /* Typography */
+        --color-text-primary: 25 35 38;
+        --color-text-secondary: 100 112 116;
+        /* Borders */
+        --color-border: 222 217 210;
+        /* Brand */
+        --color-copper: 197 138 91;
+        --color-copper-soft: 242 227 213;
+        /* Secondary Brand */
+        --color-mineral: 47 143 109;
+        --color-mineral-soft: 222 241 233;
+        /* Semantic */
+        --color-success: 39 138 93;
+        --color-warning: 190 125 31;
+        --color-error: 185 64 64;
+        --color-info: 67 119 151;
+        /* Radius */
+        --radius-xs: 6px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        /* Motion */
+        --duration-fast: 120ms;
+        --duration-normal: 180ms;
+        --duration-slow: 260ms;
+    }
+    .dark {
+        --color-background: 17 22 24;
+        --color-surface: 24 30 32;
+        --color-surface-soft: 32 39 41;
+        --color-text-primary: 244 241 236;
+        --color-text-secondary: 169 177 177;
+        --color-border: 48 56 58;
+        --color-copper: 214 154 105;
+        --color-copper-soft: 56 42 33;
+        --color-mineral: 85 184 146;
+        --color-mineral-soft: 27 57 47;
+        --color-success: 79 177 128;
+        --color-warning: 224 164 72;
+        --color-error: 221 103 103;
+        --color-info: 101 159 194;
+    }
+    html {
+        scroll-behavior: smooth;
+    }
+    body {
+        background-color: rgb(var(--color-background));
+        color: rgb(var(--color-text-primary));
+        font-family: "IBM Plex Sans Arabic", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+     ::selection {
+        background-color: rgb(var(--color-copper) / 0.22);
+        color: rgb(var(--color-text-primary));
+    }
+     :focus-visible {
+        outline: 2px solid rgb(var(--color-copper));
+        outline-offset: 3px;
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| GDFH Base Components
+|--------------------------------------------------------------------------
+*/
+
+@layer components {
+    .gdfh-card {
+        background-color: rgb(var(--color-surface));
+        border: 1px solid rgb(var(--color-border));
+        border-radius: var(--radius-lg);
+    }
+    .gdfh-surface-soft {
+        background-color: rgb(var(--color-surface-soft));
+    }
+    .gdfh-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 42px;
+        padding: 0.625rem 1rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: background-color var(--duration-normal) ease, border-color var(--duration-normal) ease, color var(--duration-normal) ease, transform var(--duration-fast) ease;
+    }
+    .gdfh-btn:active {
+        transform: translateY(1px);
+    }
+    .gdfh-btn-primary {
+        background-color: rgb(var(--color-text-primary));
+        color: rgb(var(--color-background));
+    }
+    .gdfh-btn-primary:hover {
+        opacity: 0.9;
+    }
+    .gdfh-btn-brand {
+        background-color: rgb(var(--color-copper));
+        color: #1b1511;
+    }
+    .gdfh-btn-brand:hover {
+        filter: brightness(0.96);
+    }
+    .gdfh-btn-secondary {
+        background-color: rgb(var(--color-surface));
+        color: rgb(var(--color-text-primary));
+        border: 1px solid rgb(var(--color-border));
+    }
+    .gdfh-btn-secondary:hover {
+        background-color: rgb(var(--color-surface-soft));
+    }
+    .gdfh-input {
+        width: 100%;
+        min-height: 44px;
+        padding: 0.625rem 0.875rem;
+        background-color: rgb(var(--color-surface));
+        color: rgb(var(--color-text-primary));
+        border: 1px solid rgb(var(--color-border));
+        border-radius: var(--radius-sm);
+        transition: border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease, background-color var(--duration-normal) ease;
+    }
+    .gdfh-input::placeholder {
+        color: rgb(var(--color-text-secondary));
+    }
+    .gdfh-input:focus {
+        border-color: rgb(var(--color-copper));
+        box-shadow: 0 0 0 3px rgb(var(--color-copper) / 0.12);
+        outline: none;
+    }
+    .gdfh-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.625rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Direction
+|--------------------------------------------------------------------------
+*/
+
+html[dir="rtl"] body {
+    direction: rtl;
+    text-align: right;
+}
+
+html[dir="ltr"] body {
+    direction: ltr;
+    text-align: left;
+}
