@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\ProjectTeamController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMemberController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +30,34 @@ Route::middleware('auth')->group(function () {
         ->name('profile.destroy');
 
     Route::resource('projects', ProjectController::class);
+
+    Route::resource('projects.tasks', TaskController::class)
+        ->scoped()
+        ->names('projects.tasks');
+
+    Route::post(
+        '/projects/{project}/teams',
+        [ProjectTeamController::class, 'store']
+    )->name('projects.teams.store');
+
+    Route::delete(
+        '/projects/{project}/teams/{team}',
+        [ProjectTeamController::class, 'destroy']
+    )->name('projects.teams.destroy');
+
+    Route::post(
+        '/projects/{project}/attachments',
+        [AttachmentController::class, 'store']
+    )->name('projects.attachments.store');
+
+    Route::delete(
+        '/projects/{project}/attachments/{attachment}',
+        [AttachmentController::class, 'destroy']
+    )->name('projects.attachments.destroy');
+
+    Route::resource('projects.reviews', ReviewController::class)
+        ->scoped()
+        ->names('projects.reviews');
 
     Route::post(
         '/projects/{project}/members',
