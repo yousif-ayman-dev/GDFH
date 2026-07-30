@@ -1,153 +1,486 @@
 <x-app-layout>
   <x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-      {{ __('Create Project') }}
-    </h2>
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-semibold text-[rgb(var(--color-copper))]">
+          إدارة المشاريع
+        </p>
+
+        <h2 class="mt-1 text-xl font-bold text-[rgb(var(--color-text-primary))]">
+          إنشاء مشروع جديد
+        </h2>
+      </div>
+
+      <a href="{{ route('projects.index') }}"
+        class="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-[rgb(var(--color-text-secondary))] transition hover:text-[rgb(var(--color-text-primary))]">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+        </svg>
+
+        العودة للمشاريع
+      </a>
+    </div>
   </x-slot>
 
-  <div class="py-12">
-    <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6">
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <div class="mx-auto max-w-5xl">
 
-          @if ($errors->any())
-          <div class="mb-6 p-4 bg-red-100 text-red-800 rounded-lg">
-            <ul class="list-disc list-inside">
-              @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-              @endforeach
-            </ul>
+      {{-- Intro --}}
+      <section class="mb-8">
+        <div class="flex items-start gap-4">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl
+                               bg-[rgb(var(--color-copper-soft))]
+                               text-[rgb(var(--color-copper))]">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+            </svg>
           </div>
-          @endif
 
-          <form method="POST" action="{{ route('projects.store') }}">
-            @csrf
+          <div>
+            <p class="text-xs font-semibold text-[rgb(var(--color-copper))]">
+              مشروع جديد
+            </p>
 
-            <div>
-              <x-input-label for="title" value="Project Title" />
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-[rgb(var(--color-text-primary))] sm:text-3xl">
+              ابدأ مشروعك من هنا
+            </h1>
 
-              <x-text-input id="title" name="title" type="text" class="mt-1 block w-full" :value="old('title')" required
-                autofocus />
+            <p class="mt-2 max-w-2xl text-sm leading-7 text-[rgb(var(--color-text-secondary))]">
+              أدخل المعلومات الأساسية للمشروع وحدد الميزانية والجدول الزمني.
+              يمكنك إدارة الفريق والمهام والتفاصيل الأخرى بعد إنشاء المشروع.
+            </p>
+          </div>
+        </div>
+      </section>
 
-              <x-input-error :messages="$errors->get('title')" class="mt-2" />
-            </div>
+      {{-- Global validation errors --}}
+      @if ($errors->any())
+      <div class="mb-6 flex items-start gap-3 rounded-xl border p-4" style="
+                        border-color: rgb(var(--color-error) / 0.30);
+                        background-color: rgb(var(--color-error) / 0.08);
+                    ">
+        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style="
+                            background-color: rgb(var(--color-error) / 0.12);
+                            color: rgb(var(--color-error));
+                        ">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v4m0 4h.01M10.3 3.8L2.6 17.1A2 2 0 004.3 20h15.4a2 2 0 001.7-2.9L13.7 3.8a2 2 0 00-3.4 0z" />
+          </svg>
+        </div>
 
-            <div class="mt-6">
-              <x-input-label for="description" value="Description" />
+        <div>
+          <p class="text-sm font-bold text-[rgb(var(--color-text-primary))]">
+            يوجد بعض الحقول التي تحتاج إلى مراجعة
+          </p>
 
-              <textarea id="description" name="description" rows="5" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description') }}</textarea>
-
-              <x-input-error :messages="$errors->get('description')" class="mt-2" />
-            </div>
-
-            <div class="mt-6">
-              <x-input-label for="category" value="Category" />
-
-              <x-text-input id="category" name="category" type="text" class="mt-1 block w-full"
-                :value="old('category')" />
-
-              <x-input-error :messages="$errors->get('category')" class="mt-2" />
-            </div>
-
-            <div class="mt-6">
-              <x-input-label for="visibility" value="Visibility" />
-
-              <select id="visibility" name="visibility" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="private" @selected(old('visibility', 'private' )==='private' )>
-                  Private
-                </option>
-
-                <option value="marketplace" @selected(old('visibility')==='marketplace' )>
-                  Marketplace
-                </option>
-              </select>
-
-              <x-input-error :messages="$errors->get('visibility')" class="mt-2" />
-            </div>
-
-            <div class="mt-6">
-              <x-input-label for="budget_type" value="Budget Type" />
-
-              <select id="budget_type" name="budget_type"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="">No budget type</option>
-
-                <option value="fixed" @selected(old('budget_type')==='fixed' )>
-                  Fixed
-                </option>
-
-                <option value="hourly" @selected(old('budget_type')==='hourly' )>
-                  Hourly
-                </option>
-              </select>
-
-              <x-input-error :messages="$errors->get('budget_type')" class="mt-2" />
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div>
-                <x-input-label for="budget_min" value="Minimum Budget" />
-
-                <x-text-input id="budget_min" name="budget_min" type="number" min="0" step="0.01"
-                  class="mt-1 block w-full" :value="old('budget_min')" />
-
-                <x-input-error :messages="$errors->get('budget_min')" class="mt-2" />
-              </div>
-
-              <div>
-                <x-input-label for="budget_max" value="Maximum Budget" />
-
-                <x-text-input id="budget_max" name="budget_max" type="number" min="0" step="0.01"
-                  class="mt-1 block w-full" :value="old('budget_max')" />
-
-                <x-input-error :messages="$errors->get('budget_max')" class="mt-2" />
-              </div>
-            </div>
-
-            <div class="mt-6">
-              <x-input-label for="currency" value="Currency" />
-
-              <x-text-input id="currency" name="currency" type="text" maxlength="3" class="mt-1 block w-full uppercase"
-                :value="old('currency', 'USD')" required />
-
-              <x-input-error :messages="$errors->get('currency')" class="mt-2" />
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div>
-                <x-input-label for="start_date" value="Start Date" />
-
-                <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full"
-                  :value="old('start_date')" />
-
-                <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
-              </div>
-
-              <div>
-                <x-input-label for="deadline" value="Deadline" />
-
-                <x-text-input id="deadline" name="deadline" type="date" class="mt-1 block w-full"
-                  :value="old('deadline')" />
-
-                <x-input-error :messages="$errors->get('deadline')" class="mt-2" />
-              </div>
-            </div>
-
-            <div class="mt-8 flex items-center justify-end gap-4">
-              <a href="{{ route('projects.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
-                Cancel
-              </a>
-
-              <x-primary-button>
-                Create Project
-              </x-primary-button>
-            </div>
-          </form>
-
+          <ul class="mt-2 space-y-1 text-sm" style="color: rgb(var(--color-error));">
+            @foreach ($errors->all() as $error)
+            <li>• {{ $error }}</li>
+            @endforeach
+          </ul>
         </div>
       </div>
+      @endif
+
+      <form method="POST" action="{{ route('projects.store') }}">
+        @csrf
+
+        <div class="space-y-6">
+
+          {{-- Basic information --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="flex items-center gap-3 border-b px-5 py-4 sm:px-6"
+              style="border-color: rgb(var(--color-border));">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg
+                                       bg-[rgb(var(--color-copper-soft))]
+                                       text-[rgb(var(--color-copper))]">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 19.5V5a2 2 0 012-2h8l6 6v10.5a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19.5z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 3v6h6" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                  معلومات المشروع
+                </h2>
+
+                <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                  المعلومات الأساسية التي تعرّف مشروعك.
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-6 p-5 sm:p-6">
+
+              {{-- Title --}}
+              <div>
+                <label for="title" class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                  اسم المشروع
+                  <span style="color: rgb(var(--color-error));">*</span>
+                </label>
+
+                <input id="title" name="title" type="text" value="{{ old('title') }}" required autofocus
+                  autocomplete="off" placeholder="مثال: تطوير منصة إدارة المشاريع" class="gdfh-input">
+
+                @error('title')
+                <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                  {{ $message }}
+                </p>
+                @enderror
+              </div>
+
+              {{-- Description --}}
+              <div>
+                <div class="mb-2 flex items-center justify-between gap-3">
+                  <label for="description" class="block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                    وصف المشروع
+                    <span style="color: rgb(var(--color-error));">*</span>
+                  </label>
+
+                  <span class="text-xs text-[rgb(var(--color-text-secondary))]">
+                    اكتب وصفًا واضحًا ومختصرًا
+                  </span>
+                </div>
+
+                <textarea id="description" name="description" rows="6" required
+                  placeholder="اشرح فكرة المشروع، أهدافه، والنتيجة التي تريد الوصول إليها..."
+                  class="gdfh-input min-h-[150px] resize-y">{{ old('description') }}</textarea>
+
+                @error('description')
+                <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                  {{ $message }}
+                </p>
+                @enderror
+              </div>
+
+              {{-- Category --}}
+              <div>
+                <label for="category" class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                  التصنيف
+                </label>
+
+                <input id="category" name="category" type="text" value="{{ old('category') }}" autocomplete="off"
+                  placeholder="مثال: Web Development" class="gdfh-input">
+
+                <p class="mt-2 text-xs text-[rgb(var(--color-text-secondary))]">
+                  يساعد التصنيف في تنظيم المشروع والعثور عليه بسهولة.
+                </p>
+
+                @error('category')
+                <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                  {{ $message }}
+                </p>
+                @enderror
+              </div>
+            </div>
+          </section>
+
+          {{-- Visibility --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="flex items-center gap-3 border-b px-5 py-4 sm:px-6"
+              style="border-color: rgb(var(--color-border));">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg
+                                       bg-[rgb(var(--color-copper-soft))]
+                                       text-[rgb(var(--color-copper))]">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                  ظهور المشروع
+                </h2>
+
+                <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                  حدد من يمكنه الوصول إلى المشروع.
+                </p>
+              </div>
+            </div>
+
+            <div class="p-5 sm:p-6">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                {{-- Private --}}
+                <label class="group relative cursor-pointer">
+                  <input type="radio" name="visibility" value="private" class="peer sr-only"
+                    @checked(old('visibility', 'private' )==='private' )>
+
+                  <div class="h-full rounded-xl border p-4 transition
+                                               peer-checked:border-[rgb(var(--color-copper))]
+                                               peer-checked:bg-[rgb(var(--color-copper-soft))]
+                                               hover:border-[rgb(var(--color-copper))]"
+                    style="border-color: rgb(var(--color-border));">
+                    <div class="flex items-start gap-3">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
+                                                       bg-[rgb(var(--color-surface-soft))]
+                                                       text-[rgb(var(--color-text-secondary))]
+                                                       peer-checked:text-[rgb(var(--color-copper))]">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <rect x="5" y="10" width="14" height="10" rx="2" />
+                          <path stroke-linecap="round" d="M8 10V7a4 4 0 018 0v3" />
+                        </svg>
+                      </div>
+
+                      <div>
+                        <p class="text-sm font-bold text-[rgb(var(--color-text-primary))]">
+                          خاص
+                        </p>
+
+                        <p class="mt-1 text-xs leading-6 text-[rgb(var(--color-text-secondary))]">
+                          المشروع متاح لك وللأعضاء والفرق المرتبطة به فقط.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </label>
+
+                {{-- Marketplace --}}
+                <label class="group relative cursor-pointer">
+                  <input type="radio" name="visibility" value="marketplace" class="peer sr-only"
+                    @checked(old('visibility')==='marketplace' )>
+
+                  <div class="h-full rounded-xl border p-4 transition
+                                               peer-checked:border-[rgb(var(--color-copper))]
+                                               peer-checked:bg-[rgb(var(--color-copper-soft))]
+                                               hover:border-[rgb(var(--color-copper))]"
+                    style="border-color: rgb(var(--color-border));">
+                    <div class="flex items-start gap-3">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
+                                                       bg-[rgb(var(--color-surface-soft))]
+                                                       text-[rgb(var(--color-text-secondary))]">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <circle cx="12" cy="12" r="9" />
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" />
+                        </svg>
+                      </div>
+
+                      <div>
+                        <p class="text-sm font-bold text-[rgb(var(--color-text-primary))]">
+                          سوق المشاريع
+                        </p>
+
+                        <p class="mt-1 text-xs leading-6 text-[rgb(var(--color-text-secondary))]">
+                          المشروع قابل للظهور في سوق المشاريع وفق آلية المنصة.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              @error('visibility')
+              <p class="mt-3 text-xs font-medium" style="color: rgb(var(--color-error));">
+                {{ $message }}
+              </p>
+              @enderror
+            </div>
+          </section>
+
+          {{-- Budget --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="flex items-center gap-3 border-b px-5 py-4 sm:px-6"
+              style="border-color: rgb(var(--color-border));">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg
+                                       bg-[rgb(var(--color-copper-soft))]
+                                       text-[rgb(var(--color-copper))]">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="6" width="18" height="13" rx="2" />
+                  <path stroke-linecap="round" d="M16 12h5" />
+                  <circle cx="16" cy="12" r=".5" fill="currentColor" />
+                  <path stroke-linecap="round" d="M6 6V4h11v2" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                  الميزانية
+                </h2>
+
+                <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                  هذه البيانات اختيارية ويمكن تعديلها لاحقًا.
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-6 p-5 sm:p-6">
+
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label for="budget_type"
+                    class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                    نوع الميزانية
+                  </label>
+
+                  <select id="budget_type" name="budget_type" class="gdfh-input">
+                    <option value="" @selected(old('budget_type')==='' )>
+                      بدون ميزانية محددة
+                    </option>
+
+                    <option value="fixed" @selected(old('budget_type')==='fixed' )>
+                      ميزانية ثابتة
+                    </option>
+
+                    <option value="hourly" @selected(old('budget_type')==='hourly' )>
+                      بالساعة
+                    </option>
+                  </select>
+
+                  @error('budget_type')
+                  <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                    {{ $message }}
+                  </p>
+                  @enderror
+                </div>
+
+                <div>
+                  <label for="currency" class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                    العملة
+                  </label>
+
+                  <input id="currency" name="currency" type="text" maxlength="3" value="{{ old('currency', 'USD') }}"
+                    required autocomplete="off" dir="ltr" placeholder="USD" class="gdfh-input uppercase">
+
+                  <p class="mt-2 text-xs text-[rgb(var(--color-text-secondary))]">
+                    استخدم رمز العملة المكوّن من 3 أحرف مثل USD.
+                  </p>
+
+                  @error('currency')
+                  <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                    {{ $message }}
+                  </p>
+                  @enderror
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label for="budget_min"
+                    class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                    الحد الأدنى للميزانية
+                  </label>
+
+                  <input id="budget_min" name="budget_min" type="number" min="0" step="0.01"
+                    value="{{ old('budget_min') }}" placeholder="0.00" dir="ltr" class="gdfh-input text-left">
+
+                  @error('budget_min')
+                  <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                    {{ $message }}
+                  </p>
+                  @enderror
+                </div>
+
+                <div>
+                  <label for="budget_max"
+                    class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                    الحد الأعلى للميزانية
+                  </label>
+
+                  <input id="budget_max" name="budget_max" type="number" min="0" step="0.01"
+                    value="{{ old('budget_max') }}" placeholder="0.00" dir="ltr" class="gdfh-input text-left">
+
+                  @error('budget_max')
+                  <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                    {{ $message }}
+                  </p>
+                  @enderror
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {{-- Timeline --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="flex items-center gap-3 border-b px-5 py-4 sm:px-6"
+              style="border-color: rgb(var(--color-border));">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg
+                                       bg-[rgb(var(--color-copper-soft))]
+                                       text-[rgb(var(--color-copper))]">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path stroke-linecap="round" d="M8 3v4M16 3v4M3 10h18" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                  الجدول الزمني
+                </h2>
+
+                <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                  حدد الفترة المتوقعة لتنفيذ المشروع.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 p-5 sm:p-6 md:grid-cols-2">
+              <div>
+                <label for="start_date" class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                  تاريخ البداية
+                </label>
+
+                <input id="start_date" name="start_date" type="date" value="{{ old('start_date') }}" class="gdfh-input">
+
+                @error('start_date')
+                <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                  {{ $message }}
+                </p>
+                @enderror
+              </div>
+
+              <div>
+                <label for="deadline" class="mb-2 block text-sm font-semibold text-[rgb(var(--color-text-primary))]">
+                  الموعد النهائي
+                </label>
+
+                <input id="deadline" name="deadline" type="date" value="{{ old('deadline') }}" class="gdfh-input">
+
+                @error('deadline')
+                <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
+                  {{ $message }}
+                </p>
+                @enderror
+              </div>
+            </div>
+          </section>
+
+          {{-- Submit --}}
+          <section class="gdfh-card p-5 sm:p-6">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm font-bold text-[rgb(var(--color-text-primary))]">
+                  جاهز لإنشاء المشروع؟
+                </p>
+
+                <p class="mt-1 text-xs leading-6 text-[rgb(var(--color-text-secondary))]">
+                  سيتم إنشاء المشروع كمسودة، وبعدها يمكنك إضافة الفريق والمهام واستكمال إعداده.
+                </p>
+              </div>
+
+              <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+                <a href="{{ route('projects.index') }}" class="gdfh-btn gdfh-btn-secondary">
+                  إلغاء
+                </a>
+
+                <button type="submit" class="gdfh-btn gdfh-btn-brand">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                  </svg>
+
+                  إنشاء المشروع
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </form>
     </div>
   </div>
 </x-app-layout>
