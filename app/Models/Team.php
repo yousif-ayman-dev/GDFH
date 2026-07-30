@@ -34,6 +34,7 @@ class Team extends Model
         'name',
         'description',
         'slug',
+        'logo_path',
         'type',
         'visibility',
     ];
@@ -74,6 +75,11 @@ class Team extends Model
             'joined_at',
         ])
         ->withTimestamps();
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     protected static function generateUniqueSlug(string $name): string

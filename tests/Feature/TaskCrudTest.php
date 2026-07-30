@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\Team;
+use App\Models\TeamMember;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -139,6 +141,65 @@ class TaskCrudTest extends TestCase
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
     }
 
+    public function test_task_can_be_created_with_team_linked_to_project(): void
+    {
+        $owner = User::factory()->create();
+        $project = $this->createProject($owner);
+        $team = $this->createTeam($owner);
+        $project->teams()->attach($team->id, ['is_primary' => false, 'joined_at' => now()]);
+
+        $response = $this->actingAs($owner)->post(route('projects.tasks.store', $project), [
+            'title' => 'Team Task',
+            'status' => 'todo',
+            'priority' => 'medium',
+            'team_id' => $team->id,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('tasks', [
+            'project_id' => $project->id,
+            'team_id' => $team->id,
+            'title' => 'Team Task',
+        ]);
+    }
+
+    public function test_assignee_must_be_team_member_when_team_is_selected(): void
+    {
+        $owner = User::factory()->create();
+        $project = $this->createProject($owner);
+        $team = $this->createTeam($owner);
+        $project->teams()->attach($team->id, ['is_primary' => false, 'joined_at' => now()]);
+        $member = User::factory()->create();
+
+        $response = $this->actingAs($owner)->from(route('projects.tasks.create', $project))->post(route('projects.tasks.store', $project), [
+            'title' => 'Invalid Assignment',
+            'status' => 'todo',
+            'priority' => 'medium',
+            'team_id' => $team->id,
+            'assigned_to' => $member->id,
+        ]);
+
+        $response->assertRedirect(route('projects.tasks.create', $project));
+        $response->assertSessionHasErrors('assigned_to');
+    }
+
+    public function test_team_must_belong_to_project_for_task_creation(): void
+    {
+        $owner = User::factory()->create();
+        $project = $this->createProject($owner);
+        $team = $this->createTeam($owner);
+
+        $response = $this->actingAs($owner)->from(route('projects.tasks.create', $project))->post(route('projects.tasks.store', $project), [
+            'title' => 'Wrong Team Task',
+            'status' => 'todo',
+            'priority' => 'medium',
+            'team_id' => $team->id,
+        ]);
+
+        $response->assertRedirect(route('projects.tasks.create', $project));
+        $response->assertSessionHasErrors('team_id');
+    }
+
     private function createProject(User $owner, string $title = 'Test Project'): Project
     {
         return Project::create([
@@ -162,6 +223,18 @@ class TaskCrudTest extends TestCase
             'description' => 'Task used for task tests.',
             'status' => 'todo',
             'priority' => 'medium',
+        ]);
+    }
+
+    private function createTeam(User $owner): Team
+    {
+        return Team::create([
+            'owner_id' => $owner->id,
+            'name' => 'Task Team',
+            'slug' => 'task-team-' . uniqid(),
+            'description' => 'Team used for task tests.',
+            'type' => 'permanent',
+            'visibility' => 'private',
         ]);
     }
 }

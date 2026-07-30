@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTeamRequest;
 use App\Http\Requests\UpdateTeamRequest;
+use App\Models\Project;
 use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -34,6 +37,7 @@ class TeamController extends Controller
         $team = Team::create([
             ...$data,
             'owner_id' => Auth::id(),
+            'logo_path' => $this->storeLogo($request->file('logo')),
         ]);
 
         return redirect()
@@ -48,9 +52,17 @@ class TeamController extends Controller
         $team->load([
             'owner',
             'memberships.user',
+            'projects.owner',
+            'tasks.project',
+            'tasks.assignee',
         ]);
 
-        return view('teams.show', compact('team'));
+        $availableProjects = Project::query()
+            ->where('owner_id', Auth::id())
+            ->whereNotIn('id', $team->projects->pluck('id'))
+            ->get();
+
+        return view('teams.show', compact('team', 'availableProjects'));
     }
 
     public function edit(Team $team): View
@@ -68,6 +80,11 @@ class TeamController extends Controller
 
         $data = $request->validated();
 
+        if ($request->hasFile('logo')) {
+            $this->deleteLogo($team->logo_path);
+            $data['logo_path'] = $this->storeLogo($request->file('logo'));
+        }
+
         $team->update($data);
 
         return redirect()
@@ -79,6 +96,7 @@ class TeamController extends Controller
     {
         $this->ensureOwner($team);
 
+        $this->deleteLogo($team->logo_path);
         $team->delete();
 
         return redirect()
@@ -92,5 +110,23 @@ class TeamController extends Controller
             $team->owner_id === Auth::id(),
             403
         );
+    }
+
+    private function storeLogo(?UploadedFile $logo): ?string
+    {
+        if ($logo === null) {
+            return null;
+        }
+
+        return $logo->store('teams', 'public');
+    }
+
+    private function deleteLogo(?string $logoPath): void
+    {
+        if ($logoPath === null || $logoPath === '') {
+            return;
+        }
+
+        Storage::disk('public')->delete($logoPath);
     }
 }

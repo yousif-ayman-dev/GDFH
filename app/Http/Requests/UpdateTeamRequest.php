@@ -47,6 +47,14 @@ class UpdateTeamRequest extends FormRequest
                     'public',
                 ]),
             ],
+
+            'logo' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp,gif',
+                'max:2048',
+            ],
         ];
     }
 }

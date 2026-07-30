@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class TeamCrudTest extends TestCase
@@ -50,6 +53,50 @@ class TeamCrudTest extends TestCase
             'description' => 'Handles releases.',
             'type' => 'permanent',
             'visibility' => 'private',
+            'logo_path' => null,
+        ]);
+    }
+
+    public function test_user_can_create_team_with_valid_logo(): void
+    {
+        Storage::fake('public');
+        $owner = User::factory()->create();
+        $logo = $this->fakeImageUpload('logo.png');
+
+        $response = $this->actingAs($owner)->post(route('teams.store'), [
+            'name' => 'Design Team',
+            'description' => 'Creative work.',
+            'type' => 'permanent',
+            'visibility' => 'private',
+            'logo' => $logo,
+        ]);
+
+        $response->assertRedirect();
+        $team = Team::query()->where('name', 'Design Team')->firstOrFail();
+
+        $this->assertNotNull($team->logo_path);
+        Storage::disk('public')->assertExists($team->logo_path);
+    }
+
+    public function test_invalid_logo_upload_is_rejected(): void
+    {
+        Storage::fake('public');
+        $owner = User::factory()->create();
+        $logo = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+        $response = $this->actingAs($owner)->from(route('teams.create'))->post(route('teams.store'), [
+            'name' => 'Bad Logo Team',
+            'description' => 'Should fail.',
+            'type' => 'permanent',
+            'visibility' => 'private',
+            'logo' => $logo,
+        ]);
+
+        $response->assertRedirect(route('teams.create'));
+        $response->assertSessionHasErrors(['logo']);
+        $this->assertDatabaseMissing('teams', [
+            'owner_id' => $owner->id,
+            'name' => 'Bad Logo Team',
         ]);
     }
 
@@ -132,6 +179,76 @@ class TeamCrudTest extends TestCase
         $this->assertSame('Visible Team', $team->name);
     }
 
+    public function test_owner_can_replace_team_logo(): void
+    {
+        Storage::fake('public');
+        $owner = User::factory()->create();
+        $team = $this->createTeam($owner, ['name' => 'Image Team']);
+        $initialLogo = $this->fakeImageUpload('initial.png');
+        $replacementLogo = $this->fakeImageUpload('replacement.png');
+
+        $team->update(['logo_path' => $initialLogo->store('teams', 'public')]);
+
+        $response = $this->actingAs($owner)->patch(route('teams.update', $team), [
+            'name' => $team->name,
+            'type' => $team->type,
+            'visibility' => $team->visibility,
+            'logo' => $replacementLogo,
+        ]);
+
+        $response->assertRedirect(route('teams.show', $team));
+        $team->refresh();
+
+        $this->assertNotNull($team->logo_path);
+        $this->assertNotSame('teams/initial.png', $team->logo_path);
+        Storage::disk('public')->assertExists($team->logo_path);
+        Storage::disk('public')->assertMissing('teams/initial.png');
+    }
+
+    public function test_owner_can_link_project_to_team(): void
+    {
+        $owner = User::factory()->create();
+        $team = $this->createTeam($owner, ['name' => 'Workspace Team']);
+        $project = $this->createProject($owner, ['title' => 'Linked Project']);
+
+        $response = $this->actingAs($owner)->post(route('teams.projects.attach', [$team, $project]));
+
+        $response->assertRedirect(route('teams.show', $team));
+        $this->assertDatabaseHas('project_team', [
+            'project_id' => $project->id,
+            'team_id' => $team->id,
+        ]);
+    }
+
+    public function test_duplicate_team_project_link_is_rejected(): void
+    {
+        $owner = User::factory()->create();
+        $team = $this->createTeam($owner, ['name' => 'Duplicate Team']);
+        $project = $this->createProject($owner, ['title' => 'Duplicate Project']);
+        $project->teams()->attach($team->id, ['is_primary' => false, 'joined_at' => now()]);
+
+        $response = $this->actingAs($owner)->from(route('teams.show', $team))->post(route('teams.projects.attach', [$team, $project]));
+
+        $response->assertRedirect(route('teams.show', $team));
+        $response->assertSessionHasErrors('project_id');
+    }
+
+    public function test_owner_can_unlink_project_from_team(): void
+    {
+        $owner = User::factory()->create();
+        $team = $this->createTeam($owner, ['name' => 'Unlink Team']);
+        $project = $this->createProject($owner, ['title' => 'Unlink Project']);
+        $project->teams()->attach($team->id, ['is_primary' => false, 'joined_at' => now()]);
+
+        $response = $this->actingAs($owner)->delete(route('teams.projects.detach', [$team, $project]));
+
+        $response->assertRedirect(route('teams.show', $team));
+        $this->assertDatabaseMissing('project_team', [
+            'project_id' => $project->id,
+            'team_id' => $team->id,
+        ]);
+    }
+
     public function test_owner_can_delete_team(): void
     {
         $owner = User::factory()->create();
@@ -153,6 +270,22 @@ class TeamCrudTest extends TestCase
 
         $response->assertForbidden();
         $this->assertDatabaseHas('teams', ['id' => $team->id]);
+    }
+
+    public function test_deleting_team_cleans_up_stored_logo(): void
+    {
+        Storage::fake('public');
+        $owner = User::factory()->create();
+        $team = $this->createTeam($owner, ['name' => 'Cleanup Team']);
+        $logoPath = 'teams/logo.png';
+        Storage::disk('public')->put($logoPath, 'content');
+        $team->update(['logo_path' => $logoPath]);
+
+        $response = $this->actingAs($owner)->delete(route('teams.destroy', $team));
+
+        $response->assertRedirect(route('teams.index'));
+        $this->assertDatabaseMissing('teams', ['id' => $team->id]);
+        Storage::disk('public')->assertMissing($logoPath);
     }
 
     public function test_slug_is_generated_and_changes_when_name_changes(): void
@@ -182,5 +315,27 @@ class TeamCrudTest extends TestCase
         }
 
         return Team::create($data);
+    }
+
+    private function createProject(User $owner, array $attributes = []): Project
+    {
+        return Project::create([
+            'owner_id' => $owner->id,
+            'title' => $attributes['title'] ?? 'Sample Project',
+            'slug' => ($attributes['slug'] ?? 'sample-project') . '-' . uniqid(),
+            'description' => $attributes['description'] ?? 'Sample project',
+            'visibility' => $attributes['visibility'] ?? 'private',
+            'status' => $attributes['status'] ?? 'draft',
+            'currency' => $attributes['currency'] ?? 'USD',
+        ]);
+    }
+
+    private function fakeImageUpload(string $name): UploadedFile
+    {
+        $contents = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQABAA4A1GvVxQAAAABJRU5ErkJggg==');
+        $path = tempnam(sys_get_temp_dir(), 'team-logo');
+        file_put_contents($path, $contents);
+
+        return new UploadedFile($path, $name, 'image/png', null, true);
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMemberController;
+use App\Http\Controllers\TeamProjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -91,6 +92,16 @@ Route::middleware('auth')->group(function () {
         '/teams/{team}/members/{member}',
         [TeamMemberController::class, 'destroy']
     )->name('teams.members.destroy');
+
+    Route::post(
+        '/teams/{team}/projects/{project}',
+        [TeamProjectController::class, 'attach']
+    )->name('teams.projects.attach');
+
+    Route::delete(
+        '/teams/{team}/projects/{project}',
+        [TeamProjectController::class, 'detach']
+    )->name('teams.projects.detach');
 });
 
 require __DIR__.'/auth.php';
