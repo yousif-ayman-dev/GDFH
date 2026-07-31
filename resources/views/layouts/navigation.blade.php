@@ -164,11 +164,26 @@ $navigation = [
             {{ Auth::user()->name }}
           </div>
 
-          <div class="truncate text-xs" style="color: rgb(var(--color-text-secondary));">
-            {{ Auth::user()->email }}
+          <div class="truncate text-xs font-mono" style="color: rgb(var(--color-text-secondary));">
+            @if (Auth::user()->username)
+              {{ '@' . Auth::user()->username }}
+            @else
+              {{ Auth::user()->email }}
+            @endif
           </div>
         </div>
       </div>
+
+      <form method="POST" action="{{ route('logout') }}" class="mt-3">
+        @csrf
+        <button type="submit" class="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold transition hover:bg-red-500/10"
+          style="background-color: rgb(var(--color-surface-soft)); color: rgb(var(--color-error)); border: 1px solid rgb(var(--color-border));">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+          </svg>
+          <span>تسجيل الخروج</span>
+        </button>
+      </form>
     </div>
   </div>
 </aside>

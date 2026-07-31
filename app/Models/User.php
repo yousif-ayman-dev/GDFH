@@ -19,6 +19,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'username',
+        'account_type',
+        'onboarded_at',
     ];
 
     protected $hidden = [
@@ -31,7 +34,34 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'onboarded_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if user is a freelancer.
+     */
+    public function isFreelancer(): bool
+    {
+        return $this->account_type === 'freelancer';
+    }
+
+    /**
+     * Check if user is a client.
+     */
+    public function isClient(): bool
+    {
+        return $this->account_type === 'client';
+    }
+
+    /**
+     * Check if user has completed onboarding.
+     */
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarded_at !== null
+            && ! empty($this->username)
+            && ! empty($this->account_type);
     }
 
     /**

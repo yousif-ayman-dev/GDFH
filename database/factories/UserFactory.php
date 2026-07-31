@@ -27,6 +27,9 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'username' => fake()->unique()->userName(),
+            'account_type' => 'freelancer',
+            'onboarded_at' => now(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
@@ -40,6 +43,18 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user has not completed onboarding.
+     */
+    public function unonboarded(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'username' => null,
+            'account_type' => null,
+            'onboarded_at' => null,
         ]);
     }
 }

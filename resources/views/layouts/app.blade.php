@@ -125,6 +125,14 @@
                         }}">
             الحساب والإعدادات
           </a>
+
+          <form method="POST" action="{{ route('logout') }}" class="mt-4 pt-4 border-t" style="border-color: rgb(var(--color-border));">
+            @csrf
+            <button type="submit" class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold"
+              style="background-color: rgb(var(--color-surface-soft)); color: rgb(var(--color-error)); border: 1px solid rgb(var(--color-border));">
+              <span>تسجيل الخروج</span>
+            </button>
+          </form>
         </div>
       </nav>
     </aside>
@@ -241,8 +249,12 @@
                     {{ Auth::user()->name }}
                   </div>
 
-                  <div class="mt-1 truncate text-xs" style="color: rgb(var(--color-text-secondary));">
-                    {{ Auth::user()->email }}
+                  <div class="mt-1 truncate text-xs font-mono" style="color: rgb(var(--color-text-secondary));">
+                    @if (Auth::user()->username)
+                      {{ '@' . Auth::user()->username }}
+                    @else
+                      {{ Auth::user()->email }}
+                    @endif
                   </div>
                 </div>
 
