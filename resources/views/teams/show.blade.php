@@ -476,25 +476,59 @@
                 أعضاء الفريق ({{ $membersCount }})
               </h2>
               <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
-                قائمة بأعضاء الفريق وأدوارهم.
+                قائمة بأعضاء الفريق وأدوارهم مع إمكانية إدارة الصلاحيات.
               </p>
             </div>
 
             <div class="divide-y divide-[rgb(var(--color-border))]">
               @forelse ($team->memberships as $membership)
-              <div class="p-4 flex items-center justify-between">
+              <div class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div class="min-w-0">
-                  <p class="text-xs font-bold text-[rgb(var(--color-text-primary))]">
-                    {{ $membership->user?->name ?? 'مستخدم غير معروف' }}
-                  </p>
+                  <div class="flex items-center gap-2">
+                    <p class="text-xs font-bold text-[rgb(var(--color-text-primary))]">
+                      {{ $membership->user?->name ?? 'مستخدم غير معروف' }}
+                    </p>
+                    @if ($membership->user?->username)
+                    <span class="text-xs font-mono text-[rgb(var(--color-copper))] dir-ltr">
+                      {{ '@' . $membership->user->username }}
+                    </span>
+                    @endif
+                  </div>
+
                   <p dir="ltr" class="mt-0.5 truncate text-left text-[11px] text-[rgb(var(--color-text-secondary))]">
                     {{ $membership->user?->email ?? '—' }}
                   </p>
                 </div>
 
-                <span class="gdfh-badge bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] text-[11px]">
-                  {{ $roleLabels[$membership->role] ?? $membership->role }}
-                </span>
+                <div class="flex items-center gap-2 self-end sm:self-center">
+                  <span class="gdfh-badge bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] text-[11px]">
+                    {{ $roleLabels[$membership->role] ?? $membership->role }}
+                  </span>
+
+                  {{-- Role update form for authorized users --}}
+                  @can('updateMemberRole', [$team, $membership, 'member'])
+                  <form method="POST" action="{{ route('teams.members.update-role', [$team, $membership]) }}" class="flex items-center gap-1">
+                    @csrf
+                    <select name="role" onchange="this.form.submit()" class="gdfh-input py-0.5 px-2 text-[11px] rounded-lg">
+                      <option value="admin" {{ $membership->role === 'admin' ? 'selected' : '' }}>مدير (Admin)</option>
+                      <option value="manager" {{ $membership->role === 'manager' ? 'selected' : '' }}>مدير عمل (Manager)</option>
+                      <option value="member" {{ $membership->role === 'member' ? 'selected' : '' }}>عضو (Member)</option>
+                      <option value="viewer" {{ $membership->role === 'viewer' ? 'selected' : '' }}>مشاهد (Viewer)</option>
+                    </select>
+                  </form>
+                  @endcan
+
+                  {{-- Remove member form for authorized users --}}
+                  @can('removeMember', [$team, $membership])
+                  <form method="POST" action="{{ route('teams.members.destroy', [$team, $membership]) }}" onsubmit="return confirm('هل أنت متأكد من إزالة هذا العضو من الفريق؟')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="gdfh-btn py-1 px-2 text-[11px] text-red-500 hover:bg-red-500/10">
+                      إزالة
+                    </button>
+                  </form>
+                  @endcan
+                </div>
               </div>
               @empty
               <div class="p-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">
@@ -504,7 +538,40 @@
             </div>
           </section>
 
+          {{-- Transfer Ownership Section --}}
+          @can('transferOwnership', $team)
+          <section class="gdfh-card overflow-hidden">
+            <div class="border-b border-[rgb(var(--color-border))] p-5">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                نقل ملكية الفريق
+              </h2>
+              <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                اختر عضواً لنقل ملكية الفريق إليه. ستتحول صلاحيتك إلى مدير (Admin).
+              </p>
+            </div>
+
+            <form method="POST" action="{{ route('teams.transfer-ownership', $team) }}" onsubmit="return confirm('هل أنت متأكد من نقل ملكية هذا الفريق؟')" class="p-5 space-y-3">
+              @csrf
+              <select name="new_owner_id" required class="gdfh-input text-xs">
+                <option value="">اختر العضو الجديد ليكون المالك...</option>
+                @foreach ($team->memberships as $m)
+                  @if ($m->user_id !== $team->owner_id && $m->user)
+                  <option value="{{ $m->user_id }}">
+                    {{ $m->user->name }} (@ {{ $m->user->username ?? 'user' }})
+                  </option>
+                  @endif
+                @endforeach
+              </select>
+
+              <button type="submit" class="w-full gdfh-btn gdfh-btn-brand py-2 text-xs font-bold">
+                نقل الملكية الآن
+              </button>
+            </form>
+          </section>
+          @endcan
+
           {{-- Danger Zone Section --}}
+          @can('delete', $team)
           <section class="overflow-hidden rounded-xl border border-[rgb(var(--color-error)/0.25)] bg-[rgb(var(--color-error)/0.06)] p-5">
             <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">منطقة الخطر</h3>
             <p class="mt-1 text-xs leading-5 text-[rgb(var(--color-text-secondary))]">
@@ -518,6 +585,7 @@
               </button>
             </form>
           </section>
+          @endcan
 
         </div>
 

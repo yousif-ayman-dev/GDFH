@@ -6,108 +6,132 @@ use App\Http\Requests\StoreTeamMemberRequest;
 use App\Http\Requests\UpdateTeamMemberRequest;
 use App\Models\Team;
 use App\Models\TeamMember;
+use App\Models\User;
+use App\Services\TeamMemberService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 class TeamMemberController extends Controller
 {
+    public function __construct(
+        protected TeamMemberService $memberService
+    ) {}
+
+    /**
+     * Store a newly created team member.
+     */
     public function store(
         StoreTeamMemberRequest $request,
         Team $team
     ): RedirectResponse {
-        $this->ensureOwner($team);
+        $this->authorize('addMember', $team);
 
         $data = $request->validated();
+        $user = User::findOrFail($data['user_id']);
 
-        if ($team->owner_id === (int) $data['user_id']) {
-            throw ValidationException::withMessages([
-                'user_id' => 'The team owner cannot be added as a member.',
-            ]);
-        }
-
-        $alreadyMember = TeamMember::query()
-            ->where('team_id', $team->id)
-            ->where('user_id', $data['user_id'])
-            ->exists();
-
-        if ($alreadyMember) {
-            throw ValidationException::withMessages([
-                'user_id' => 'This user is already a member of the team.',
-            ]);
-        }
-
-        $status = $data['status'] ?? 'active';
-        $joinedAt = null;
-
-        if ($status === 'active') {
-            $joinedAt = now();
-        }
-
-        TeamMember::create([
-            'team_id' => $team->id,
-            'user_id' => $data['user_id'],
-            'role' => $data['role'],
-            'status' => $status,
-            'invited_by' => Auth::id(),
-            'joined_at' => $joinedAt,
-        ]);
+        $this->memberService->addMember(
+            $team,
+            $user,
+            $data['role'] ?? 'member',
+            $data['status'] ?? 'active',
+            Auth::id()
+        );
 
         return redirect()
             ->route('teams.show', $team)
-            ->with('success', 'Team member added successfully.');
+            ->with('success', 'تم إضافة العضو بنجاح.');
     }
 
+    /**
+     * Update team member settings (role/status).
+     */
     public function update(
         UpdateTeamMemberRequest $request,
         Team $team,
         TeamMember $member
     ): RedirectResponse {
-        $this->ensureOwner($team);
         $this->ensureMemberBelongsToTeam($team, $member);
 
         $data = $request->validated();
 
-        if (
-            isset($data['status']) &&
-            $data['status'] === 'active' &&
-            $member->status !== 'active'
-        ) {
-            $data['joined_at'] = now();
+        if (isset($data['role'])) {
+            $this->authorize('updateMemberRole', [$team, $member, $data['role']]);
+            $this->memberService->updateRole($team, $member, $data['role']);
         }
 
-        if (
-            isset($data['status']) &&
-            $data['status'] !== 'active'
-        ) {
-            $data['joined_at'] = $member->joined_at;
+        if (isset($data['status'])) {
+            $this->authorize('update', $team);
+            $member->update(['status' => $data['status']]);
         }
-
-        $member->update($data);
 
         return redirect()
             ->route('teams.show', $team)
-            ->with('success', 'Team member updated successfully.');
+            ->with('success', 'تم تحديث بيانات العضو بنجاح.');
     }
 
-    public function destroy(Team $team, TeamMember $member): RedirectResponse
-    {
-        $this->ensureOwner($team);
+    /**
+     * Explicit route to update a member's role.
+     */
+    public function updateRole(
+        Request $request,
+        Team $team,
+        TeamMember $member
+    ): RedirectResponse {
         $this->ensureMemberBelongsToTeam($team, $member);
 
-        $member->delete();
+        $validated = $request->validate([
+            'role' => ['required', 'string', 'in:admin,manager,member,viewer'],
+        ], [
+            'role.required' => 'يرجى اختيار الدور.',
+            'role.in' => 'الدور المحدد غير صالح.',
+        ]);
+
+        $this->authorize('updateMemberRole', [$team, $member, $validated['role']]);
+
+        $this->memberService->updateRole($team, $member, $validated['role']);
 
         return redirect()
             ->route('teams.show', $team)
-            ->with('success', 'Team member removed successfully.');
+            ->with('success', 'تم تغيير دور العضو بنجاح.');
     }
 
-    private function ensureOwner(Team $team): void
+    /**
+     * Remove a member from the team.
+     */
+    public function destroy(Team $team, TeamMember $member): RedirectResponse
     {
-        abort_unless(
-            $team->owner_id === Auth::id(),
-            403
-        );
+        $this->ensureMemberBelongsToTeam($team, $member);
+        $this->authorize('removeMember', [$team, $member]);
+
+        $this->memberService->removeMember($team, $member);
+
+        return redirect()
+            ->route('teams.show', $team)
+            ->with('success', 'تم إزالة العضو من الفريق بنجاح.');
+    }
+
+    /**
+     * Transfer team ownership to another member.
+     */
+    public function transferOwnership(Request $request, Team $team): RedirectResponse
+    {
+        $this->authorize('transferOwnership', $team);
+
+        $validated = $request->validate([
+            'new_owner_id' => ['required', 'integer', 'exists:users,id'],
+        ], [
+            'new_owner_id.required' => 'يرجى اختيار المالك الجديد.',
+            'new_owner_id.exists' => 'المستخدم المحدد غير موجود.',
+        ]);
+
+        $newOwner = User::findOrFail($validated['new_owner_id']);
+
+        $this->memberService->transferOwnership($team, $newOwner);
+
+        return redirect()
+            ->route('teams.show', $team)
+            ->with('success', 'تم نقل ملكية الفريق بنجاح.');
     }
 
     private function ensureMemberBelongsToTeam(Team $team, TeamMember $member): void

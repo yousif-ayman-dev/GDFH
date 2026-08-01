@@ -103,6 +103,16 @@ Route::middleware('auth')->group(function () {
         )->name('teams.members.destroy');
 
         Route::post(
+            '/teams/{team}/members/{member}/role',
+            [TeamMemberController::class, 'updateRole']
+        )->name('teams.members.update-role');
+
+        Route::post(
+            '/teams/{team}/transfer-ownership',
+            [TeamMemberController::class, 'transferOwnership']
+        )->name('teams.transfer-ownership');
+
+        Route::post(
             '/teams/{team}/projects/{project}',
             [TeamProjectController::class, 'attach']
         )->name('teams.projects.attach');
