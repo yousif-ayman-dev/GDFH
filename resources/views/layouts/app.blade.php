@@ -118,6 +118,14 @@
             الفرق
           </a>
 
+          <a href="{{ route('invitations.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-medium"
+            style="{{ request()->routeIs('invitations.*')
+                            ? 'background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-text-primary));'
+                            : 'color: rgb(var(--color-text-secondary));'
+                        }}">
+            الدعوات
+          </a>
+
           <a href="{{ route('profile.edit') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-medium"
             style="{{ request()->routeIs('profile.*')
                             ? 'background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-text-primary));'
@@ -259,6 +267,10 @@
                 </div>
 
                 <div class="my-1 border-t" style="border-color: rgb(var(--color-border));"></div>
+
+                <a href="{{ route('invitations.index') }}" class="flex min-h-10 items-center rounded-xl px-3 text-sm">
+                  مركز الدعوات
+                </a>
 
                 <a href="{{ route('profile.edit') }}" class="flex min-h-10 items-center rounded-xl px-3 text-sm">
                   الحساب والإعدادات

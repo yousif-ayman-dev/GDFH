@@ -112,6 +112,11 @@ Route::middleware('auth')->group(function () {
             [TeamProjectController::class, 'detach']
         )->name('teams.projects.detach');
 
+        Route::get(
+            '/invitations',
+            [TeamInvitationController::class, 'index']
+        )->name('invitations.index');
+
         Route::post(
             '/teams/{team}/invitations',
             [TeamInvitationController::class, 'store']

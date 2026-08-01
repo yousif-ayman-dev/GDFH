@@ -18,6 +18,12 @@ $navigation = [
 'active' => 'teams.*',
 'icon' => 'teams',
 ],
+[
+'label' => 'الدعوات',
+'route' => 'invitations.index',
+'active' => 'invitations.*',
+'icon' => 'invitations',
+],
 ];
 @endphp
 
@@ -85,6 +91,14 @@ $navigation = [
             aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M8.5 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3 19a5.5 5.5 0 0 1 11 0M13 15.5a4.5 4.5 0 0 1 8 2.8" />
+          </svg>
+          @break
+
+          @case('invitations')
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
           </svg>
           @break
           @endswitch

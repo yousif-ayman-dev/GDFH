@@ -360,6 +360,115 @@
         {{-- Right Column: Members & Actions --}}
         <div class="space-y-8">
 
+          {{-- Invite Member Section --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="border-b border-[rgb(var(--color-border))] p-5">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                دعوة عضو جديد
+              </h2>
+              <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                أدخل اسم المستخدم (Handle) لإرسال دعوة للانضمام إلى الفريق.
+              </p>
+            </div>
+
+            <form method="POST" action="{{ route('teams.invitations.store', $team) }}" class="p-5 space-y-4">
+              @csrf
+
+              <div>
+                <label for="username" class="block text-xs font-semibold text-[rgb(var(--color-text-primary))] mb-1">
+                  اسم المستخدم (@username) <span class="text-red-500">*</span>
+                </label>
+                <div class="relative flex items-center dir-ltr">
+                  <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-xs font-bold text-[rgb(var(--color-copper))]">
+                    @
+                  </div>
+                  <input id="username" type="text" name="username" value="{{ old('username') }}" required
+                    placeholder="yousif"
+                    class="gdfh-input ps-7 font-mono text-xs text-left"
+                    dir="ltr">
+                </div>
+                @error('username')
+                  <p class="mt-1 text-xs text-red-500 font-semibold">{{ $message }}</p>
+                @enderror
+              </div>
+
+              <div>
+                <label for="role" class="block text-xs font-semibold text-[rgb(var(--color-text-primary))] mb-1">
+                  الدور في الفريق
+                </label>
+                <select id="role" name="role" class="gdfh-input text-xs">
+                  <option value="member">عضو (Member)</option>
+                  <option value="admin">مدير (Admin)</option>
+                  <option value="viewer">مشاهد (Viewer)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="message" class="block text-xs font-semibold text-[rgb(var(--color-text-primary))] mb-1">
+                  رسالة دعوة ترحيبية (اختياري)
+                </label>
+                <textarea id="message" name="message" rows="2" placeholder="مرحباً بك في الفريق..."
+                  class="gdfh-input text-xs">{{ old('message') }}</textarea>
+              </div>
+
+              <button type="submit" class="w-full gdfh-btn gdfh-btn-brand py-2 text-xs font-bold">
+                إرسال الدعوة
+              </button>
+            </form>
+          </section>
+
+          {{-- Pending Invitations Section --}}
+          @php
+            $pendingInvitations = $team->invitations->where('status', 'pending');
+          @endphp
+
+          @if ($pendingInvitations->isNotEmpty())
+          <section class="gdfh-card overflow-hidden">
+            <div class="border-b border-[rgb(var(--color-border))] p-5">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                الدعوات المعلقة ({{ $pendingInvitations->count() }})
+              </h2>
+              <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                الدعوات المرسلة وفي انتظار قبول الأعضاء.
+              </p>
+            </div>
+
+            <div class="divide-y divide-[rgb(var(--color-border))]">
+              @foreach ($pendingInvitations as $invitation)
+              <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-[rgb(var(--color-text-primary))]">
+                      {{ $invitation->invitee?->name ?? 'مستخدم' }}
+                    </span>
+                    <span class="text-xs font-mono text-[rgb(var(--color-copper))] dir-ltr">
+                      {{ '@' . ($invitation->invitee?->username ?? 'user') }}
+                    </span>
+                  </div>
+
+                  <p class="mt-1 text-[11px] text-[rgb(var(--color-text-secondary))]">
+                    أرسلت بواسطة: <strong>{{ $invitation->inviter?->name ?? 'المالك' }}</strong> • {{ $invitation->created_at->format('Y/m/d') }}
+                  </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="gdfh-badge bg-amber-500/10 text-amber-600 text-[11px]">
+                    {{ $roleLabels[$invitation->role] ?? $invitation->role }}
+                  </span>
+
+                  <form method="POST" action="{{ route('invitations.cancel', $invitation) }}" onsubmit="return confirm('هل تريد إلغاء هذه الدعوة؟')">
+                    @csrf
+                    <button type="submit" class="gdfh-btn py-1 text-[11px] text-red-500 hover:bg-red-500/10">
+                      إلغاء
+                    </button>
+                  </form>
+                </div>
+              </div>
+              @endforeach
+            </div>
+          </section>
+          @endif
+
           {{-- Team Members Section --}}
           <section class="gdfh-card overflow-hidden">
             <div class="border-b border-[rgb(var(--color-border))] p-5">

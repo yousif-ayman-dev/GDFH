@@ -55,6 +55,8 @@ class TeamController extends Controller
             'projects.owner',
             'tasks.project',
             'tasks.assignee',
+            'invitations.invitee',
+            'invitations.inviter',
         ]);
 
         $availableProjects = Project::query()

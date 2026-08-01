@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
 use App\Services\TeamInvitationService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,20 @@ class TeamInvitationController extends Controller
     public function __construct(
         protected TeamInvitationService $invitationService
     ) {}
+
+    /**
+     * Display a listing of invitations received by the authenticated user.
+     */
+    public function index(): View
+    {
+        $invitations = Auth::user()
+            ->receivedTeamInvitations()
+            ->with(['team.owner', 'inviter'])
+            ->latest()
+            ->get();
+
+        return view('invitations.index', compact('invitations'));
+    }
 
     /**
      * Store a new team invitation.
