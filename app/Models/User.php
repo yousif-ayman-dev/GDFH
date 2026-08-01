@@ -176,4 +176,20 @@ public function reviewsReceived(): HasMany
     {
         return $this->hasMany(Comment::class, 'user_id');
     }
+
+    /**
+     * Team invitations sent by the user.
+     */
+    public function sentTeamInvitations(): HasMany
+    {
+        return $this->hasMany(TeamInvitation::class, 'inviter_id');
+    }
+
+    /**
+     * Team invitations received by the user.
+     */
+    public function receivedTeamInvitations(): HasMany
+    {
+        return $this->hasMany(TeamInvitation::class, 'invitee_id');
+    }
 }

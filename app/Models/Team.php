@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\TeamFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +12,9 @@ use Illuminate\Support\Str;
 
 class Team extends Model
 {
+    /** @use HasFactory<TeamFactory> */
+    use HasFactory;
+
     protected static function booted(): void
     {
         static::creating(function (self $team): void {
@@ -80,6 +85,11 @@ class Team extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(TeamInvitation::class);
     }
 
     protected static function generateUniqueSlug(string $name): string

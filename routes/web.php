@@ -9,6 +9,7 @@ use App\Http\Controllers\ProjectTeamController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TeamInvitationController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamProjectController;
 use App\Http\Controllers\Auth\OnboardingController;
@@ -110,6 +111,26 @@ Route::middleware('auth')->group(function () {
             '/teams/{team}/projects/{project}',
             [TeamProjectController::class, 'detach']
         )->name('teams.projects.detach');
+
+        Route::post(
+            '/teams/{team}/invitations',
+            [TeamInvitationController::class, 'store']
+        )->name('teams.invitations.store');
+
+        Route::post(
+            '/invitations/{invitation}/accept',
+            [TeamInvitationController::class, 'accept']
+        )->name('invitations.accept');
+
+        Route::post(
+            '/invitations/{invitation}/reject',
+            [TeamInvitationController::class, 'reject']
+        )->name('invitations.reject');
+
+        Route::post(
+            '/invitations/{invitation}/cancel',
+            [TeamInvitationController::class, 'cancel']
+        )->name('invitations.cancel');
     });
 });
 
