@@ -55,8 +55,10 @@ class ProjectController extends Controller
 
         $project->load([
             'owner',
-            'team',
+            'team.memberships.user',
             'memberRecords.user',
+            'tasks.assignee',
+            'tasks.creator',
         ]);
 
         return view('projects.show', compact('project'));
