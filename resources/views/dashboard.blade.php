@@ -1,423 +1,315 @@
 <x-app-layout>
-  @php
-  $hour = now()->hour;
+  <x-slot name="header">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-xl font-bold tracking-tight text-[rgb(var(--color-text-primary))]">
+          لوحة التحكم والتحليلات (Enterprise Dashboard)
+        </h2>
+        <p class="mt-1 text-xs text-[rgb(var(--color-text-secondary))]">
+          مرحباً بك، {{ Auth::user()->name }}! ملخص شامل وأداء مباشر لمساحة العمل الخاصة بك.
+        </p>
+      </div>
 
-  $greeting = match (true) {
-  $hour < 12=> 'صباح الخير',
-    $hour < 18=> 'مساء الخير',
-      default => 'مساء الخير',
-      };
+      {{-- Quick Actions Toolbar --}}
+      <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('projects.create') }}" class="gdfh-btn gdfh-btn-brand text-xs">
+          + مشروع جديد
+        </a>
+        <a href="{{ route('teams.create') }}" class="gdfh-btn gdfh-btn-secondary text-xs">
+          + فريق جديد
+        </a>
+        <a href="{{ route('invitations.index') }}" class="gdfh-btn gdfh-btn-secondary text-xs">
+          دعوة عضو
+        </a>
+        <a href="{{ route('notifications.index') }}" class="gdfh-btn gdfh-btn-secondary text-xs relative">
+          الإشعارات
+          @if ($kpis['unread_notifications'] > 0)
+          <span class="ms-1.5 flex h-4 px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-[rgb(var(--color-copper))] text-[#1b1511]">
+            {{ $kpis['unread_notifications'] }}
+          </span>
+          @endif
+        </a>
+      </div>
+    </div>
+  </x-slot>
 
-      $projectStatusLabels = [
-      'draft' => 'مسودة',
-      'open' => 'مفتوح',
-      'in_progress' => 'قيد التنفيذ',
-      'on_hold' => 'متوقف مؤقتًا',
-      'completed' => 'مكتمل',
-      'cancelled' => 'ملغي',
-      ];
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
+    <div class="mx-auto max-w-7xl space-y-8">
 
-      $taskPriorityLabels = [
-      'low' => 'منخفضة',
-      'medium' => 'متوسطة',
-      'high' => 'عالية',
-      'urgent' => 'عاجلة',
-      ];
-      @endphp
-
-      <div class="gdfh-dashboard">
-        {{-- Hero --}}
-        <section class="gdfh-dashboard-hero">
-          <div>
-            <div class="gdfh-eyebrow">مساحة العمل</div>
-
-            <h1 class="gdfh-dashboard-title">
-              {{ $greeting }}، {{ auth()->user()->name }}
-            </h1>
-
-            <p class="gdfh-dashboard-subtitle">
-              إليك نظرة سريعة على مشاريعك ومهامك وما يحتاج إلى انتباهك اليوم.
-            </p>
+      {{-- 1. KPI Cards Grid (10 Metrics) --}}
+      <section class="space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-secondary))]">مؤشرات الأداء الرئيسية (KPIs)</h3>
+        
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
+          {{-- Total Projects --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">إجمالي المشاريع</span>
+            <div class="text-2xl font-bold text-[rgb(var(--color-text-primary))]">{{ $kpis['total_projects'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">مشاريع بيئة العمل</p>
           </div>
 
-          <a href="{{ route('projects.create') }}" class="gdfh-primary-action">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M12 5v14M5 12h14" stroke-linecap="round" />
-            </svg>
+          {{-- Active Projects --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">المشاريع النشطة</span>
+            <div class="text-2xl font-bold text-[rgb(var(--color-copper))]">{{ $kpis['active_projects'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">قيد التنفيذ والمراجعة</p>
+          </div>
 
-            <span>مشروع جديد</span>
-          </a>
-        </section>
+          {{-- Completed Projects --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">المشاريع المكتملة</span>
+            <div class="text-2xl font-bold text-emerald-500">{{ $kpis['completed_projects'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">مكتملة بالكامل</p>
+          </div>
 
-        {{-- Statistics --}}
-        <section class="gdfh-stat-grid" aria-label="ملخص مساحة العمل">
-          <article class="gdfh-stat-card">
-            <div class="gdfh-stat-top">
-              <div class="gdfh-stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                  <path d="M4 7.5h6l2 2H20v9.5H4z" stroke-linejoin="round" />
-                  <path d="M4 7.5V5h6l2 2h8v2.5" stroke-linejoin="round" />
-                </svg>
+          {{-- Total Tasks --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">إجمالي المهام</span>
+            <div class="text-2xl font-bold text-[rgb(var(--color-text-primary))]">{{ $kpis['total_tasks'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">في كل المشاريع</p>
+          </div>
+
+          {{-- Completed Tasks --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">المهام المكتملة</span>
+            <div class="text-2xl font-bold text-emerald-500">{{ $kpis['completed_tasks'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">مكتملة بنجاح</p>
+          </div>
+
+          {{-- Overdue Tasks --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">المهام المتأخرة</span>
+            <div class="text-2xl font-bold text-red-500">{{ $kpis['overdue_tasks'] }}</div>
+            <p class="text-[11px] text-red-400 font-medium">تجاوزت الموعد</p>
+          </div>
+
+          {{-- Tasks Due Today --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">تستحق اليوم</span>
+            <div class="text-2xl font-bold text-amber-500">{{ $kpis['tasks_due_today'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">موعدها اليوم</p>
+          </div>
+
+          {{-- Teams Count --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">الفرق المرتبطة</span>
+            <div class="text-2xl font-bold text-[rgb(var(--color-text-primary))]">{{ $kpis['teams_count'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">فريق عمل</p>
+          </div>
+
+          {{-- Unread Notifications --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">إشعارات غير مقروءة</span>
+            <div class="text-2xl font-bold text-[rgb(var(--color-copper))]">{{ $kpis['unread_notifications'] }}</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">تتطلب الانتباه</p>
+          </div>
+
+          {{-- Overall Progress --}}
+          <div class="gdfh-card p-4 space-y-1">
+            <span class="text-xs text-[rgb(var(--color-text-secondary))]">نسبة الإنجاز العام</span>
+            <div class="text-2xl font-bold text-[rgb(var(--color-copper))]">{{ $kpis['overall_progress'] }}%</div>
+            <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">معدل التقدّم الكلي</p>
+          </div>
+        </div>
+      </section>
+
+      {{-- 2. Analytics Widgets --}}
+      <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        
+        {{-- Project & Task Progress Widget --}}
+        <div class="gdfh-card p-6 space-y-6 lg:col-span-2">
+          <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">تحليلات ومعدلات الإنجاز (Analytics)</h3>
+
+          <div class="space-y-4">
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-bold text-[rgb(var(--color-text-primary))]">معدل اكتمال المشاريع</span>
+                <span class="font-bold text-[rgb(var(--color-copper))]">{{ $analytics['project_completion_rate'] }}%</span>
               </div>
-
-              <span class="gdfh-stat-label">المشاريع النشطة</span>
-            </div>
-
-            <div class="gdfh-stat-value">
-              {{ number_format($stats['active_projects']) }}
-            </div>
-
-            <p class="gdfh-stat-caption">
-              المشاريع المفتوحة وقيد التنفيذ
-            </p>
-          </article>
-
-          <article class="gdfh-stat-card">
-            <div class="gdfh-stat-top">
-              <div class="gdfh-stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                  <path d="M8 6h11M8 12h11M8 18h11" stroke-linecap="round" />
-                  <path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
+              <div class="h-2.5 w-full overflow-hidden rounded-full bg-[rgb(var(--color-surface-soft))]">
+                <div class="h-full rounded-full transition-all duration-500 bg-[rgb(var(--color-copper))]" style="width: {{ $analytics['project_completion_rate'] }}%;"></div>
               </div>
-
-              <span class="gdfh-stat-label">المهام المفتوحة</span>
             </div>
 
-            <div class="gdfh-stat-value">
-              {{ number_format($stats['open_tasks']) }}
-            </div>
-
-            <p class="gdfh-stat-caption">
-              المهام المسندة إليك حاليًا
-            </p>
-          </article>
-
-          <article class="gdfh-stat-card">
-            <div class="gdfh-stat-top">
-              <div class="gdfh-stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                  <circle cx="9" cy="8" r="3" />
-                  <circle cx="17" cy="9" r="2" />
-                  <path d="M3.5 19c.5-3.5 2.4-5.5 5.5-5.5s5 2 5.5 5.5M14 14.5c2.8-.4 5 .9 6 3.5"
-                    stroke-linecap="round" />
-                </svg>
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-bold text-[rgb(var(--color-text-primary))]">معدل اكتمال المهام</span>
+                <span class="font-bold text-emerald-500">{{ $analytics['task_completion_rate'] }}%</span>
               </div>
-
-              <span class="gdfh-stat-label">الفرق</span>
-            </div>
-
-            <div class="gdfh-stat-value">
-              {{ number_format($stats['teams']) }}
-            </div>
-
-            <p class="gdfh-stat-caption">
-              الفرق التي تديرها أو تعمل معها
-            </p>
-          </article>
-
-          <article class="gdfh-stat-card gdfh-stat-card--attention">
-            <div class="gdfh-stat-top">
-              <div class="gdfh-stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                  <path d="M12 8v5" stroke-linecap="round" />
-                  <path d="M12 16.5v.1" stroke-linecap="round" />
-                  <path d="M10.2 4.6 3.4 17a2 2 0 0 0 1.8 3h13.6a2 2 0 0 0 1.8-3L13.8 4.6a2 2 0 0 0-3.6 0Z"
-                    stroke-linejoin="round" />
-                </svg>
+              <div class="h-2.5 w-full overflow-hidden rounded-full bg-[rgb(var(--color-surface-soft))]">
+                <div class="h-full rounded-full transition-all duration-500 bg-emerald-500" style="width: {{ $analytics['task_completion_rate'] }}%;"></div>
               </div>
-
-              <span class="gdfh-stat-label">تحتاج انتباهك</span>
             </div>
+          </div>
 
-            <div class="gdfh-stat-value">
-              {{ number_format($stats['overdue_tasks']) }}
+          <div class="pt-4 border-t border-[rgb(var(--color-border))] grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <span class="text-[rgb(var(--color-text-secondary))]">الأنشطة (آخر 7 أيام)</span>
+              <p class="mt-1 text-base font-bold text-[rgb(var(--color-text-primary))]">{{ $analytics['recent_activities_count'] }} إجراء</p>
             </div>
+            <div>
+              <span class="text-[rgb(var(--color-text-secondary))]">معدل المهام المكتملة</span>
+              <p class="mt-1 text-base font-bold text-emerald-500">{{ $kpis['completed_tasks'] }} من {{ $kpis['total_tasks'] }}</p>
+            </div>
+            <div>
+              <span class="text-[rgb(var(--color-text-secondary))]">المهام الحرجة المتأخرة</span>
+              <p class="mt-1 text-base font-bold text-red-500">{{ $kpis['overdue_tasks'] }} مهمة</p>
+            </div>
+          </div>
+        </div>
 
-            <p class="gdfh-stat-caption">
-              مهام تجاوزت موعد التسليم
-            </p>
-          </article>
-        </section>
+        {{-- Team Summary Widget --}}
+        <div class="gdfh-card p-6 space-y-4">
+          <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">ملخص الفرق (Team Summary)</h3>
 
-        {{-- Primary workspace --}}
-        <section class="gdfh-dashboard-grid">
-          {{-- Active projects --}}
-          <article class="gdfh-panel gdfh-panel--projects">
-            <header class="gdfh-panel-header">
+          <div class="divide-y divide-[rgb(var(--color-border))]">
+            @forelse ($analytics['teams_summary'] as $teamSummary)
+            <div class="py-3 flex items-center justify-between gap-3 text-xs">
               <div>
-                <span class="gdfh-panel-kicker">المشاريع</span>
-                <h2>المشاريع النشطة</h2>
+                <a href="{{ route('teams.show', $teamSummary) }}" class="font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))]">
+                  {{ $teamSummary->name }}
+                </a>
+                <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">{{ $teamSummary->members_count }} عضو · {{ $teamSummary->projects_count }} مشروع</p>
               </div>
+              <span class="gdfh-badge text-[10px]" style="background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-copper));">نشط</span>
+            </div>
+            @empty
+            <div class="py-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">لا توجد فرق مرتبطة بعد.</div>
+            @endforelse
+          </div>
+        </div>
 
-              <a href="{{ route('projects.index') }}" class="gdfh-text-link">
-                <span>عرض الكل</span>
+      </section>
 
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M15 6 9 12l6 6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </a>
-            </header>
+      {{-- 3. Recent Sections Grid (Projects & Tasks) --}}
+      <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
-            @if ($activeProjects->isNotEmpty())
-            <div class="gdfh-project-list">
-              @foreach ($activeProjects as $project)
-              <a href="{{ route('projects.show', $project) }}" class="gdfh-project-item">
-                <div class="gdfh-project-heading">
-                  <div class="gdfh-project-identity">
-                    <span class="gdfh-project-dot"></span>
+        {{-- Recent Projects --}}
+        <div class="gdfh-card overflow-hidden">
+          <div class="border-b border-[rgb(var(--color-border))] p-5 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">أحدث المشاريع (Recent Projects)</h3>
+            <a href="{{ route('projects.index') }}" class="text-xs font-bold text-[rgb(var(--color-copper))] hover:underline">عرض الكل</a>
+          </div>
 
-                    <div>
-                      <h3>{{ $project->title }}</h3>
-
-                      <span>
-                        {{ $projectStatusLabels[$project->status] ?? $project->status }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <strong>{{ $project->progress_percentage }}%</strong>
-                </div>
-
-                <div class="gdfh-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
-                  aria-valuenow="{{ $project->progress_percentage }}">
-                  <span style="width: {{ $project->progress_percentage }}%"></span>
-                </div>
-
-                <div class="gdfh-project-meta">
-                  <span>
-                    {{ number_format($project->completed_tasks_count) }}
-                    من
-                    {{ number_format($project->tasks_count) }}
-                    مهمة مكتملة
-                  </span>
-
-                  <span class="gdfh-meta-separator"></span>
-
-                  <span>
-                    {{ number_format($project->active_members_count) }}
-                    أعضاء
-                  </span>
-
-                  @if ($project->deadline)
-                  <span class="gdfh-meta-separator"></span>
-
-                  <span>
-                    التسليم
-                    {{ $project->deadline->translatedFormat('j M') }}
-                  </span>
+          <div class="divide-y divide-[rgb(var(--color-border))]">
+            @forelse ($recents['projects'] as $project)
+            <div class="p-4 flex items-center justify-between gap-3 hover:bg-[rgb(var(--color-surface-soft)/0.5)] transition">
+              <div class="min-w-0 space-y-1">
+                <a href="{{ route('projects.show', $project) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))] truncate block">
+                  {{ $project->title }}
+                </a>
+                <div class="flex items-center gap-2 text-[11px] text-[rgb(var(--color-text-secondary))]">
+                  <span>المالك: {{ $project->owner?->name }}</span>
+                  @if ($project->team)
+                  <span>· الفريق: {{ $project->team->name }}</span>
                   @endif
                 </div>
-              </a>
-              @endforeach
+              </div>
+              <span class="gdfh-badge text-[11px]" style="background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-copper));">
+                {{ $project->status }}
+              </span>
             </div>
-            @else
-            <div class="gdfh-empty-state">
-              <div class="gdfh-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <path d="M4 7.5h6l2 2H20v9.5H4z" stroke-linejoin="round" />
-                </svg>
-              </div>
+            @empty
+            <div class="p-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">لا توجد مشاريع مضافة حديثاً.</div>
+            @endforelse
+          </div>
+        </div>
 
-              <h3>ابدأ أول مشروع لك</h3>
+        {{-- Recent Tasks --}}
+        <div class="gdfh-card overflow-hidden">
+          <div class="border-b border-[rgb(var(--color-border))] p-5 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">أحدث المهام (Recent Tasks)</h3>
+          </div>
 
-              <p>
-                لا توجد مشاريع نشطة حاليًا. أنشئ مشروعًا وابدأ بتنظيم العمل من مكان واحد.
-              </p>
-
-              <a href="{{ route('projects.create') }}" class="gdfh-secondary-action">
-                إنشاء مشروع
-              </a>
-            </div>
-            @endif
-          </article>
-
-          {{-- Tasks --}}
-          <article class="gdfh-panel">
-            <header class="gdfh-panel-header">
-              <div>
-                <span class="gdfh-panel-kicker">الأولوية الآن</span>
-                <h2>مهامك القادمة</h2>
-              </div>
-
-              <div class="gdfh-live-indicator">
-                <span></span>
-                مباشر
-              </div>
-            </header>
-
-            @if ($upcomingTasks->isNotEmpty())
-            <div class="gdfh-task-list">
-              @foreach ($upcomingTasks as $task)
-              @php
-              $isOverdue = $task->due_at
-              && $task->due_at->isPast()
-              && ! in_array($task->status, ['completed', 'cancelled'], true);
-              @endphp
-
-              <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}" class="gdfh-task-item">
-                <div class="gdfh-task-check"></div>
-
-                <div class="gdfh-task-content">
-                  <div class="gdfh-task-title-row">
-                    <h3>{{ $task->title }}</h3>
-
-                    <span class="gdfh-priority gdfh-priority--{{ $task->priority }}">
-                      {{ $taskPriorityLabels[$task->priority] ?? $task->priority }}
-                    </span>
-                  </div>
-
-                  <div class="gdfh-task-meta">
-                    <span>{{ $task->project->title }}</span>
-
-                    @if ($task->due_at)
-                    <span class="gdfh-meta-separator"></span>
-
-                    <span @class(['gdfh-overdue'=> $isOverdue])>
-                      @if ($isOverdue)
-                      متأخرة
-                      @else
-                      {{ $task->due_at->translatedFormat('j M، H:i') }}
-                      @endif
-                    </span>
-                    @endif
-                  </div>
+          <div class="divide-y divide-[rgb(var(--color-border))]">
+            @forelse ($recents['tasks'] as $task)
+            <div class="p-4 flex items-center justify-between gap-3 hover:bg-[rgb(var(--color-surface-soft)/0.5)] transition">
+              <div class="min-w-0 space-y-1">
+                <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))] truncate block">
+                  {{ $task->title }}
+                </a>
+                <div class="flex items-center gap-3 text-[11px] text-[rgb(var(--color-text-secondary))]">
+                  <span>المشروع: {{ $task->project?->title }}</span>
+                  <span>المسند إليه: {{ $task->assignee?->name ?? 'غير معين' }}</span>
                 </div>
-              </a>
-              @endforeach
-            </div>
-            @else
-            <div class="gdfh-empty-state gdfh-empty-state--compact">
-              <div class="gdfh-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <path d="m5 12 4 4L19 6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
               </div>
-
-              <h3>كل شيء تحت السيطرة</h3>
-
-              <p>لا توجد مهام مفتوحة مسندة إليك حاليًا.</p>
+              <span class="gdfh-badge text-[11px] bg-gray-500/10 text-gray-600">
+                {{ $task->status }}
+              </span>
             </div>
-            @endif
-          </article>
-        </section>
+            @empty
+            <div class="p-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">لا توجد مهام مضافة حديثاً.</div>
+            @endforelse
+          </div>
+        </div>
 
-        {{-- Secondary workspace --}}
-        <section class="gdfh-dashboard-grid gdfh-dashboard-grid--secondary">
-          {{-- Deadlines --}}
-          <article class="gdfh-panel">
-            <header class="gdfh-panel-header">
-              <div>
-                <span class="gdfh-panel-kicker">الجدول</span>
-                <h2>المواعيد القادمة</h2>
+      </section>
+
+      {{-- 4. Recent Activities, Comments & Attachments --}}
+      <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        {{-- Recent Activities --}}
+        <div class="gdfh-card overflow-hidden">
+          <div class="border-b border-[rgb(var(--color-border))] p-4">
+            <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">أحدث الأنشطة (Activities)</h3>
+          </div>
+          <div class="divide-y divide-[rgb(var(--color-border))] p-4 space-y-3">
+            @forelse ($recents['activities'] as $act)
+            <div class="text-xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $act->user?->name ?? 'النظام' }}</span>
+                <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $act->created_at->diffForHumans() }}</span>
               </div>
-            </header>
-
-            @if ($projectDeadlines->isNotEmpty())
-            <div class="gdfh-deadline-list">
-              @foreach ($projectDeadlines as $project)
-              <a href="{{ route('projects.show', $project) }}" class="gdfh-deadline-item">
-                <div class="gdfh-date-block">
-                  <strong>{{ $project->deadline->format('d') }}</strong>
-                  <span>{{ $project->deadline->translatedFormat('M') }}</span>
-                </div>
-
-                <div class="gdfh-deadline-content">
-                  <h3>{{ $project->title }}</h3>
-
-                  <span>
-                    @if ($project->deadline->isToday())
-                    اليوم
-                    @elseif ($project->deadline->isTomorrow())
-                    غدًا
-                    @else
-                    متبقي {{ (int) today()->diffInDays($project->deadline) }} أيام
-                    @endif
-                  </span>
-                </div>
-
-                <svg class="gdfh-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M15 6 9 12l6 6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </a>
-              @endforeach
+              <p class="text-[rgb(var(--color-text-secondary))] text-[11px] leading-4">{{ $act->description }}</p>
             </div>
-            @else
-            <div class="gdfh-empty-state gdfh-empty-state--compact">
-              <div class="gdfh-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <rect x="4" y="5.5" width="16" height="14" rx="2" />
-                  <path d="M8 3.5v4M16 3.5v4M4 10h16" stroke-linecap="round" />
-                </svg>
+            @empty
+            <div class="text-center text-xs text-[rgb(var(--color-text-secondary))] py-4">لا توجد أنشطة مؤخراً.</div>
+            @endforelse
+          </div>
+        </div>
+
+        {{-- Recent Comments --}}
+        <div class="gdfh-card overflow-hidden">
+          <div class="border-b border-[rgb(var(--color-border))] p-4">
+            <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">أحدث النقاشات (Comments)</h3>
+          </div>
+          <div class="divide-y divide-[rgb(var(--color-border))] p-4 space-y-3">
+            @forelse ($recents['comments'] as $comm)
+            <div class="text-xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $comm->user?->name }}</span>
+                <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $comm->created_at->diffForHumans() }}</span>
               </div>
-
-              <h3>لا مواعيد قريبة</h3>
-              <p>لا توجد مشاريع نشطة لها موعد تسليم قادم.</p>
+              <p class="text-[rgb(var(--color-text-secondary))] text-[11px] line-clamp-2 leading-4">{{ $comm->body ?: $comm->content }}</p>
             </div>
-            @endif
-          </article>
+            @empty
+            <div class="text-center text-xs text-[rgb(var(--color-text-secondary))] py-4">لا توجد تعليقات مؤخراً.</div>
+            @endforelse
+          </div>
+        </div>
 
-          {{-- Teams --}}
-          <article class="gdfh-panel">
-            <header class="gdfh-panel-header">
-              <div>
-                <span class="gdfh-panel-kicker">التعاون</span>
-                <h2>فرقك</h2>
+        {{-- Recent Attachments --}}
+        <div class="gdfh-card overflow-hidden">
+          <div class="border-b border-[rgb(var(--color-border))] p-4">
+            <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">أحدث المرفقات (Attachments)</h3>
+          </div>
+          <div class="divide-y divide-[rgb(var(--color-border))] p-4 space-y-3">
+            @forelse ($recents['attachments'] as $att)
+            <div class="text-xs flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="font-bold text-[rgb(var(--color-text-primary))] truncate text-[11px]">{{ $att->original_name }}</p>
+                <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $att->formattedSize() }} · {{ $att->created_at->diffForHumans() }}</span>
               </div>
-
-              <a href="{{ route('teams.index') }}" class="gdfh-text-link">
-                <span>عرض الكل</span>
-
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M15 6 9 12l6 6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </a>
-            </header>
-
-            @if ($teams->isNotEmpty())
-            <div class="gdfh-team-list">
-              @foreach ($teams as $team)
-              <a href="{{ route('teams.show', $team) }}" class="gdfh-team-item">
-                <div class="gdfh-team-avatar">
-                  {{ mb_substr($team->name, 0, 1) }}
-                </div>
-
-                <div class="gdfh-team-content">
-                  <h3>{{ $team->name }}</h3>
-
-                  <span>
-                    {{ number_format($team->active_members_count) }}
-                    أعضاء نشطين
-                  </span>
-                </div>
-
-                <svg class="gdfh-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M15 6 9 12l6 6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </a>
-              @endforeach
+              <a href="{{ route('attachments.download', $att) }}" class="gdfh-btn gdfh-btn-secondary text-[10px] py-1 px-2 shrink-0">تنزيل</a>
             </div>
-            @else
-            <div class="gdfh-empty-state gdfh-empty-state--compact">
-              <div class="gdfh-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <circle cx="9" cy="8" r="3" />
-                  <circle cx="17" cy="9" r="2" />
-                  <path d="M3.5 19c.5-3.5 2.4-5.5 5.5-5.5s5 2 5.5 5.5M14 14.5c2.8-.4 5 .9 6 3.5"
-                    stroke-linecap="round" />
-                </svg>
-              </div>
+            @empty
+            <div class="text-center text-xs text-[rgb(var(--color-text-secondary))] py-4">لا توجد ملفات مرفقة مؤخراً.</div>
+            @endforelse
+          </div>
+        </div>
 
-              <h3>ابنِ فريقك</h3>
-              <p>أنشئ فريقًا أو انضم إلى فريق لبدء العمل المشترك.</p>
+      </section>
 
-              <a href="{{ route('teams.create') }}" class="gdfh-secondary-action">
-                إنشاء فريق
-              </a>
-            </div>
-            @endif
-          </article>
-        </section>
-      </div>
+    </div>
+  </div>
 </x-app-layout>
