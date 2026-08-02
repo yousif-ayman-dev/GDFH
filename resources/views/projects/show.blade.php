@@ -529,6 +529,75 @@
             </div>
           </section>
 
+          {{-- Files & Attachments Section --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="border-b border-[rgb(var(--color-border))] p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">ملفات ومرفقات المشروع (Files)</h2>
+                <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">المستندات والصور المرفقة مع إمكانية التنزيل الفوري.</p>
+              </div>
+            </div>
+
+            {{-- File Upload Form --}}
+            <div class="p-5 border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft)/0.3)]">
+              <form method="POST" action="{{ route('projects.attachments.store', $project) }}" enctype="multipart/form-data" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                @csrf
+                <input type="file" name="file" required class="gdfh-input text-xs flex-1 file:me-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[rgb(var(--color-copper-soft))] file:text-[rgb(var(--color-copper))]" />
+                <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs shrink-0">
+                  رفع ملف جديد
+                </button>
+              </form>
+            </div>
+
+            {{-- Files List --}}
+            <div class="divide-y divide-[rgb(var(--color-border))]">
+              @forelse ($project->attachments as $attachment)
+              <div class="p-4 flex items-center justify-between gap-3 hover:bg-[rgb(var(--color-surface-soft)/0.5)] transition">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] font-bold text-xs">
+                    {{ strtoupper($attachment->extension ?: 'FILE') }}
+                  </div>
+
+                  <div class="min-w-0 space-y-0.5">
+                    <p class="text-xs font-bold text-[rgb(var(--color-text-primary))] truncate">
+                      {{ $attachment->original_name }}
+                    </p>
+                    <div class="flex items-center gap-3 text-[11px] text-[rgb(var(--color-text-secondary))]">
+                      <span>الحجم: <strong>{{ $attachment->formattedSize() }}</strong></span>
+                      <span>بواسطة: <strong>{{ $attachment->user?->name ?? 'مستخدم' }}</strong></span>
+                      <span>{{ $attachment->created_at->diffForHumans() }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <a href="{{ route('attachments.download', $attachment) }}" class="gdfh-btn gdfh-btn-secondary text-xs py-1.5 px-3">
+                    تنزيل
+                  </a>
+
+                  @can('delete', $attachment)
+                  <form method="POST" action="{{ route('attachments.destroy', $attachment) }}" onsubmit="return confirm('هل تريد حذف هذا الملف؟')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="gdfh-btn text-xs py-1.5 px-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                      حذف
+                    </button>
+                  </form>
+                  @endcan
+                </div>
+              </div>
+              @empty
+              <div class="p-8 text-center space-y-2">
+                <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))]">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">لا توجد ملفات مرفقة بعد</h3>
+                <p class="text-[11px] text-[rgb(var(--color-text-secondary))] max-w-xs mx-auto">ارفع الملفات والمستندات الهامة الخاصة بالمشروع لتكون متاحة للجميع.</p>
+              </div>
+              @endforelse
+            </div>
+          </section>
+
         </div>
 
         {{-- Side Column: Quick Actions & Workflow Management --}}

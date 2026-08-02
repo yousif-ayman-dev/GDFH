@@ -18,11 +18,11 @@ class AttachmentCrudTest extends TestCase
     public function test_authorized_user_can_create_attachment_for_project(): void
     {
         Storage::fake('local');
-        $owner = User::factory()->create();
+        $owner = User::factory()->create(['onboarded_at' => now()]);
         $project = $this->createProject($owner);
         $file = UploadedFile::fake()->create('brief.pdf', 100, 'application/pdf');
 
-        $response = $this->actingAs($owner)->post(route('projects.attachments.store', $project), [
+        $response = $this->actingAs($owner)->from(route('projects.show', $project))->post(route('projects.attachments.store', $project), [
             'file' => $file,
             'visibility' => 'private',
         ]);
@@ -38,7 +38,7 @@ class AttachmentCrudTest extends TestCase
     public function test_invalid_attachment_is_rejected(): void
     {
         Storage::fake('local');
-        $owner = User::factory()->create();
+        $owner = User::factory()->create(['onboarded_at' => now()]);
         $project = $this->createProject($owner);
         $file = UploadedFile::fake()->create('notes.txt', 50, 'text/plain');
 
@@ -53,8 +53,8 @@ class AttachmentCrudTest extends TestCase
     public function test_unauthorized_user_cannot_add_attachment(): void
     {
         Storage::fake('local');
-        $owner = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $owner = User::factory()->create(['onboarded_at' => now()]);
+        $otherUser = User::factory()->create(['onboarded_at' => now()]);
         $project = $this->createProject($owner);
         $file = UploadedFile::fake()->create('brief.pdf', 100, 'application/pdf');
 
@@ -69,11 +69,11 @@ class AttachmentCrudTest extends TestCase
     public function test_attachment_can_be_deleted(): void
     {
         Storage::fake('local');
-        $owner = User::factory()->create();
+        $owner = User::factory()->create(['onboarded_at' => now()]);
         $project = $this->createProject($owner);
         $attachment = $this->createAttachment($project, $owner);
 
-        $response = $this->actingAs($owner)->delete(route('projects.attachments.destroy', [$project, $attachment]));
+        $response = $this->actingAs($owner)->from(route('projects.show', $project))->delete(route('projects.attachments.destroy', [$project, $attachment]));
 
         $response->assertRedirect(route('projects.show', $project));
         $this->assertDatabaseMissing('attachments', ['id' => $attachment->id]);

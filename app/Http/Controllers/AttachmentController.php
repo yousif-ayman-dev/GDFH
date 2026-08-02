@@ -2,71 +2,82 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreAttachmentRequest;
 use App\Models\Attachment;
 use App\Models\Project;
-use App\Models\Task;
+use App\Services\AttachmentService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 
 class AttachmentController extends Controller
 {
-    public function store(StoreAttachmentRequest $request, Project $project): RedirectResponse
+    public function __construct(
+        protected AttachmentService $attachmentService
+    ) {}
+
+    public function storeProjectAttachment(Request $request, Project $project): RedirectResponse
     {
-        $this->ensureProjectOwner($project);
+        $this->authorize('view', $project);
 
-        $data = $request->validated();
-        $file = $data['file'];
-
-        $path = $file->store('attachments', 'local');
-
-        $attachment = Attachment::create([
-            'uploaded_by' => Auth::id(),
-            'attachable_type' => Project::class,
-            'attachable_id' => $project->id,
-            'original_name' => $file->getClientOriginalName(),
-            'stored_name' => $file->hashName(),
-            'disk' => 'local',
-            'path' => $path,
-            'mime_type' => $file->getClientMimeType(),
-            'extension' => $file->extension(),
-            'size' => $file->getSize(),
-            'visibility' => $data['visibility'] ?? 'private',
+        $request->validate([
+            'file' => ['required', 'file', 'max:20480'],
+        ], [
+            'file.required' => 'يرجى اختيار ملف المرفق.',
+            'file.max' => 'حجم الملف يتجاوز الحد المسموح (20 ميجابايت).',
         ]);
 
-        return redirect()
-            ->route('projects.show', $project)
-            ->with('success', 'Attachment uploaded successfully.');
-    }
+        try {
+            $this->attachmentService->upload(Auth::user(), $project, $request->file('file'));
 
-    public function destroy(Project $project, Attachment $attachment): RedirectResponse
-    {
-        $this->ensureProjectOwner($project);
-        $this->ensureAttachmentBelongsToProject($project, $attachment);
-
-        if ($attachment->path && Storage::disk($attachment->disk)->exists($attachment->path)) {
-            Storage::disk($attachment->disk)->delete($attachment->path);
+            return back()->with('success', 'تم رفع المرفق بنجاح.');
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
         }
-
-        $attachment->delete();
-
-        return redirect()
-            ->route('projects.show', $project)
-            ->with('success', 'Attachment deleted successfully.');
     }
 
-    private function ensureProjectOwner(Project $project): void
+    public function store(Request $request, Project $project): RedirectResponse
     {
-        abort_unless($project->owner_id === Auth::id(), 403);
+        return $this->storeProjectAttachment($request, $project);
     }
 
-    private function ensureAttachmentBelongsToProject(Project $project, Attachment $attachment): void
+    public function download(mixed $projectOrAttachment, ?Attachment $attachment = null)
     {
-        abort_unless(
-            $attachment->attachable_type === Project::class && $attachment->attachable_id === $project->id,
-            404
-        );
+        $target = $attachment ?? ($projectOrAttachment instanceof Attachment ? $projectOrAttachment : Attachment::findOrFail($projectOrAttachment));
+
+        $this->authorize('download', $target);
+
+        return $this->attachmentService->download($target);
+    }
+
+    public function replace(Request $request, mixed $projectOrAttachment, ?Attachment $attachment = null): RedirectResponse
+    {
+        $target = $attachment ?? ($projectOrAttachment instanceof Attachment ? $projectOrAttachment : Attachment::findOrFail($projectOrAttachment));
+
+        $this->authorize('update', $target);
+
+        $request->validate([
+            'file' => ['required', 'file', 'max:20480'],
+        ], [
+            'file.required' => 'يرجى اختيار الملف الجديد.',
+        ]);
+
+        try {
+            $this->attachmentService->replace($target, $request->file('file'));
+
+            return back()->with('success', 'تم استبدال المرفق بنجاح.');
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+    }
+
+    public function destroy(mixed $projectOrAttachment, ?Attachment $attachment = null): RedirectResponse
+    {
+        $target = $attachment ?? ($projectOrAttachment instanceof Attachment ? $projectOrAttachment : Attachment::findOrFail($projectOrAttachment));
+
+        $this->authorize('delete', $target);
+
+        $this->attachmentService->delete($target);
+
+        return back()->with('success', 'تم حذف المرفق بنجاح.');
     }
 }

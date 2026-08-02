@@ -78,6 +78,31 @@ Route::middleware('auth')->group(function () {
             [CommentController::class, 'destroy']
         )->name('comments.destroy');
 
+        Route::post(
+            '/projects/{project}/attachments',
+            [AttachmentController::class, 'storeProjectAttachment']
+        )->name('projects.attachments.store');
+
+        Route::get(
+            '/attachments/{attachment}/download',
+            [AttachmentController::class, 'download']
+        )->name('attachments.download');
+
+        Route::post(
+            '/attachments/{attachment}/replace',
+            [AttachmentController::class, 'replace']
+        )->name('attachments.replace');
+
+        Route::delete(
+            '/attachments/{attachment}',
+            [AttachmentController::class, 'destroy']
+        )->name('attachments.destroy');
+
+        Route::delete(
+            '/projects/{project}/attachments/{attachment}',
+            [AttachmentController::class, 'destroy']
+        )->name('projects.attachments.destroy');
+
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
             ->names('projects.tasks');
@@ -91,16 +116,6 @@ Route::middleware('auth')->group(function () {
             '/projects/{project}/teams/{team}',
             [ProjectTeamController::class, 'destroy']
         )->name('projects.teams.destroy');
-
-        Route::post(
-            '/projects/{project}/attachments',
-            [AttachmentController::class, 'store']
-        )->name('projects.attachments.store');
-
-        Route::delete(
-            '/projects/{project}/attachments/{attachment}',
-            [AttachmentController::class, 'destroy']
-        )->name('projects.attachments.destroy');
 
         Route::resource('projects.reviews', ReviewController::class)
             ->scoped()
