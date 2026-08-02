@@ -22,7 +22,7 @@ class ActivityService
         string $description,
         array $properties = []
     ): Activity {
-        return Activity::create([
+        $activity = Activity::create([
             'user_id' => $user?->id,
             'subject_type' => get_class($subject),
             'subject_id' => $subject->getKey(),
@@ -30,6 +30,14 @@ class ActivityService
             'description' => $description,
             'properties' => $properties,
         ]);
+
+        try {
+            app(NotificationService::class)->createFromActivity($activity);
+        } catch (\Throwable $e) {
+            // Silently ignore notification failure during activity recording
+        }
+
+        return $activity;
     }
 
     public function logTeamCreated(?User $user, Team $team): Activity

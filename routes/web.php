@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
@@ -102,6 +103,26 @@ Route::middleware('auth')->group(function () {
             '/projects/{project}/attachments/{attachment}',
             [AttachmentController::class, 'destroy']
         )->name('projects.attachments.destroy');
+
+        Route::get(
+            '/notifications',
+            [NotificationController::class, 'index']
+        )->name('notifications.index');
+
+        Route::post(
+            '/notifications/{notification}/read',
+            [NotificationController::class, 'markAsRead']
+        )->name('notifications.read');
+
+        Route::post(
+            '/notifications/read-all',
+            [NotificationController::class, 'markAllAsRead']
+        )->name('notifications.read-all');
+
+        Route::delete(
+            '/notifications/{notification}',
+            [NotificationController::class, 'destroy']
+        )->name('notifications.destroy');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()

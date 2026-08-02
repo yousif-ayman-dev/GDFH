@@ -183,6 +183,19 @@ public function reviewsReceived(): HasMany
     }
 
     /**
+     * App notifications received by the user.
+     */
+    public function appNotifications(): HasMany
+    {
+        return $this->hasMany(AppNotification::class, 'user_id');
+    }
+
+    public function unreadNotificationsCount(): int
+    {
+        return $this->appNotifications()->unread()->count();
+    }
+
+    /**
      * Team invitations sent by the user.
      */
     public function sentTeamInvitations(): HasMany
