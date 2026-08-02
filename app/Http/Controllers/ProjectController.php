@@ -5,16 +5,22 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
+use App\Services\ProjectService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProjectController extends Controller
 {
+    public function __construct(
+        protected ProjectService $projectService
+    ) {}
+
     public function index(): View
     {
         $projects = Project::query()
+            ->active()
             ->where('owner_id', Auth::id())
             ->latest()
             ->paginate(10);
@@ -24,31 +30,30 @@ class ProjectController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Project::class);
+
         return view('projects.create');
     }
 
     public function store(StoreProjectRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $this->authorize('create', Project::class);
 
-        $project = Project::create([
-            ...$data,
-            'owner_id' => Auth::id(),
-            'slug' => Str::slug($data['title']) . '-' . Str::lower(Str::random(6)),
-            'status' => 'draft',
-        ]);
+        $data = $request->validated();
+        $project = $this->projectService->createProject(Auth::user(), $data);
 
         return redirect()
             ->route('projects.show', $project)
-            ->with('success', 'Project created successfully.');
+            ->with('success', 'تم إنشاء المشروع بنجاح.');
     }
 
     public function show(Project $project): View
     {
-        $this->ensureOwner($project);
+        $this->authorize('view', $project);
 
         $project->load([
             'owner',
+            'team',
             'memberRecords.user',
         ]);
 
@@ -57,7 +62,7 @@ class ProjectController extends Controller
 
     public function edit(Project $project): View
     {
-        $this->ensureOwner($project);
+        $this->authorize('update', $project);
 
         return view('projects.edit', compact('project'));
     }
@@ -66,41 +71,58 @@ class ProjectController extends Controller
         UpdateProjectRequest $request,
         Project $project
     ): RedirectResponse {
-        $this->ensureOwner($project);
+        $this->authorize('update', $project);
 
         $data = $request->validated();
-
-        if (
-            isset($data['title']) &&
-            $data['title'] !== $project->title
-        ) {
-            $data['slug'] =
-                Str::slug($data['title']) . '-' . Str::lower(Str::random(6));
-        }
-
-        $project->update($data);
+        $updatedProject = $this->projectService->updateProject($project, $data);
 
         return redirect()
-            ->route('projects.show', $project)
-            ->with('success', 'Project updated successfully.');
+            ->route('projects.show', $updatedProject)
+            ->with('success', 'تم تحديث المشروع بنجاح.');
+    }
+
+    public function archive(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('archive', $project);
+
+        $this->projectService->archiveProject($project);
+
+        return back()->with('success', 'تم أرشفة المشروع بنجاح.');
+    }
+
+    public function restore(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('restore', $project);
+
+        $this->projectService->restoreProject($project);
+
+        return back()->with('success', 'تم إلغاء أرشفة المشروع واستعادته بنجاح.');
+    }
+
+    public function changeStatus(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:draft,open,in_progress,on_hold,completed,cancelled'],
+        ], [
+            'status.required' => 'يرجى اختيار حالة المشروع.',
+            'status.in' => 'حالة المشروع غير صالحة.',
+        ]);
+
+        $this->projectService->changeStatus($project, $validated['status']);
+
+        return back()->with('success', 'تم تغيير حالة المشروع بنجاح.');
     }
 
     public function destroy(Project $project): RedirectResponse
     {
-        $this->ensureOwner($project);
+        $this->authorize('delete', $project);
 
         $project->delete();
 
         return redirect()
             ->route('projects.index')
-            ->with('success', 'Project deleted successfully.');
-    }
-
-    private function ensureOwner(Project $project): void
-    {
-        abort_unless(
-            $project->owner_id === Auth::id(),
-            403
-        );
+            ->with('success', 'تم حذف المشروع بنجاح.');
     }
 }

@@ -42,6 +42,21 @@ Route::middleware('auth')->group(function () {
     Route::middleware('onboarded')->group(function () {
         Route::resource('projects', ProjectController::class);
 
+        Route::post(
+            '/projects/{project}/archive',
+            [ProjectController::class, 'archive']
+        )->name('projects.archive');
+
+        Route::post(
+            '/projects/{project}/restore',
+            [ProjectController::class, 'restore']
+        )->name('projects.restore');
+
+        Route::post(
+            '/projects/{project}/status',
+            [ProjectController::class, 'changeStatus']
+        )->name('projects.change-status');
+
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
             ->names('projects.tasks');
