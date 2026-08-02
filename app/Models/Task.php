@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Task extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'project_id',
         'team_id',
@@ -80,5 +83,51 @@ class Task extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');
+    }
+
+    /**
+     * Check if task is past due date.
+     */
+    public function isLate(): bool
+    {
+        if (in_array($this->status, ['completed', 'done', 'cancelled'], true)) {
+            return false;
+        }
+
+        if (! $this->due_at) {
+            return false;
+        }
+
+        return now()->startOfDay()->gt($this->due_at->startOfDay());
+    }
+
+    /**
+     * Get remaining days until due date.
+     */
+    public function remainingDays(): int
+    {
+        if (in_array($this->status, ['completed', 'done', 'cancelled'], true)) {
+            return 0;
+        }
+
+        if (! $this->due_at || now()->startOfDay()->gte($this->due_at->startOfDay())) {
+            return 0;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->due_at->startOfDay());
+    }
+
+    /**
+     * Get task duration in days.
+     */
+    public function durationDays(): int
+    {
+        $startDate = $this->start_at ?? $this->created_at;
+
+        if (! $startDate || ! $this->due_at) {
+            return 0;
+        }
+
+        return (int) $startDate->startOfDay()->diffInDays($this->due_at->startOfDay());
     }
 }

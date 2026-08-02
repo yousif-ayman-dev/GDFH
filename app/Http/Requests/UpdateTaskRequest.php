@@ -20,7 +20,7 @@ class UpdateTaskRequest extends FormRequest
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
-            'status' => ['sometimes', 'required', 'string', Rule::in(['todo', 'in_progress', 'in_review', 'completed', 'cancelled'])],
+            'status' => ['sometimes', 'required', 'string', Rule::in(['todo', 'in_progress', 'review', 'in_review', 'completed', 'done', 'cancelled'])],
             'priority' => ['sometimes', 'required', 'string', Rule::in(['low', 'medium', 'high', 'urgent'])],
             'assigned_to' => ['sometimes', 'nullable', 'integer', 'exists:users,id', function (string $attribute, mixed $value, \Closure $fail): void {
                 $project = $this->route('project');

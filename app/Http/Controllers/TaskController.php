@@ -6,15 +6,20 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Services\TaskService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class TaskController extends Controller
 {
+    public function __construct(
+        protected TaskService $taskService
+    ) {}
+
     public function index(Project $project): View
     {
-        $this->ensureProjectOwner($project);
+        $this->authorize('view', $project);
 
         $tasks = $project->tasks()
             ->latest()
@@ -25,73 +30,61 @@ class TaskController extends Controller
 
     public function create(Project $project): View
     {
-        $this->ensureProjectOwner($project);
+        $this->authorize('create', [Task::class, $project]);
 
         return view('tasks.create', compact('project'));
     }
 
     public function store(StoreTaskRequest $request, Project $project): RedirectResponse
     {
-        $this->ensureProjectOwner($project);
+        $this->authorize('create', [Task::class, $project]);
 
         $data = $request->validated();
-
-        $task = Task::create([
-            ...$data,
-            'project_id' => $project->id,
-            'created_by' => Auth::id(),
-            'status' => $data['status'] ?? 'todo',
-            'priority' => $data['priority'] ?? 'medium',
-        ]);
+        $task = $this->taskService->createTask(Auth::user(), $project, $data);
 
         return redirect()
             ->route('projects.tasks.show', [$project, $task])
-            ->with('success', 'Task created successfully.');
+            ->with('success', 'تم إنشاء المهمة بنجاح.');
     }
 
     public function show(Project $project, Task $task): View
     {
-        $this->ensureProjectOwner($project);
         $this->ensureTaskBelongsToProject($project, $task);
+        $this->authorize('view', $task);
 
         return view('tasks.show', compact('project', 'task'));
     }
 
     public function edit(Project $project, Task $task): View
     {
-        $this->ensureProjectOwner($project);
         $this->ensureTaskBelongsToProject($project, $task);
+        $this->authorize('update', $task);
 
         return view('tasks.edit', compact('project', 'task'));
     }
 
     public function update(UpdateTaskRequest $request, Project $project, Task $task): RedirectResponse
     {
-        $this->ensureProjectOwner($project);
         $this->ensureTaskBelongsToProject($project, $task);
+        $this->authorize('update', $task);
 
-        $task->update($request->validated());
+        $this->taskService->updateTask($task, $request->validated());
 
         return redirect()
             ->route('projects.tasks.show', [$project, $task])
-            ->with('success', 'Task updated successfully.');
+            ->with('success', 'تم تحديث المهمة بنجاح.');
     }
 
     public function destroy(Project $project, Task $task): RedirectResponse
     {
-        $this->ensureProjectOwner($project);
         $this->ensureTaskBelongsToProject($project, $task);
+        $this->authorize('delete', $task);
 
-        $task->delete();
+        $this->taskService->deleteTask($task);
 
         return redirect()
             ->route('projects.tasks.index', $project)
-            ->with('success', 'Task deleted successfully.');
-    }
-
-    private function ensureProjectOwner(Project $project): void
-    {
-        abort_unless($project->owner_id === Auth::id(), 403);
+            ->with('success', 'تم حذف المهمة بنجاح.');
     }
 
     private function ensureTaskBelongsToProject(Project $project, Task $task): void

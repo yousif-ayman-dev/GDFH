@@ -20,7 +20,7 @@ class StoreTaskRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'status' => ['sometimes', 'required', 'string', Rule::in(['todo', 'in_progress', 'in_review', 'completed', 'cancelled'])],
+            'status' => ['sometimes', 'required', 'string', Rule::in(['todo', 'in_progress', 'review', 'in_review', 'completed', 'done', 'cancelled'])],
             'priority' => ['sometimes', 'required', 'string', Rule::in(['low', 'medium', 'high', 'urgent'])],
             'team_id' => ['nullable', 'integer', 'exists:teams,id', function (string $attribute, mixed $value, \Closure $fail): void {
                 $project = $this->route('project');
