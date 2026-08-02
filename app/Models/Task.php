@@ -85,6 +85,11 @@ class Task extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
 
+    public function activities(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
     /**
      * Check if task is past due date.
      */

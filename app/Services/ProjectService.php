@@ -9,6 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class ProjectService
 {
+    public function __construct(
+        protected ActivityService $activityService
+    ) {}
+
     /**
      * Create a new enterprise project.
      */
@@ -34,6 +38,8 @@ class ProjectService
                 'deadline' => $data['deadline'] ?? $data['due_date'] ?? null,
                 'published_at' => ($data['status'] ?? 'draft') === 'open' ? now() : null,
             ]);
+
+            $this->activityService->logProjectCreated($owner, $project);
 
             return $project;
         });

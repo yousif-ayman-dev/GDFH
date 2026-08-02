@@ -15,6 +15,10 @@ use Illuminate\View\View;
 
 class TeamController extends Controller
 {
+    public function __construct(
+        protected \App\Services\ActivityService $activityService
+    ) {}
+
     public function index(): View
     {
         $teams = Team::query()
@@ -39,6 +43,8 @@ class TeamController extends Controller
             'owner_id' => Auth::id(),
             'logo_path' => $this->storeLogo($request->file('logo')),
         ]);
+
+        $this->activityService->logTeamCreated(Auth::user(), $team);
 
         return redirect()
             ->route('teams.show', $team)

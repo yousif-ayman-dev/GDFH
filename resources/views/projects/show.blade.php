@@ -360,6 +360,43 @@
             </div>
           </section>
 
+          {{-- Activity Audit Timeline Section --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="border-b border-[rgb(var(--color-border))] p-5">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">سجل الأنشطة والأحداث (Activity Timeline)</h2>
+              <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">سجل زمني لجميع عمليات وإجراءات المشروع التراكمية.</p>
+            </div>
+
+            <div class="divide-y divide-[rgb(var(--color-border))] p-5 space-y-4">
+              @forelse ($activities as $activity)
+              <div class="flex items-start gap-3 text-xs">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] font-bold text-xs">
+                  {{ $activity->user ? mb_strtoupper(mb_substr($activity->user->name, 0, 1)) : 'S' }}
+                </div>
+
+                <div class="min-w-0 flex-1 space-y-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="font-bold text-[rgb(var(--color-text-primary))]">
+                      {{ $activity->user?->name ?? 'النظام' }}
+                    </p>
+                    <span class="text-[11px] text-[rgb(var(--color-text-secondary))]">
+                      {{ $activity->created_at->diffForHumans() }}
+                    </span>
+                  </div>
+
+                  <p class="text-[rgb(var(--color-text-secondary))] leading-5">
+                    {{ $activity->description }}
+                  </p>
+                </div>
+              </div>
+              @empty
+              <div class="p-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+                لا توجد أنشطة مسجلة لهذا المشروع حتى الآن.
+              </div>
+              @endforelse
+            </div>
+          </section>
+
         </div>
 
         {{-- Side Column: Quick Actions & Workflow Management --}}

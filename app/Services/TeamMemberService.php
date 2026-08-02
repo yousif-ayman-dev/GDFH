@@ -10,6 +10,10 @@ use Illuminate\Validation\ValidationException;
 
 class TeamMemberService
 {
+    public function __construct(
+        protected ActivityService $activityService
+    ) {}
+
     /**
      * Add a new member to the team.
      */
@@ -40,10 +44,15 @@ class TeamMemberService
                 'invited_by' => $invitedBy ?? $existingMember->invited_by,
             ]);
 
+            if ($status === 'active') {
+                $inviter = $invitedBy ? User::find($invitedBy) : null;
+                $this->activityService->logMemberJoined($inviter, $team, $user);
+            }
+
             return $existingMember;
         }
 
-        return TeamMember::create([
+        $member = TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $user->id,
             'role' => $role,
@@ -51,6 +60,13 @@ class TeamMemberService
             'invited_by' => $invitedBy,
             'joined_at' => $status === 'active' ? now() : null,
         ]);
+
+        if ($status === 'active') {
+            $inviter = $invitedBy ? User::find($invitedBy) : null;
+            $this->activityService->logMemberJoined($inviter, $team, $user);
+        }
+
+        return $member;
     }
 
     /**

@@ -3,11 +3,16 @@
 namespace App\Services;
 
 use App\Models\Project;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ProjectWorkflowService
 {
+    public function __construct(
+        protected ActivityService $activityService
+    ) {}
+
     /**
      * Map of allowed status transitions.
      */
@@ -46,7 +51,7 @@ class ProjectWorkflowService
             ]);
         }
 
-        DB::transaction(function () use ($project, $targetStatus) {
+        DB::transaction(function () use ($project, $currentStatus, $targetStatus) {
             $payload = [
                 'status' => $targetStatus,
             ];
@@ -64,6 +69,8 @@ class ProjectWorkflowService
             }
 
             $project->update($payload);
+
+            $this->activityService->logProjectStatusChanged(Auth::user(), $project, $currentStatus, $targetStatus);
         });
     }
 
@@ -81,6 +88,8 @@ class ProjectWorkflowService
                 'status' => 'archived',
                 'archived_at' => now(),
             ]);
+
+            $this->activityService->logProjectArchived(Auth::user(), $project);
         });
     }
 
@@ -100,6 +109,8 @@ class ProjectWorkflowService
                 'status' => $newStatus,
                 'archived_at' => null,
             ]);
+
+            $this->activityService->logProjectRestored(Auth::user(), $project);
         });
     }
 }

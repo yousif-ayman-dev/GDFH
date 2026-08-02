@@ -61,7 +61,23 @@ class ProjectController extends Controller
             'tasks.creator',
         ]);
 
-        return view('projects.show', compact('project'));
+        $taskIds = $project->tasks->pluck('id');
+
+        $activities = \App\Models\Activity::query()
+            ->where(function ($q) use ($project) {
+                $q->where('subject_type', Project::class)
+                  ->where('subject_id', $project->id);
+            })
+            ->orWhere(function ($q) use ($taskIds) {
+                $q->where('subject_type', \App\Models\Task::class)
+                  ->whereIn('subject_id', $taskIds);
+            })
+            ->with('user')
+            ->latest()
+            ->take(15)
+            ->get();
+
+        return view('projects.show', compact('project', 'activities'));
     }
 
     public function edit(Project $project): View

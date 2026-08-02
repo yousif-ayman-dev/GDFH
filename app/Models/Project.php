@@ -130,6 +130,11 @@ class Project extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function activities(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;

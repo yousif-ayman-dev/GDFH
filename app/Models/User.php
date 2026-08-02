@@ -38,6 +38,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function activities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Activity::class);
+    }
+
     /**
      * Check if user is a freelancer.
      */

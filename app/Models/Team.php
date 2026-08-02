@@ -92,6 +92,11 @@ class Team extends Model
         return $this->hasMany(TeamInvitation::class);
     }
 
+    public function activities(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
     protected static function generateUniqueSlug(string $name): string
     {
         $baseSlug = Str::slug($name) ?: 'team';

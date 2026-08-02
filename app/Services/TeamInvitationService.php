@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class TeamInvitationService
 {
+    public function __construct(
+        protected ActivityService $activityService
+    ) {}
+
     /**
      * Create and send a new team invitation.
      */
@@ -37,6 +41,8 @@ class TeamInvitationService
                 'status' => 'accepted',
                 'responded_at' => now(),
             ]);
+
+            $this->activityService->logInvitationAccepted($invitation->invitee, $invitation);
 
             $memberRole = match ($invitation->role) {
                 'owner' => 'owner',

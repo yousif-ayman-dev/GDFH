@@ -5,11 +5,16 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class TaskService
 {
+    public function __construct(
+        protected ActivityService $activityService
+    ) {}
+
     /**
      * Map of allowed task workflow transitions.
      */
@@ -36,7 +41,7 @@ class TaskService
             $status = $data['status'] ?? 'todo';
             $dueAt = $data['due_at'] ?? $data['due_date'] ?? null;
 
-            return Task::create([
+            $task = Task::create([
                 'project_id' => $project->id,
                 'team_id' => $data['team_id'] ?? $project->team_id,
                 'created_by' => $creator->id,
@@ -51,6 +56,18 @@ class TaskService
                 'completed_at' => in_array($status, ['completed', 'done'], true) ? now() : null,
                 'estimated_minutes' => $data['estimated_minutes'] ?? null,
             ]);
+
+            $this->activityService->logTaskCreated($creator, $task);
+
+            if ($task->assigned_to && $assignee = User::find($task->assigned_to)) {
+                $this->activityService->logTaskAssigned($creator, $task, $assignee);
+            }
+
+            if (in_array($status, ['completed', 'done'], true)) {
+                $this->activityService->logTaskCompleted($creator, $task);
+            }
+
+            return $task;
         });
     }
 
@@ -82,7 +99,18 @@ class TaskService
                 }
             }
 
+            $oldAssignedTo = $task->assigned_to;
             $task->update($data);
+
+            if (isset($data['assigned_to']) && $data['assigned_to'] && (int)$data['assigned_to'] !== (int)$oldAssignedTo) {
+                if ($assignee = User::find($data['assigned_to'])) {
+                    $this->activityService->logTaskAssigned(Auth::user(), $task, $assignee);
+                }
+            }
+
+            if (isset($data['status']) && in_array($data['status'], ['completed', 'done'], true)) {
+                $this->activityService->logTaskCompleted(Auth::user(), $task);
+            }
 
             return $task->fresh();
         });
@@ -109,6 +137,10 @@ class TaskService
             }
 
             $task->update($payload);
+
+            if (in_array($targetStatus, ['completed', 'done'], true)) {
+                $this->activityService->logTaskCompleted(Auth::user(), $task);
+            }
 
             return $task->fresh();
         });
