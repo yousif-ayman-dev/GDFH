@@ -397,6 +397,138 @@
             </div>
           </section>
 
+          {{-- Comments & Discussions Section --}}
+          <section class="gdfh-card overflow-hidden" x-data="{ replyingTo: null }">
+            <div class="border-b border-[rgb(var(--color-border))] p-5">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">النقاشات والتعليقات (Discussions)</h2>
+              <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">ناقش التفاصيل والقرارات مع أعضاء المشروع (يدعم الإشارة بـ @username).</p>
+            </div>
+
+            {{-- New Comment Form --}}
+            <div class="p-5 border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft)/0.3)]">
+              <form method="POST" action="{{ route('projects.comments.store', $project) }}" class="space-y-3">
+                @csrf
+                <div>
+                  <textarea name="body" required rows="3" placeholder="اكتب تعليقك هنا... يمكنك إشارة شخص بـ @username" class="gdfh-input text-xs w-full"></textarea>
+                </div>
+                <div class="flex justify-end">
+                  <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs">
+                    إضافة تعليق
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {{-- Comments List --}}
+            <div class="divide-y divide-[rgb(var(--color-border))] p-5 space-y-6">
+              @forelse ($project->comments as $comment)
+              <div class="space-y-4 text-xs">
+                {{-- Main Comment --}}
+                <div class="flex items-start gap-3">
+                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] font-bold text-xs">
+                    {{ mb_strtoupper(mb_substr($comment->user?->name ?? 'U', 0, 1)) }}
+                  </div>
+
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $comment->user?->name }}</span>
+                        @if ($comment->user?->username)
+                        <span class="text-[11px] font-mono text-[rgb(var(--color-copper))] dir-ltr">{{ '@' . $comment->user->username }}</span>
+                        @endif
+                      </div>
+
+                      <div class="flex items-center gap-3">
+                        <span class="text-[11px] text-[rgb(var(--color-text-secondary))]">
+                          {{ $comment->created_at->diffForHumans() }}
+                          @if ($comment->isEdited()) <span class="text-amber-500 font-medium">(مُعدل)</span> @endif
+                        </span>
+
+                        @can('delete', $comment)
+                        <form method="POST" action="{{ route('comments.destroy', $comment) }}" onsubmit="return confirm('هل تريد حذف هذا التعليق؟')">
+                          @csrf
+                          @method('DELETE')
+                          <button type="submit" class="text-red-500 hover:underline text-[11px]">حذف</button>
+                        </form>
+                        @endcan
+                      </div>
+                    </div>
+
+                    <p class="text-[rgb(var(--color-text-primary))] leading-6 whitespace-pre-line">
+                      {{ $comment->body ?: $comment->content }}
+                    </p>
+
+                    <div class="pt-1">
+                      <button type="button" @click="replyingTo = replyingTo === {{ $comment->id }} ? null : {{ $comment->id }}" class="text-[11px] font-bold text-[rgb(var(--color-copper))] hover:underline">
+                        رد على التعليق
+                      </button>
+                    </div>
+
+                    {{-- Reply Form --}}
+                    <div x-show="replyingTo === {{ $comment->id }}" x-cloak class="mt-3 pt-2">
+                      <form method="POST" action="{{ route('comments.replies.store', $comment) }}" class="space-y-2">
+                        @csrf
+                        <textarea name="body" required rows="2" placeholder="اكتب ردك..." class="gdfh-input text-xs w-full"></textarea>
+                        <div class="flex justify-end gap-2">
+                          <button type="button" @click="replyingTo = null" class="gdfh-btn gdfh-btn-secondary text-[11px] py-1">إلغاء</button>
+                          <button type="submit" class="gdfh-btn gdfh-btn-brand text-[11px] py-1">إرسال الرد</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                {{-- Threaded Replies --}}
+                @if ($comment->replies->count() > 0)
+                <div class="ms-8 space-y-3 border-r-2 border-[rgb(var(--color-border))] pe-3">
+                  @foreach ($comment->replies as $reply)
+                  <div class="flex items-start gap-2 text-xs">
+                    <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-primary))] font-bold text-[11px]">
+                      {{ mb_strtoupper(mb_substr($reply->user?->name ?? 'U', 0, 1)) }}
+                    </div>
+
+                    <div class="min-w-0 flex-1 space-y-1">
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5">
+                          <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $reply->user?->name }}</span>
+                          @if ($reply->user?->username)
+                          <span class="text-[10px] font-mono text-[rgb(var(--color-copper))] dir-ltr">{{ '@' . $reply->user->username }}</span>
+                          @endif
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                          <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $reply->created_at->diffForHumans() }}</span>
+                          @can('delete', $reply)
+                          <form method="POST" action="{{ route('comments.destroy', $reply) }}" onsubmit="return confirm('هل تريد حذف الرد؟')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 hover:underline text-[10px]">حذف</button>
+                          </form>
+                          @endcan
+                        </div>
+                      </div>
+
+                      <p class="text-[rgb(var(--color-text-primary))] leading-5 whitespace-pre-line text-[11px]">
+                        {{ $reply->body ?: $reply->content }}
+                      </p>
+                    </div>
+                  </div>
+                  @endforeach
+                </div>
+                @endif
+              </div>
+              @empty
+              <div class="p-8 text-center space-y-2">
+                <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))]">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">لا توجد تعليقات أو نقاشات بعد</h3>
+                <p class="text-[11px] text-[rgb(var(--color-text-secondary))] max-w-xs mx-auto">اكتب أول تعليق لبدء النقاش والتواصل مع أعضاء المشروع.</p>
+              </div>
+              @endforelse
+            </div>
+          </section>
+
         </div>
 
         {{-- Side Column: Quick Actions & Workflow Management --}}

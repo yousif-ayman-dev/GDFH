@@ -59,6 +59,8 @@ class ProjectController extends Controller
             'memberRecords.user',
             'tasks.assignee',
             'tasks.creator',
+            'comments.user',
+            'comments.replies.user',
         ]);
 
         $taskIds = $project->tasks->pluck('id');

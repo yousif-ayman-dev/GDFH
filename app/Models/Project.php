@@ -135,6 +135,11 @@ class Project extends Model
         return $this->morphMany(Activity::class, 'subject');
     }
 
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable')->whereNull('parent_id')->latest();
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;

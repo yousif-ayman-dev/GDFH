@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -56,6 +57,26 @@ Route::middleware('auth')->group(function () {
             '/projects/{project}/status',
             [ProjectController::class, 'changeStatus']
         )->name('projects.change-status');
+
+        Route::post(
+            '/projects/{project}/comments',
+            [CommentController::class, 'storeProjectComment']
+        )->name('projects.comments.store');
+
+        Route::post(
+            '/comments/{comment}/replies',
+            [CommentController::class, 'storeReply']
+        )->name('comments.replies.store');
+
+        Route::patch(
+            '/comments/{comment}',
+            [CommentController::class, 'update']
+        )->name('comments.update');
+
+        Route::delete(
+            '/comments/{comment}',
+            [CommentController::class, 'destroy']
+        )->name('comments.destroy');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
