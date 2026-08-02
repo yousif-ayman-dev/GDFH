@@ -145,6 +145,94 @@ class Project extends Model
         return $query->whereNotNull('archived_at');
     }
 
+    public function getTargetDueDate()
+    {
+        return $this->due_date ?? $this->deadline;
+    }
+
+    /**
+     * Check if project is past due date.
+     */
+    public function isLate(): bool
+    {
+        if ($this->status === 'completed' || $this->isArchived()) {
+            return false;
+        }
+
+        $targetDate = $this->getTargetDueDate();
+
+        if (! $targetDate) {
+            return false;
+        }
+
+        return now()->startOfDay()->gt($targetDate->startOfDay());
+    }
+
+    /**
+     * Get remaining days until due date.
+     */
+    public function remainingDays(): int
+    {
+        if ($this->status === 'completed' || $this->isArchived()) {
+            return 0;
+        }
+
+        $targetDate = $this->getTargetDueDate();
+
+        if (! $targetDate || now()->startOfDay()->gte($targetDate->startOfDay())) {
+            return 0;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($targetDate->startOfDay());
+    }
+
+    /**
+     * Calculate total project duration in days.
+     */
+    public function durationDays(): int
+    {
+        if (! $this->start_date) {
+            return 0;
+        }
+
+        $targetDate = $this->getTargetDueDate();
+
+        if (! $targetDate) {
+            return 0;
+        }
+
+        return (int) $this->start_date->startOfDay()->diffInDays($targetDate->startOfDay());
+    }
+
+    /**
+     * Calculate project completion progress percentage (0 - 100).
+     */
+    public function progress(): int
+    {
+        if ($this->status === 'completed') {
+            return 100;
+        }
+
+        $tasksCount = $this->relationLoaded('tasks') ? $this->tasks->count() : $this->tasks()->count();
+
+        if ($tasksCount > 0) {
+            $completedCount = $this->relationLoaded('tasks')
+                ? $this->tasks->where('status', 'completed')->count()
+                : $this->tasks()->where('status', 'completed')->count();
+
+            return (int) round(($completedCount / $tasksCount) * 100);
+        }
+
+        return match ($this->status) {
+            'draft' => 0,
+            'open' => 10,
+            'in_progress' => 50,
+            'review' => 85,
+            'completed', 'archived' => 100,
+            default => 0,
+        };
+    }
+
     protected static function generateUniqueSlug(string $title): string
     {
         $baseSlug = Str::slug($title) ?: 'project';

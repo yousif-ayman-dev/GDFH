@@ -145,10 +145,10 @@ class ProjectEngineTest extends TestCase
         $this->assertEquals('open', $project->status);
         $this->assertNotNull($project->published_at);
 
-        // Transition open -> completed
-        $this->actingAs($owner)
-            ->post(route('projects.change-status', $project), ['status' => 'completed'])
-            ->assertRedirect();
+        // Transition open -> in_progress -> review -> completed
+        $this->actingAs($owner)->post(route('projects.change-status', $project), ['status' => 'in_progress']);
+        $this->actingAs($owner)->post(route('projects.change-status', $project), ['status' => 'review']);
+        $this->actingAs($owner)->post(route('projects.change-status', $project), ['status' => 'completed']);
 
         $project->refresh();
         $this->assertEquals('completed', $project->status);

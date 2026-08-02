@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
 use App\Services\ProjectService;
+use App\Services\ProjectWorkflowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,8 @@ use Illuminate\View\View;
 class ProjectController extends Controller
 {
     public function __construct(
-        protected ProjectService $projectService
+        protected ProjectService $projectService,
+        protected ProjectWorkflowService $workflowService
     ) {}
 
     public function index(): View
@@ -85,7 +87,7 @@ class ProjectController extends Controller
     {
         $this->authorize('archive', $project);
 
-        $this->projectService->archiveProject($project);
+        $this->workflowService->archive($project);
 
         return back()->with('success', 'تم أرشفة المشروع بنجاح.');
     }
@@ -94,7 +96,7 @@ class ProjectController extends Controller
     {
         $this->authorize('restore', $project);
 
-        $this->projectService->restoreProject($project);
+        $this->workflowService->restore($project);
 
         return back()->with('success', 'تم إلغاء أرشفة المشروع واستعادته بنجاح.');
     }
@@ -104,13 +106,13 @@ class ProjectController extends Controller
         $this->authorize('update', $project);
 
         $validated = $request->validate([
-            'status' => ['required', 'string', 'in:draft,open,in_progress,on_hold,completed,cancelled'],
+            'status' => ['required', 'string', 'in:draft,open,in_progress,on_hold,review,completed,cancelled,archived'],
         ], [
             'status.required' => 'يرجى اختيار حالة المشروع.',
             'status.in' => 'حالة المشروع غير صالحة.',
         ]);
 
-        $this->projectService->changeStatus($project, $validated['status']);
+        $this->workflowService->changeStatus($project, $validated['status']);
 
         return back()->with('success', 'تم تغيير حالة المشروع بنجاح.');
     }
