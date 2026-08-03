@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -146,6 +147,41 @@ Route::middleware('auth')->group(function () {
             '/gantt',
             [GanttController::class, 'index']
         )->name('gantt.index');
+
+        Route::get(
+            '/time-tracking',
+            [TimeTrackingController::class, 'index']
+        )->name('time-tracking.index');
+
+        Route::post(
+            '/time-tracking/start',
+            [TimeTrackingController::class, 'start']
+        )->name('time-tracking.start');
+
+        Route::post(
+            '/time-tracking/{worklog}/pause',
+            [TimeTrackingController::class, 'pause']
+        )->name('time-tracking.pause');
+
+        Route::post(
+            '/time-tracking/{worklog}/resume',
+            [TimeTrackingController::class, 'resume']
+        )->name('time-tracking.resume');
+
+        Route::post(
+            '/time-tracking/{worklog}/stop',
+            [TimeTrackingController::class, 'stop']
+        )->name('time-tracking.stop');
+
+        Route::post(
+            '/time-tracking/manual',
+            [TimeTrackingController::class, 'storeManual']
+        )->name('time-tracking.manual');
+
+        Route::delete(
+            '/time-tracking/{worklog}',
+            [TimeTrackingController::class, 'destroy']
+        )->name('time-tracking.destroy');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()

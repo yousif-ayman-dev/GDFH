@@ -48,6 +48,12 @@ $navigation = [
 'active' => 'gantt.*',
 'icon' => 'gantt',
 ],
+[
+'label' => 'تتبع الوقت',
+'route' => 'time-tracking.index',
+'active' => 'time-tracking.*',
+'icon' => 'time-tracking',
+],
 ];
 @endphp
 
@@ -153,6 +159,14 @@ $navigation = [
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
             aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18M3 9.5h12M3 14.5h15M3 19.5h9" />
+          </svg>
+          @break
+
+          @case('time-tracking')
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3" />
           </svg>
           @break
           @endswitch
