@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AIController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
@@ -188,6 +189,26 @@ Route::middleware('auth')->group(function () {
             '/reports',
             [ReportsController::class, 'index']
         )->name('reports.index');
+
+        Route::get(
+            '/ai',
+            [AIController::class, 'index']
+        )->name('ai.index');
+
+        Route::post(
+            '/ai/conversations',
+            [AIController::class, 'storeConversation']
+        )->name('ai.conversations.store');
+
+        Route::post(
+            '/ai/conversations/{conversation}/messages',
+            [AIController::class, 'sendMessage']
+        )->name('ai.conversations.messages.store');
+
+        Route::delete(
+            '/ai/conversations/{conversation}',
+            [AIController::class, 'destroyConversation']
+        )->name('ai.conversations.destroy');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
