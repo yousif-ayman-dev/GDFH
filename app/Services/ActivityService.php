@@ -86,6 +86,17 @@ class ActivityService
         );
     }
 
+    public function logProjectUpdated(?User $user, Project $project): Activity
+    {
+        return $this->record(
+            $user,
+            $project,
+            'project_updated',
+            "تم تحديث بيانات المشروع '{$project->title}'",
+            ['project_id' => $project->id, 'title' => $project->title]
+        );
+    }
+
     public function logProjectArchived(?User $user, Project $project): Activity
     {
         return $this->record(

@@ -42,6 +42,18 @@ class NotificationService
     }
 
     /**
+     * Send notification helper.
+     */
+    public function sendNotification(
+        User $recipient,
+        string $title,
+        string $description,
+        ?string $actionUrl = null
+    ): AppNotification {
+        return $this->send($recipient, 'system', $title, $description, null, $actionUrl);
+    }
+
+    /**
      * Send notification to multiple recipients.
      *
      * @param  iterable<User>  $recipients

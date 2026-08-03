@@ -627,6 +627,127 @@
           </section>
           @endcan
 
+          {{-- Proposals & Hiring Section --}}
+          @if (in_array($project->visibility, ['marketplace', 'public'], true) || $project->proposals->count() > 0)
+          <section class="gdfh-card p-6 space-y-6">
+            <div class="border-b border-[rgb(var(--color-border))] pb-4 flex items-center justify-between">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">عروض العمل المقدمة (Proposals)</h2>
+              <span class="gdfh-badge text-xs font-bold" style="background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-copper));">
+                إجمالي العروض: {{ $project->proposals->count() }}
+              </span>
+            </div>
+
+            {{-- 1. If User is Project Owner (Client) -> View received proposals --}}
+            @if (Auth::id() === $project->owner_id)
+            <div class="divide-y divide-[rgb(var(--color-border))] space-y-4">
+              @forelse ($project->proposals as $prop)
+              <div class="pt-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                <div class="space-y-2 max-w-xl">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-[rgb(var(--color-text-primary))]">{{ $prop->freelancer?->name }}</span>
+                    <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $prop->freelancer?->username ? '@'.$prop->freelancer->username : '' }}</span>
+                    <span class="gdfh-badge text-[10px] {{ $prop->isAccepted() ? 'bg-emerald-500/10 text-emerald-500 font-bold' : ($prop->isRejected() ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500') }}">
+                      {{ $prop->status }}
+                    </span>
+                  </div>
+
+                  <p class="text-xs text-[rgb(var(--color-text-secondary))] whitespace-pre-line leading-relaxed">
+                    {{ $prop->cover_letter }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+                  <div class="text-start md:text-end">
+                    <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">قيمة العرض</span>
+                    <div class="text-sm font-extrabold text-[rgb(var(--color-copper))]">${{ number_format($prop->bid_amount, 2) }}</div>
+                    <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $prop->delivery_days }} أيام تسليم</span>
+                  </div>
+
+                  @if ($prop->isPending())
+                  <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('proposals.accept', $prop) }}" onsubmit="return confirm('تأكيد قبول هذا العرض وتوقيع العقد؟')">
+                      @csrf
+                      <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-1.5 px-3 font-bold">
+                        قبول العرض
+                      </button>
+                    </form>
+
+                    <form method="POST" action="{{ route('proposals.reject', $prop) }}">
+                      @csrf
+                      <button type="submit" class="gdfh-btn text-xs py-1.5 px-2 bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                        رفض
+                      </button>
+                    </form>
+                  </div>
+                  @endif
+                </div>
+              </div>
+              @empty
+              <div class="p-8 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+                لا توجد عروض قدمت على هذا المشروع حتى الآن.
+              </div>
+              @endforelse
+            </div>
+
+            {{-- 2. If User is Freelancer --}}
+            @else
+              @php
+              $myProposal = $project->proposals->firstWhere('freelancer_id', Auth::id());
+              @endphp
+
+              @if ($myProposal)
+              <div class="p-4 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft)/0.4)] space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-[rgb(var(--color-copper))]">لقد قمت بتقديم عرض على هذا المشروع</span>
+                  <span class="gdfh-badge text-xs font-bold bg-amber-500/10 text-amber-500">
+                    الحالة: {{ $myProposal->status }}
+                  </span>
+                </div>
+                <p class="text-xs text-[rgb(var(--color-text-secondary))]">{{ $myProposal->cover_letter }}</p>
+                <div class="text-xs font-bold text-[rgb(var(--color-text-primary))]">
+                  الميزانية المعروضة: ${{ number_format($myProposal->bid_amount, 2) }} (خلال {{ $myProposal->delivery_days }} أيام)
+                </div>
+
+                @if ($myProposal->isPending())
+                <form method="POST" action="{{ route('proposals.withdraw', $myProposal) }}">
+                  @csrf
+                  <button type="submit" class="gdfh-btn text-xs py-1 px-3 bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                    سحب العرض
+                  </button>
+                </form>
+                @endif
+              </div>
+              @else
+              <form method="POST" action="{{ route('projects.proposals.store', $project) }}" class="space-y-4 text-xs">
+                @csrf
+                <h3 class="font-bold text-[rgb(var(--color-text-primary))]">تقديم عرض عمل على هذا المشروع</h3>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="block font-bold text-[rgb(var(--color-text-primary))] mb-1">المبلغ المعروض ($)</label>
+                    <input type="number" step="0.01" name="bid_amount" required placeholder="مثال: 500" class="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]">
+                  </div>
+
+                  <div>
+                    <label class="block font-bold text-[rgb(var(--color-text-primary))] mb-1">مدة التسليم المتوقعة (بالأيام)</label>
+                    <input type="number" name="delivery_days" required placeholder="مثال: 7" class="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block font-bold text-[rgb(var(--color-text-primary))] mb-1">رسالة التقديم (Cover Letter)</label>
+                  <textarea name="notes" name="cover_letter" rows="3" required placeholder="اذكر خبراتك وخطة تنفيذ المشروع..." class="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]"></textarea>
+                </div>
+
+                <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-6 font-bold">
+                  إرسال العرض إلى صاحب العمل
+                </button>
+              </form>
+              @endif
+            @endif
+          </section>
+          @endif
+
           {{-- Archive & Restore Card --}}
           @can('archive', $project)
           <section class="gdfh-card p-5 space-y-3">

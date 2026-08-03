@@ -4,6 +4,7 @@ use App\Http\Controllers\AIController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\KanbanController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectTeamController;
+use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskController;
@@ -225,6 +227,41 @@ Route::middleware('auth')->group(function () {
             '/marketplace/freelancers/{user}',
             [MarketplaceController::class, 'showFreelancer']
         )->name('marketplace.freelancers.show');
+
+        Route::post(
+            '/projects/{project}/proposals',
+            [ProposalController::class, 'store']
+        )->name('projects.proposals.store');
+
+        Route::post(
+            '/proposals/{proposal}/accept',
+            [ProposalController::class, 'accept']
+        )->name('proposals.accept');
+
+        Route::post(
+            '/proposals/{proposal}/reject',
+            [ProposalController::class, 'reject']
+        )->name('proposals.reject');
+
+        Route::post(
+            '/proposals/{proposal}/withdraw',
+            [ProposalController::class, 'withdraw']
+        )->name('proposals.withdraw');
+
+        Route::get(
+            '/contracts',
+            [ContractController::class, 'index']
+        )->name('contracts.index');
+
+        Route::get(
+            '/contracts/{contract}',
+            [ContractController::class, 'show']
+        )->name('contracts.show');
+
+        Route::post(
+            '/contracts/{contract}/complete',
+            [ContractController::class, 'complete']
+        )->name('contracts.complete');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()

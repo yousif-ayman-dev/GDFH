@@ -156,6 +156,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Proposals submitted by user.
+     */
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(Proposal::class, 'freelancer_id');
+    }
+
+    /**
+     * Contracts where user is the client.
+     */
+    public function contractsAsClient(): HasMany
+    {
+        return $this->hasMany(Contract::class, 'client_id');
+    }
+
+    /**
+     * Contracts where user is the freelancer.
+     */
+    public function contractsAsFreelancer(): HasMany
+    {
+        return $this->hasMany(Contract::class, 'freelancer_id');
+    }
+
+    /**
      * Tasks created by the user.
      */
     public function createdTasks(): HasMany
