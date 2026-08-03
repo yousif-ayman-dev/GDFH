@@ -180,6 +180,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Reviews received by user.
+     */
+    public function receivedReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
+    }
+
+    /**
+     * Reviews submitted by user.
+     */
+    public function submittedReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
+    /**
      * Tasks created by the user.
      */
     public function createdTasks(): HasMany

@@ -2,95 +2,70 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreReviewRequest;
-use App\Http\Requests\UpdateReviewRequest;
 use App\Models\Project;
 use App\Models\Review;
+use App\Services\ReviewService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ReviewController extends Controller
 {
+    public function __construct(
+        protected ReviewService $reviewService
+    ) {}
+
     public function index(Project $project): View
     {
-        $this->ensureProjectOwner($project);
+        $reviews = $this->reviewService->getProjectReviews($project);
 
-        $reviews = $project->reviews()->latest()->paginate(10);
-
-        return view('reviews.index', compact('project', 'reviews'));
+        return view('projects.show', compact('project', 'reviews'));
     }
 
     public function create(Project $project): View
     {
-        $this->ensureProjectOwner($project);
-
-        return view('reviews.create', compact('project'));
+        return view('projects.show', compact('project'));
     }
 
-    public function store(StoreReviewRequest $request, Project $project): RedirectResponse
+    public function store(Request $request, Project $project): RedirectResponse
     {
-        $this->ensureProjectOwner($project);
-
-        $data = $request->validated();
-
-        Review::create([
-            'project_id' => $project->id,
-            'reviewer_id' => Auth::id(),
-            'reviewee_id' => $data['reviewee_id'],
-            'rating' => $data['rating'],
-            'communication_rating' => $data['communication_rating'] ?? null,
-            'quality_rating' => $data['quality_rating'] ?? null,
-            'professionalism_rating' => $data['professionalism_rating'] ?? null,
-            'deadline_rating' => $data['deadline_rating'] ?? null,
-            'comment' => $data['comment'] ?? null,
-            'status' => $data['status'] ?? 'published',
+        $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['nullable', 'string', 'max:2000'],
+            'reviewee_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        return redirect()
-            ->route('projects.reviews.index', $project)
-            ->with('success', 'Review created successfully.');
-    }
+        try {
+            $this->reviewService->submitReview(
+                Auth::user(),
+                $project,
+                (int) $request->input('rating'),
+                $request->input('comment'),
+                $request->filled('reviewee_id') ? (int) $request->input('reviewee_id') : null
+            );
 
-    public function edit(Project $project, Review $review): View
-    {
-        $this->ensureProjectOwner($project);
-        $this->ensureReviewBelongsToProject($project, $review);
-
-        return view('reviews.edit', compact('project', 'review'));
-    }
-
-    public function update(UpdateReviewRequest $request, Project $project, Review $review): RedirectResponse
-    {
-        $this->ensureProjectOwner($project);
-        $this->ensureReviewBelongsToProject($project, $review);
-
-        $review->update($request->validated());
-
-        return redirect()
-            ->route('projects.reviews.index', $project)
-            ->with('success', 'Review updated successfully.');
+            return redirect()->route('projects.reviews.index', $project)
+                ->with('success', 'شكراً لك! تم تسليم التقييم بنجاح.');
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors([
+                'review' => $e->getMessage(),
+                'reviewee_id' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function destroy(Project $project, Review $review): RedirectResponse
     {
-        $this->ensureProjectOwner($project);
-        $this->ensureReviewBelongsToProject($project, $review);
+        $user = Auth::user();
+
+        if ((int) $review->reviewer_id !== (int) $user->id && (int) $project->owner_id !== (int) $user->id) {
+            abort(403, 'غير مصرح لك بحذف هذا التقييم.');
+        }
 
         $review->delete();
 
-        return redirect()
-            ->route('projects.reviews.index', $project)
-            ->with('success', 'Review deleted successfully.');
-    }
-
-    private function ensureProjectOwner(Project $project): void
-    {
-        abort_unless($project->owner_id === Auth::id(), 403);
-    }
-
-    private function ensureReviewBelongsToProject(Project $project, Review $review): void
-    {
-        abort_unless($review->project_id === $project->id, 404);
+        return redirect()->route('projects.reviews.index', $project)
+            ->with('success', 'تم حذف التقييم.');
     }
 }

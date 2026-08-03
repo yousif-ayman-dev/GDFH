@@ -279,6 +279,10 @@ Route::middleware('auth')->group(function () {
             [MessagingController::class, 'sendMessage']
         )->name('messaging.send');
 
+        Route::resource('projects.reviews', ReviewController::class)
+            ->scoped()
+            ->names('projects.reviews');
+
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
             ->names('projects.tasks');

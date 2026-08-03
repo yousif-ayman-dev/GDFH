@@ -748,6 +748,79 @@
           </section>
           @endif
 
+          {{-- Project Reviews & Ratings Section --}}
+          @if ($project->status === 'completed' || $project->reviews->count() > 0)
+          <section class="gdfh-card p-6 space-y-6">
+            <div class="border-b border-[rgb(var(--color-border))] pb-4 flex items-center justify-between">
+              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">تقييمات وآراء المشروع (Reviews & Ratings)</h2>
+              <span class="text-xs font-bold text-amber-500 flex items-center gap-1">
+                ★ {{ number_format($project->reviews->avg('rating') ?? 5.0, 1) }} ({{ $project->reviews->count() }} تقييم)
+              </span>
+            </div>
+
+            {{-- 1. Review Submission Form if user hasn't reviewed yet --}}
+            @php
+            $hasReviewed = $project->reviews->contains('reviewer_id', Auth::id());
+            @endphp
+
+            @if ($project->status === 'completed' && !$hasReviewed)
+            <form method="POST" action="{{ route('projects.reviews.store', $project) }}" class="p-4 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft)/0.4)] space-y-4 text-xs">
+              @csrf
+              <h3 class="font-bold text-[rgb(var(--color-text-primary))]">أضف تقييمك ورأيك لهذا المشروع</h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-bold text-[rgb(var(--color-text-primary))] mb-1">التقييم الإجمالي (من 1 إلى 5 نجوم)</label>
+                  <select name="rating" required class="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]">
+                    <option value="5" selected>★★★★★ (5 نجوم - ممتاز)</option>
+                    <option value="4">★★★★☆ (4 نجوم - جيد جداً)</option>
+                    <option value="3">★★★☆☆ (3 نجوم - متوسط)</option>
+                    <option value="2">★★☆☆☆ (نجمتان - مقبولة)</option>
+                    <option value="1">★☆☆☆☆ (نجمة واحدة - ضعيف)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-bold text-[rgb(var(--color-text-primary))] mb-1">ملاحظات ورأي منفصل (اختياري)</label>
+                <textarea name="comment" rows="3" placeholder="اذكر تجربة العمل والالتزام بالمواعيد والجودة..." class="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]"></textarea>
+              </div>
+
+              <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-6 font-bold">
+                إرسال التقييم
+              </button>
+            </form>
+            @endif
+
+            {{-- 2. Reviews List --}}
+            <div class="divide-y divide-[rgb(var(--color-border))] space-y-4">
+              @forelse ($project->reviews as $rev)
+              <div class="pt-4 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $rev->reviewer?->name }}</span>
+                    <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">← {{ $rev->reviewee?->name }}</span>
+                  </div>
+                  <span class="font-bold text-amber-500 text-xs">
+                    ★ {{ $rev->rating }}.0
+                  </span>
+                </div>
+                @if ($rev->comment)
+                <p class="text-[rgb(var(--color-text-secondary))] leading-relaxed">
+                  {{ $rev->comment }}
+                </p>
+                @endif
+                <span class="text-[10px] text-[rgb(var(--color-text-secondary))] block">{{ $rev->created_at->diffForHumans() }}</span>
+              </div>
+              @empty
+              <div class="p-8 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+                لا توجد تقييمات مكتوبة لهذا المشروع حتى الآن.
+              </div>
+              @endforelse
+            </div>
+          </section>
+          @endif
+
           {{-- Archive & Restore Card --}}
           @can('archive', $project)
           <section class="gdfh-card p-5 space-y-3">
