@@ -147,6 +147,14 @@ class TaskService
     }
 
     /**
+     * Alias for changeStatus.
+     */
+    public function updateStatus(Task $task, string $targetStatus): Task
+    {
+        return $this->changeStatus($task, $targetStatus);
+    }
+
+    /**
      * Delete a task.
      */
     public function deleteTask(Task $task): void

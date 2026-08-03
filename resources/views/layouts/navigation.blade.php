@@ -36,6 +36,12 @@ $navigation = [
 'active' => 'calendar.*',
 'icon' => 'calendar',
 ],
+[
+'label' => 'لوحة كانبان',
+'route' => 'kanban.index',
+'active' => 'kanban.*',
+'icon' => 'kanban',
+],
 ];
 @endphp
 
@@ -127,6 +133,13 @@ $navigation = [
             aria-hidden="true">
             <rect x="3" y="4" width="18" height="16" rx="2" />
             <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          @break
+
+          @case('kanban')
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-12-15h18" />
           </svg>
           @break
           @endswitch

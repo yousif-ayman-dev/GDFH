@@ -4,6 +4,7 @@ use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -129,6 +130,16 @@ Route::middleware('auth')->group(function () {
             '/calendar',
             [CalendarController::class, 'index']
         )->name('calendar.index');
+
+        Route::get(
+            '/kanban',
+            [KanbanController::class, 'index']
+        )->name('kanban.index');
+
+        Route::post(
+            '/kanban/tasks/{task}/status',
+            [KanbanController::class, 'updateStatus']
+        )->name('kanban.tasks.update-status');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
