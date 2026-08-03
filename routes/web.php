@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
@@ -123,6 +124,11 @@ Route::middleware('auth')->group(function () {
             '/notifications/{notification}',
             [NotificationController::class, 'destroy']
         )->name('notifications.destroy');
+
+        Route::get(
+            '/calendar',
+            [CalendarController::class, 'index']
+        )->name('calendar.index');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
