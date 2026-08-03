@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\MessagingController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -262,6 +263,21 @@ Route::middleware('auth')->group(function () {
             '/contracts/{contract}/complete',
             [ContractController::class, 'complete']
         )->name('contracts.complete');
+
+        Route::get(
+            '/chat',
+            [MessagingController::class, 'index']
+        )->name('messaging.index');
+
+        Route::post(
+            '/chat/start/{user}',
+            [MessagingController::class, 'startConversation']
+        )->name('messaging.start');
+
+        Route::post(
+            '/chat/{conversation}/messages',
+            [MessagingController::class, 'sendMessage']
+        )->name('messaging.send');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()

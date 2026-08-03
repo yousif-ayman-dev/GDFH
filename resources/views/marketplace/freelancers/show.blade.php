@@ -32,9 +32,12 @@
               <div class="text-lg font-bold text-[rgb(var(--color-text-primary))]">${{ number_format($user->freelancerProfile?->hourly_rate ?? 25, 0) }}/h</div>
             </div>
 
-            <button type="button" onclick="alert('تم فتح قناة تواصل مع المستقل!')" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-4 font-bold">
-              تواصل مع المستقل
-            </button>
+            <form method="POST" action="{{ route('messaging.start', $user) }}">
+              @csrf
+              <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-4 font-bold">
+                💬 تواصل مع المستقل
+              </button>
+            </form>
           </div>
         </div>
 
