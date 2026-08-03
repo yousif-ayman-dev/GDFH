@@ -42,6 +42,12 @@ $navigation = [
 'active' => 'kanban.*',
 'icon' => 'kanban',
 ],
+[
+'label' => 'مخطط غانت',
+'route' => 'gantt.index',
+'active' => 'gantt.*',
+'icon' => 'gantt',
+],
 ];
 @endphp
 
@@ -140,6 +146,13 @@ $navigation = [
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
             aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-12-15h18" />
+          </svg>
+          @break
+
+          @case('gantt')
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18M3 9.5h12M3 14.5h15M3 19.5h9" />
           </svg>
           @break
           @endswitch
