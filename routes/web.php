@@ -7,6 +7,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -209,6 +210,21 @@ Route::middleware('auth')->group(function () {
             '/ai/conversations/{conversation}',
             [AIController::class, 'destroyConversation']
         )->name('ai.conversations.destroy');
+
+        Route::get(
+            '/marketplace',
+            [MarketplaceController::class, 'index']
+        )->name('marketplace.index');
+
+        Route::get(
+            '/marketplace/services/{service}',
+            [MarketplaceController::class, 'showService']
+        )->name('marketplace.services.show');
+
+        Route::get(
+            '/marketplace/freelancers/{user}',
+            [MarketplaceController::class, 'showFreelancer']
+        )->name('marketplace.freelancers.show');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
