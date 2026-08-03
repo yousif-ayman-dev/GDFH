@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectTeamController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
@@ -182,6 +183,11 @@ Route::middleware('auth')->group(function () {
             '/time-tracking/{worklog}',
             [TimeTrackingController::class, 'destroy']
         )->name('time-tracking.destroy');
+
+        Route::get(
+            '/reports',
+            [ReportsController::class, 'index']
+        )->name('reports.index');
 
         Route::resource('projects.tasks', TaskController::class)
             ->scoped()
