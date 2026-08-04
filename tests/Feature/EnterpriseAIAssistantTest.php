@@ -126,4 +126,37 @@ class EnterpriseAIAssistantTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_gemini_ai_provider_with_faked_http_response(): void
+    {
+        $user = $this->createOnboardedUser();
+        config(['services.gemini.api_key' => 'test-api-key-123']);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'generativelanguage.googleapis.com/*' => \Illuminate\Support\Facades\Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                ['text' => 'مرحباً، أنا نموذج جيميناي للذكاء الاصطناعي!']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200)
+        ]);
+
+        $provider = app(\App\Services\AI\AIProviderInterface::class);
+        $response = $provider->generateResponse($user, 'اختبار المساعد');
+
+        $this->assertEquals('مرحباً، أنا نموذج جيميناي للذكاء الاصطناعي!', $response);
+    }
+
+    public function test_gemini_provider_falls_back_when_api_key_empty(): void
+    {
+        config(['services.gemini.api_key' => null]);
+
+        $provider = app(\App\Services\AI\AIProviderInterface::class);
+        $this->assertInstanceOf(\App\Services\AI\RuleBasedAIProvider::class, $provider);
+    }
 }

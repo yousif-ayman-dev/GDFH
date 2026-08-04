@@ -251,36 +251,36 @@ $navigation = [
       @endforeach
     </div>
 
-    {{-- Planned product areas --}}
+    {{-- Workspace quick shortcuts --}}
     <div class="mt-8">
-      <div class="px-3 text-xs font-semibold" style="color: rgb(var(--color-text-secondary));">
-        مساحة العمل
+      <div class="px-3 text-xs font-bold uppercase tracking-wider" style="color: rgb(var(--color-copper));">
+        اختصارات الوصول السريع
       </div>
 
       <div class="mt-2 space-y-1">
-        <div class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm opacity-50"
-          style="color: rgb(var(--color-text-secondary));" title="قريبًا">
-          <span class="flex h-8 w-8 items-center justify-center">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              aria-hidden="true">
+        <a href="{{ route('kanban.index') }}"
+          class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition hover:bg-[rgb(var(--color-surface-soft))]"
+          style="color: rgb(var(--color-text-primary));">
+          <span class="flex h-8 w-8 items-center justify-center text-[rgb(var(--color-copper))]">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 6h14M5 12h9M5 18h6" />
               <circle cx="18" cy="12" r="2" />
             </svg>
           </span>
-          <span>مهامي</span>
-        </div>
+          <span>جدول مهامي</span>
+        </a>
 
-        <div class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm opacity-50"
-          style="color: rgb(var(--color-text-secondary));" title="قريبًا">
-          <span class="flex h-8 w-8 items-center justify-center">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              aria-hidden="true">
+        <a href="{{ route('calendar.index') }}"
+          class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition hover:bg-[rgb(var(--color-surface-soft))]"
+          style="color: rgb(var(--color-text-primary));">
+          <span class="flex h-8 w-8 items-center justify-center text-[rgb(var(--color-copper))]">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <rect x="4" y="5.5" width="16" height="14" rx="2" />
               <path d="M8 3.5v4M16 3.5v4M4 10h16" />
             </svg>
           </span>
-          <span>التقويم</span>
-        </div>
+          <span>التقويم الزمني</span>
+        </a>
       </div>
     </div>
   </nav>

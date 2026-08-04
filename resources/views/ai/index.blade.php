@@ -163,14 +163,30 @@
 
           {{-- Input Prompt Form --}}
           @if ($activeConversation)
-          <form method="POST" action="{{ route('ai.conversations.messages.store', $activeConversation) }}" class="p-4 border-t border-[rgb(var(--color-border))] flex items-center gap-3">
-            @csrf
-            <input type="text" name="message" required placeholder="اسأل المساعد الذكي عن المهام، المشاريع، أو نصائح لزيادة الإنتاجية..." class="flex-1 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft))] p-3 text-xs text-[rgb(var(--color-text-primary))] placeholder:text-[rgb(var(--color-text-secondary))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--color-copper))]">
-            
-            <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-3 px-5 font-bold">
-              إرسال
-            </button>
-          </form>
+          <div class="p-4 border-t border-[rgb(var(--color-border))] space-y-3">
+            {{-- Quick Prompts --}}
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 text-[11px]" x-data>
+              <span class="text-[rgb(var(--color-text-secondary))] shrink-0">مقترحات:</span>
+              <button type="button" @click="$refs.promptInput.value = 'ما هي حالة المهام المتأخرة وكيف نحلها؟'" class="px-2.5 py-1 rounded-full bg-[rgb(var(--color-surface-soft))] hover:bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-text-primary))] transition shrink-0">
+                ⚠️ المهام المتأخرة
+              </button>
+              <button type="button" @click="$refs.promptInput.value = 'كيف ترى مؤشر صحة بيئة العمل وتوصيات الإنتاجية؟'" class="px-2.5 py-1 rounded-full bg-[rgb(var(--color-surface-soft))] hover:bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-text-primary))] transition shrink-0">
+                💡 تحليل الإنتاجية
+              </button>
+              <button type="button" @click="$refs.promptInput.value = 'أعطني ملخصاً سريعا عن تقدم المشاريع والعقود النشطة.'" class="px-2.5 py-1 rounded-full bg-[rgb(var(--color-surface-soft))] hover:bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-text-primary))] transition shrink-0">
+                📊 ملخص المشاريع
+              </button>
+            </div>
+
+            <form method="POST" action="{{ route('ai.conversations.messages.store', $activeConversation) }}" class="flex items-center gap-3">
+              @csrf
+              <input x-ref="promptInput" type="text" name="message" required placeholder="اسأل المساعد الذكي عن المهام، المشاريع، أو نصائح لزيادة الإنتاجية..." class="flex-1 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft))] p-3 text-xs text-[rgb(var(--color-text-primary))] placeholder:text-[rgb(var(--color-text-secondary))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--color-copper))]">
+              
+              <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-3 px-5 font-bold">
+                إرسال
+              </button>
+            </form>
+          </div>
           @endif
 
         </div>
