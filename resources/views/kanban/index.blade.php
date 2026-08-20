@@ -117,10 +117,10 @@
                 {{-- Counts & Status Action --}}
                 <div class="flex items-center gap-2 shrink-0">
                   @if ($task->comments_count > 0)
-                  <span class="flex items-center gap-0.5">💬 {{ $task->comments_count }}</span>
+                  <span class="flex items-center gap-1"><svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008H8.625V12zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008h.008V12zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008h.008V12c0 3.728-4.03 6.75-9 6.75a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-3.728 4.03-6.75 9-6.75s9 3.022 9 6.75z"/></svg>{{ $task->comments_count }}</span>
                   @endif
                   @if ($task->attachments_count > 0)
-                  <span class="flex items-center gap-0.5">📎 {{ $task->attachments_count }}</span>
+                  <span class="flex items-center gap-1"><svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.55 18.32a1.5 1.5 0 01-2.121-2.121l9.9-9.9"/></svg>{{ $task->attachments_count }}</span>
                   @endif
                 </div>
               </div>

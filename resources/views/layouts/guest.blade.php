@@ -9,7 +9,7 @@
 
   <meta name="color-scheme" content="light dark">
 
-  <title>GDFH</title>
+  <title>Tasker</title>
 
   <script>
   (() => {
@@ -41,7 +41,7 @@
     style="background-color: rgb(var(--color-background));">
     <div class="w-full max-w-md">
       <div class="mb-8 flex justify-center">
-        <a href="/" aria-label="GDFH">
+        <a href="/" aria-label="Tasker">
           <x-application-logo class="h-16 w-16" style="color: rgb(var(--color-copper));" />
         </a>
       </div>

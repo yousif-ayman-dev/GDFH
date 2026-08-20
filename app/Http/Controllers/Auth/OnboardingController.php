@@ -74,6 +74,6 @@ class OnboardingController extends Controller
 
         return redirect()
             ->route('dashboard')
-            ->with('success', 'تم إكمال إعداد حسابك بنجاح! مرحباً بك في GDFH.');
+            ->with('success', 'تم إكمال إعداد حسابك بنجاح! مرحباً بك في Tasker.');
     }
 }

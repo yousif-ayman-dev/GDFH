@@ -34,8 +34,9 @@
 
             <form method="POST" action="{{ route('messaging.start', $user) }}">
               @csrf
-              <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-4 font-bold">
-                💬 تواصل مع المستقل
+              <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-4 font-bold flex items-center gap-1.5">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008H8.625V12zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008h.008V12zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008h.008V12c0 3.728-4.03 6.75-9 6.75a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-3.728 4.03-6.75 9-6.75s9 3.022 9 6.75z"/></svg>
+                <span>تواصل مع المستقل</span>
               </button>
             </form>
           </div>

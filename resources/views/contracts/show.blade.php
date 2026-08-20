@@ -66,8 +66,9 @@
         <div class="pt-6 border-t border-[rgb(var(--color-border))] flex items-center justify-end">
           <form method="POST" action="{{ route('contracts.complete', $contract) }}" onsubmit="return confirm('تأكيد إتمام وتأليم العقد والمشروع؟')">
             @csrf
-            <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-6 font-bold">
-              ✓ تأكيد تسليم وإتمام العقد
+            <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-6 font-bold flex items-center gap-1.5">
+              <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+              <span>تأكيد تسليم وإتمام العقد</span>
             </button>
           </form>
         </div>

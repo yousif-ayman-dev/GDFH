@@ -123,8 +123,9 @@
           </div>
 
           <div>
-            <button type="submit" class="w-full gdfh-btn gdfh-btn-brand text-xs py-2.5">
-              ▶ تشغيل المؤقت المباشر
+            <button type="submit" class="w-full gdfh-btn gdfh-btn-brand text-xs py-2.5 flex items-center justify-center gap-1.5">
+              <svg class="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <span>تشغيل المؤقت المباشر</span>
             </button>
           </div>
         </form>

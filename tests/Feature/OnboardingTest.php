@@ -41,7 +41,7 @@ class OnboardingTest extends TestCase
         $response = $this->actingAs($user)->get(route('onboarding'));
 
         $response->assertStatus(200);
-        $response->assertSee('مرحباً بك في GDFH!');
+        $response->assertSee('مرحباً بك في Tasker!');
     }
 
     public function test_onboarded_user_is_redirected_to_dashboard_when_visiting_onboarding(): void

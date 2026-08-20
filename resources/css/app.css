@@ -11,58 +11,69 @@
 */
 
 @layer base {
-     :root {
-        /* Surfaces */
-        --color-background: 246 244 241;
-        --color-surface: 255 255 255;
-        --color-surface-soft: 239 235 230;
-        /* Typography */
-        --color-text-primary: 25 35 38;
-        --color-text-secondary: 100 112 116;
-        /* Borders */
-        --color-border: 222 217 210;
-        /* Brand */
-        --color-copper: 197 138 91;
-        --color-copper-soft: 242 227 213;
-        /* Secondary Brand */
-        --color-mineral: 47 143 109;
-        --color-mineral-soft: 222 241 233;
-        /* Semantic */
-        --color-success: 39 138 93;
-        --color-warning: 190 125 31;
-        --color-error: 185 64 64;
-        --color-info: 67 119 151;
-        /* Radius */
+    :root {
+        /* ─── Surfaces ─── */
+        --color-background: 248 250 252;    /* #F8FAFC */
+        --color-surface:    255 255 255;    /* #FFFFFF */
+        --color-surface-soft: 241 245 249;
+        /* ─── Typography ─── */
+        --color-text-primary:   28 43 69;   /* #1C2B45 — Tasker Navy */
+        --color-text-secondary: 107 114 128; /* #6B7280 — Neutral Gray */
+        /* ─── Borders ─── */
+        --color-border: 226 232 240;
+        /* ─── Tasker Navy  #1C2B45 ─── */
+        --color-navy:      28 43 69;
+        --color-navy-soft: 38 58 92;
+        /* ─── Tasker Orange  #F7931E ─── */
+        --color-copper:      247 147 30;
+        --color-copper-soft: 254 243 199;
+        /* ─── Tasker Blue  #3756C6 ─── */
+        --color-mineral:      55 86 198;
+        --color-mineral-soft: 219 234 254;
+        /* ─── Semantic ─── */
+        --color-success: 16 185 129;
+        --color-warning: 247 147 30;
+        --color-error:   239 68 68;
+        --color-info:    55 86 198;
+        /* ─── Radius ─── */
         --radius-xs: 6px;
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 16px;
         --radius-xl: 20px;
-        /* Motion */
-        --duration-fast: 120ms;
+        /* ─── Motion ─── */
+        --duration-fast:   120ms;
         --duration-normal: 180ms;
-        --duration-slow: 260ms;
-        /* Dashboard */
-        --dashboard-shadow: 0 1px 2px rgb(25 35 38 / 0.025), 0 14px 38px rgb(25 35 38 / 0.045);
-        --dashboard-shadow-hover: 0 2px 4px rgb(25 35 38 / 0.03), 0 18px 48px rgb(25 35 38 / 0.075);
+        --duration-slow:   260ms;
+        /* ─── Shadows ─── */
+        --dashboard-shadow:       0 1px 3px rgba(28, 43, 69, 0.05), 0 10px 30px rgba(28, 43, 69, 0.04);
+        --dashboard-shadow-hover: 0 4px 6px rgba(28, 43, 69, 0.06), 0 16px 40px rgba(28, 43, 69, 0.08);
     }
     .dark {
-        --color-background: 17 22 24;
-        --color-surface: 24 30 32;
-        --color-surface-soft: 32 39 41;
-        --color-text-primary: 244 241 236;
-        --color-text-secondary: 169 177 177;
-        --color-border: 48 56 58;
-        --color-copper: 214 154 105;
-        --color-copper-soft: 56 42 33;
-        --color-mineral: 85 184 146;
-        --color-mineral-soft: 27 57 47;
-        --color-success: 79 177 128;
-        --color-warning: 224 164 72;
-        --color-error: 221 103 103;
-        --color-info: 101 159 194;
-        --dashboard-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 16px 42px rgb(0 0 0 / 0.16);
-        --dashboard-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.16), 0 20px 54px rgb(0 0 0 / 0.22);
+        /* ─── Dark surfaces ─── */
+        --color-background:   17 24 39;
+        --color-surface:      31 41 55;
+        --color-surface-soft: 55 65 81;
+        /* ─── Dark typography ─── */
+        --color-text-primary:   248 250 252;
+        --color-text-secondary: 156 163 175;
+        /* ─── Dark borders ─── */
+        --color-border: 55 65 81;
+        /* ─── Brand (same hues, dark variants) ─── */
+        --color-navy:      28 43 69;
+        --color-navy-soft: 38 58 92;
+        --color-copper:      247 147 30;
+        --color-copper-soft: 69 39 8;
+        --color-mineral:      55 86 198;
+        --color-mineral-soft: 30 58 138;
+        /* ─── Semantic dark ─── */
+        --color-success: 52 211 153;
+        --color-warning: 251 191 36;
+        --color-error:   248 113 113;
+        --color-info:    96 165 250;
+        /* ─── Shadows dark ─── */
+        --dashboard-shadow:       0 1px 2px rgb(0 0 0 / 0.2),  0 16px 42px rgb(0 0 0 / 0.25);
+        --dashboard-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.25), 0 20px 54px rgb(0 0 0 / 0.35);
     }
     html {
         scroll-behavior: smooth;
@@ -70,20 +81,37 @@
     body {
         background-color: rgb(var(--color-background));
         color: rgb(var(--color-text-primary));
-        font-family: "IBM Plex Sans Arabic", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: "Alexandria", "IBM Plex Sans Arabic", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
      ::selection {
-        background-color: rgb(var(--color-copper) / 0.22);
+        background-color: rgb(var(--color-mineral) / 0.22);
         color: rgb(var(--color-text-primary));
     }
      :focus-visible {
-        outline: 2px solid rgb(var(--color-copper));
+        outline: 2px solid rgb(var(--color-mineral));
         outline-offset: 3px;
     }
+
+    /* Motion System Keyframes */
+    @keyframes gdfhFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes gdfhSlideUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: gdfhFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-slide-up {
+        animation: gdfhSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 }
+
 
 
 /*
@@ -96,23 +124,17 @@
     .gdfh-card {
         background-color: rgb(var(--color-surface));
         border: 1px solid rgb(var(--color-border));
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-md);
         box-shadow: var(--dashboard-shadow);
-        transition: border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease, transform var(--duration-fast) ease;
+        transition: box-shadow var(--duration-normal) ease, border-color var(--duration-normal) ease, transform var(--duration-fast) ease;
     }
-    .gdfh-card-hover:hover {
-        border-color: rgb(var(--color-copper) / 0.5);
+    .gdfh-card:hover {
         box-shadow: var(--dashboard-shadow-hover);
-        transform: translateY(-2px);
     }
-    .gdfh-glass {
-        background: rgba(var(--color-surface), 0.75);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(var(--color-border), 0.6);
-    }
-    .gdfh-surface-soft {
+    .gdfh-panel {
         background-color: rgb(var(--color-surface-soft));
+        border: 1px solid rgb(var(--color-border));
+        border-radius: var(--radius-md);
     }
     .gdfh-btn {
         display: inline-flex;
@@ -130,21 +152,23 @@
         transform: translateY(1px);
     }
     .gdfh-btn-primary {
-        background-color: rgb(var(--color-text-primary));
-        color: rgb(var(--color-background));
+        background-color: rgb(var(--color-navy));
+        color: #ffffff;
     }
     .gdfh-btn-primary:hover {
-        opacity: 0.92;
+        background-color: #263A5C;
+        color: #ffffff;
         transform: translateY(-1px);
     }
     .gdfh-btn-brand {
         background-color: rgb(var(--color-copper));
-        color: #1b1511;
-        box-shadow: 0 4px 14px rgb(var(--color-copper) / 0.2);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgb(var(--color-copper) / 0.25);
     }
     .gdfh-btn-brand:hover {
-        filter: brightness(0.96);
-        box-shadow: 0 6px 20px rgb(var(--color-copper) / 0.3);
+        background-color: #E07E0D;
+        color: #ffffff;
+        box-shadow: 0 6px 20px rgb(var(--color-copper) / 0.35);
         transform: translateY(-1px);
     }
     .gdfh-btn-secondary {
@@ -154,7 +178,8 @@
     }
     .gdfh-btn-secondary:hover {
         background-color: rgb(var(--color-surface-soft));
-        border-color: rgb(var(--color-copper) / 0.4);
+        border-color: rgb(var(--color-mineral) / 0.4);
+        color: rgb(var(--color-mineral));
         transform: translateY(-1px);
     }
     .gdfh-input {
@@ -171,8 +196,8 @@
         color: rgb(var(--color-text-secondary));
     }
     .gdfh-input:focus {
-        border-color: rgb(var(--color-copper));
-        box-shadow: 0 0 0 3px rgb(var(--color-copper) / 0.15);
+        border-color: rgb(var(--color-mineral));
+        box-shadow: 0 0 0 3px rgb(var(--color-mineral) / 0.15);
         outline: none;
     }
     .gdfh-badge {
@@ -187,7 +212,7 @@
     /* Chat & AI Utilities */
     .chat-bubble-user {
         background-color: rgb(var(--color-copper));
-        color: #1b1511;
+        color: #ffffff;
         border-radius: var(--radius-lg) var(--radius-lg) 2px var(--radius-lg);
     }
     .chat-bubble-assistant {
@@ -227,7 +252,134 @@
     .gdfh-table-zebra tbody tr:hover {
         background-color: rgb(var(--color-copper-soft) / 0.35);
     }
+
+    /* Alerts */
+    .gdfh-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.875rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid transparent;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+    .gdfh-alert-success {
+        background-color: rgb(var(--color-success) / 0.08);
+        border-color: rgb(var(--color-success) / 0.3);
+        color: rgb(var(--color-success));
+    }
+    .gdfh-alert-warning {
+        background-color: rgb(var(--color-warning) / 0.08);
+        border-color: rgb(var(--color-warning) / 0.3);
+        color: rgb(var(--color-warning));
+    }
+    .gdfh-alert-error {
+        background-color: rgb(var(--color-error) / 0.08);
+        border-color: rgb(var(--color-error) / 0.3);
+        color: rgb(var(--color-error));
+    }
+    .gdfh-alert-info {
+        background-color: rgb(var(--color-info) / 0.08);
+        border-color: rgb(var(--color-info) / 0.3);
+        color: rgb(var(--color-info));
+    }
+
+    /* Empty States */
+    .gdfh-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+        border: 1.5px dashed rgb(var(--color-border));
+        border-radius: var(--radius-lg);
+        background-color: rgb(var(--color-surface-soft) / 0.3);
+    }
+
+    /* Loading Skeletons */
+    .gdfh-skeleton {
+        background: linear-gradient(90deg, rgb(var(--color-surface-soft)) 25%, rgb(var(--color-border) / 0.4) 50%, rgb(var(--color-surface-soft)) 75%);
+        background-size: 200% 100%;
+        animation: gdfhShimmer 1.6s infinite ease-in-out;
+        border-radius: var(--radius-xs);
+    }
+    @keyframes gdfhShimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Progress Bars */
+    .gdfh-progress-track {
+        width: 100%;
+        height: 0.5rem;
+        background-color: rgb(var(--color-surface-soft));
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .gdfh-progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.5s ease-in-out;
+    }
+
+    /* Dropdowns */
+    .gdfh-dropdown-menu {
+        background-color: rgb(var(--color-surface));
+        border: 1px solid rgb(var(--color-border));
+        border-radius: var(--radius-md);
+        box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        padding: 0.375rem;
+    }
+    .gdfh-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: rgb(var(--color-text-primary));
+        transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+    }
+    .gdfh-dropdown-item:hover {
+        background-color: rgb(var(--color-surface-soft));
+    }
+
+    /* Extended Badges */
+    .gdfh-badge-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .gdfh-badge-copper {
+        background-color: rgb(var(--color-copper-soft));
+        color: rgb(var(--color-copper));
+    }
+    .gdfh-badge-mineral {
+        background-color: rgb(var(--color-mineral-soft));
+        color: rgb(var(--color-mineral));
+    }
+    .gdfh-badge-success {
+        background-color: rgb(var(--color-success) / 0.12);
+        color: rgb(var(--color-success));
+    }
+    .gdfh-badge-warning {
+        background-color: rgb(var(--color-warning) / 0.12);
+        color: rgb(var(--color-warning));
+    }
+    .gdfh-badge-error {
+        background-color: rgb(var(--color-error) / 0.12);
+        color: rgb(var(--color-error));
+    }
+    .gdfh-badge-info {
+        background-color: rgb(var(--color-info) / 0.12);
+        color: rgb(var(--color-info));
+    }
 }
+
 
 
 /*
@@ -308,11 +460,11 @@
         gap: 0.65rem;
         min-height: 46px;
         padding: 0.72rem 1.1rem;
-        color: #1b1511;
+        color: #ffffff;
         background-color: rgb(var(--color-copper));
         border: 1px solid rgb(var(--color-copper));
         border-radius: var(--radius-sm);
-        box-shadow: 0 8px 24px rgb(var(--color-copper) / 0.15);
+        box-shadow: 0 8px 24px rgb(var(--color-copper) / 0.2);
         font-size: 0.875rem;
         font-weight: 700;
         transition: transform var(--duration-fast) ease, box-shadow var(--duration-normal) ease, filter var(--duration-normal) ease;
@@ -874,7 +1026,7 @@
     |--------------------------------------------------------------------------
     */
     .dark .gdfh-primary-action {
-        color: rgb(25 20 16);
+        color: #ffffff;
     }
     .dark .gdfh-stat-card--attention {
         background: linear-gradient( 145deg, rgb(var(--color-surface)), rgb(var(--color-copper-soft) / 0.5));

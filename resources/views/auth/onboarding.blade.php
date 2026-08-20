@@ -5,7 +5,7 @@
     }" class="space-y-6">
     <div class="text-center">
       <h1 class="text-xl font-bold tracking-tight" style="color: rgb(var(--color-text-primary));">
-        مرحباً بك في GDFH! 👋
+        مرحباً بك في Tasker!
       </h1>
       <p class="mt-2 text-sm" style="color: rgb(var(--color-text-secondary));">
         اختر نوع حسابك واسم المستخدم الفريد الخاص بك لبدء تجربة العمل.
@@ -29,7 +29,7 @@
       {{-- Account Type Selection --}}
       <div>
         <label class="block text-sm font-semibold mb-3" style="color: rgb(var(--color-text-primary));">
-          كيف تخطط لاستخدام GDFH؟ <span class="text-red-500">*</span>
+          كيف تخطط لاستخدام Tasker؟ <span class="text-red-500">*</span>
         </label>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -49,7 +49,7 @@
               </div>
 
               <div x-show="accountType === 'freelancer'" class="flex h-6 w-6 items-center justify-center rounded-full"
-                style="background-color: rgb(var(--color-copper)); color: #1b1511;">
+                style="background-color: rgb(var(--color-copper)); color: #ffffff;">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
@@ -82,7 +82,7 @@
               </div>
 
               <div x-show="accountType === 'client'" class="flex h-6 w-6 items-center justify-center rounded-full"
-                style="background-color: rgb(var(--color-copper)); color: #1b1511;">
+                style="background-color: rgb(var(--color-copper)); color: #ffffff;">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>

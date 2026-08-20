@@ -105,7 +105,7 @@
           @foreach ($days as $day)
           <div class="p-2 min-h-[100px] flex flex-col justify-between transition {{ $day['is_current_month'] ? 'bg-[rgb(var(--color-surface))]' : 'bg-[rgb(var(--color-surface-soft)/0.3)] text-gray-400' }} {{ $day['is_today'] ? 'ring-2 ring-inset ring-[rgb(var(--color-copper))]' : '' }}">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold {{ $day['is_today'] ? 'flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(var(--color-copper))] text-[#1b1511]' : 'text-[rgb(var(--color-text-primary))]' }}">
+              <span class="text-xs font-bold {{ $day['is_today'] ? 'flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(var(--color-copper))] text-white' : 'text-[rgb(var(--color-text-primary))]' }}">
                 {{ $day['day_number'] }}
               </span>
               @if ($day['events']->count() > 0)

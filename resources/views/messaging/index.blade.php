@@ -95,7 +95,9 @@
               <div class="flex items-center gap-1.5 mt-1 text-[10px] text-[rgb(var(--color-text-secondary))] px-1">
                 <span>{{ $msg->created_at->format('H:i') }}</span>
                 @if ($isMine)
-                <span>{{ $msg->isRead() ? '✓✓' : '✓' }}</span>
+                <span class="flex items-center text-blue-500 font-semibold">
+                  <svg class="h-3.5 w-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5{{ $msg->isRead() ? 'm-10.5 0 6 6 9-13.5' : '' }}"/></svg>
+                </span>
                 @endif
               </div>
             </div>
@@ -118,7 +120,9 @@
 
           @else
           <div class="p-16 text-center text-xs text-[rgb(var(--color-text-secondary))] space-y-3">
-            <div class="text-3xl">💬</div>
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))] mx-auto">
+              <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008H8.625V12zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008h.008V12zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.008v.008h.008V12c0 3.728-4.03 6.75-9 6.75a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-3.728 4.03-6.75 9-6.75s9 3.022 9 6.75z"/></svg>
+            </div>
             <p>اختر محادثة من القائمة الجانبية أو ابدأ محادثة جديدة من ملف أي مستقل أو صاحب عمل.</p>
           </div>
           @endif
