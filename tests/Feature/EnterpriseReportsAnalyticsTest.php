@@ -157,4 +157,56 @@ class EnterpriseReportsAnalyticsTest extends TestCase
         $this->assertEquals(0, $user2Data['kpis']['total_projects']);
         $this->assertEquals(0, $user2Data['kpis']['total_tasks']);
     }
+
+    public function test_authenticated_user_can_export_reports_as_csv(): void
+    {
+        $user = $this->createOnboardedUser();
+        $project = Project::factory()->create(['owner_id' => $user->id, 'title' => 'مشروع التصدير التجريبي']);
+        Task::factory()->create(['project_id' => $project->id, 'title' => 'مهمة التصدير']);
+
+        $response = $this->actingAs($user)->get(route('reports.export.csv', [
+            'project_id' => $project->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        
+        $content = $response->streamedContent();
+        $this->assertStringStartsWith("\xEF\xBB\xBF", $content);
+        $this->assertStringContainsString('تقرير تحليلات الإنتاجية', $content);
+        $this->assertStringContainsString('مشروع التصدير التجريبي', $content);
+    }
+
+    public function test_authenticated_user_can_export_reports_as_pdf(): void
+    {
+        $user = $this->createOnboardedUser();
+        $project = Project::factory()->create(['owner_id' => $user->id, 'title' => 'مشروع الطباعة']);
+
+        $response = $this->actingAs($user)->get(route('reports.export.pdf', [
+            'project_id' => $project->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('تقرير تحليلات الإنتاجية والأداء');
+        $response->assertSee('مشروع الطباعة');
+    }
+
+    public function test_reports_export_does_not_leak_unauthorized_project_data(): void
+    {
+        $owner = $this->createOnboardedUser();
+        $stranger = $this->createOnboardedUser();
+
+        $secretProject = Project::factory()->create([
+            'owner_id' => $owner->id,
+            'title' => 'مشروع سري للغاية',
+        ]);
+
+        $response = $this->actingAs($stranger)->get(route('reports.export.csv', [
+            'project_id' => $secretProject->id,
+        ]));
+
+        $response->assertStatus(200);
+        $content = $response->streamedContent();
+        $this->assertStringNotContainsString('مشروع سري للغاية', $content);
+    }
 }

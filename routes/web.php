@@ -144,6 +144,11 @@ Route::middleware('auth')->group(function () {
         )->name('calendar.index');
 
         Route::get(
+            '/tasks',
+            [TaskController::class, 'all']
+        )->name('tasks.index');
+
+        Route::get(
             '/kanban',
             [KanbanController::class, 'index']
         )->name('kanban.index');
@@ -197,6 +202,16 @@ Route::middleware('auth')->group(function () {
             '/reports',
             [ReportsController::class, 'index']
         )->name('reports.index');
+
+        Route::get(
+            '/reports/export/csv',
+            [ReportsController::class, 'exportCsv']
+        )->name('reports.export.csv');
+
+        Route::get(
+            '/reports/export/pdf',
+            [ReportsController::class, 'exportPdf']
+        )->name('reports.export.pdf');
 
         Route::get(
             '/ai',

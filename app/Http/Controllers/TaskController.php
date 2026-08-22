@@ -6,8 +6,10 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\Team;
 use App\Services\TaskService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -16,6 +18,71 @@ class TaskController extends Controller
     public function __construct(
         protected TaskService $taskService
     ) {}
+
+    public function all(Request $request): View
+    {
+        $user = Auth::user();
+
+        $userTeamIds = Team::query()
+            ->where('owner_id', $user->id)
+            ->orWhereHas('memberships', fn ($q) => $q->where('user_id', $user->id)->where('status', 'active'))
+            ->pluck('id');
+
+        $projectIds = Project::query()
+            ->where(function ($q) use ($user, $userTeamIds) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereIn('team_id', $userTeamIds)
+                  ->orWhereHas('memberRecords', fn ($mq) => $mq->where('user_id', $user->id)->where('status', 'active'));
+            })
+            ->pluck('id');
+
+        $filters = [
+            'search' => $request->query('search'),
+            'project_id' => $request->query('project_id'),
+            'status' => $request->query('status'),
+            'priority' => $request->query('priority'),
+            'overdue' => $request->boolean('overdue'),
+        ];
+
+        $query = Task::query()
+            ->whereIn('project_id', $projectIds)
+            ->with(['project', 'assignee', 'creator']);
+
+        if (! empty($filters['search'])) {
+            $search = '%' . trim($filters['search']) . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', $search)
+                  ->orWhere('description', 'like', $search);
+            });
+        }
+
+        if (! empty($filters['project_id'])) {
+            $query->where('project_id', $filters['project_id']);
+        }
+
+        if (! empty($filters['status'])) {
+            if ($filters['status'] === 'completed') {
+                $query->whereIn('status', ['completed', 'done']);
+            } else {
+                $query->where('status', $filters['status']);
+            }
+        }
+
+        if (! empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+
+        if (! empty($filters['overdue'])) {
+            $query->whereNotIn('status', ['completed', 'done', 'cancelled'])
+                ->whereNotNull('due_at')
+                ->where('due_at', '<', now());
+        }
+
+        $tasks = $query->latest('updated_at')->paginate(12)->withQueryString();
+        $userProjects = Project::query()->whereIn('id', $projectIds)->get(['id', 'title']);
+
+        return view('tasks.global_index', compact('tasks', 'filters', 'userProjects'));
+    }
 
     public function index(Project $project): View
     {

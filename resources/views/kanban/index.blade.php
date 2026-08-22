@@ -18,7 +18,36 @@
     </div>
   </x-slot>
 
-  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-6">
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-6"
+       x-data="{
+         isMoving: false,
+         async moveTask(taskId, targetStatus) {
+           if (this.isMoving) return;
+           this.isMoving = true;
+           const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+           try {
+             const res = await fetch(`/kanban/tasks/${taskId}/status`, {
+               method: 'POST',
+               headers: {
+                 'Content-Type': 'application/json',
+                 'X-CSRF-TOKEN': csrfToken,
+                 'Accept': 'application/json'
+               },
+               body: JSON.stringify({ status: targetStatus })
+             });
+             const data = await res.json();
+             if (res.ok && data.success) {
+               window.location.reload();
+             } else {
+               alert(data.message || 'حدث خطأ أثناء نقل المهمة');
+             }
+           } catch (e) {
+             console.error('Kanban Drag Drop Error:', e);
+           } finally {
+             this.isMoving = false;
+           }
+         }
+       }">
     <div class="mx-auto max-w-7xl space-y-6">
 
       {{-- Search & Filter Toolbar --}}
@@ -77,10 +106,19 @@
             </span>
           </div>
 
-          {{-- Column Task List --}}
-          <div class="p-3 space-y-3 overflow-y-auto min-h-[300px]">
+          {{-- Column Task List (Drop Target) --}}
+          <div class="p-3 space-y-3 overflow-y-auto min-h-[300px] transition-colors rounded-b-xl"
+               x-on:dragover.prevent="$el.classList.add('bg-blue-500/10')"
+               x-on:dragleave="$el.classList.remove('bg-blue-500/10')"
+               x-on:drop.prevent="
+                 $el.classList.remove('bg-blue-500/10');
+                 const taskId = event.dataTransfer.getData('text/plain');
+                 if (taskId) moveTask(taskId, '{{ $column['key'] }}');
+               ">
             @forelse ($column['tasks'] as $task)
-            <div class="p-4 rounded-xl border border-[rgb(var(--color-border))] space-y-3 bg-[rgb(var(--color-surface))] transition hover:shadow-md">
+            <div draggable="true"
+                 x-on:dragstart="event.dataTransfer.setData('text/plain', '{{ $task->id }}'); event.dataTransfer.effectAllowed = 'move';"
+                 class="p-4 rounded-xl border border-[rgb(var(--color-border))] space-y-3 bg-[rgb(var(--color-surface))] transition hover:shadow-md cursor-grab active:cursor-grabbing">
               
               {{-- Priority & Project Tag --}}
               <div class="flex items-center justify-between gap-2">

@@ -12,6 +12,7 @@
             { title: 'المشاريع (Projects)', type: 'صفحة', url: '{{ route('projects.index') }}', category: 'إدارة العمل' },
             { title: 'إنشاء مشروع جديد (New Project)', type: 'إجراء سريع', url: '{{ route('projects.create') }}', category: 'اختصارات' },
             { title: 'الفرق (Teams)', type: 'صفحة', url: '{{ route('teams.index') }}', category: 'إدارة العمل' },
+            { title: 'جميع المهام (Tasks)', type: 'صفحة', url: '{{ route('tasks.index') }}', category: 'إدارة العمل' },
             { title: 'إنشاء فريق جديد (New Team)', type: 'إجراء سريع', url: '{{ route('teams.create') }}', category: 'اختصارات' },
             { title: 'لوحة كانبان (Kanban Board)', type: 'أداة', url: '{{ route('kanban.index') }}', category: 'الأدوات' },
             { title: 'مخطط غانت (Gantt Chart)', type: 'أداة', url: '{{ route('gantt.index') }}', category: 'الأدوات' },
@@ -134,6 +135,9 @@
         </a>
         <a href="{{ route('teams.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-medium transition" style="{{ request()->routeIs('teams.*') ? 'background-color: rgba(55, 86, 198, 0.15); color: #3756C6; font-weight: 700;' : 'color: #94A3B8;' }}">
           الفرق
+        </a>
+        <a href="{{ route('tasks.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-medium transition" style="{{ request()->routeIs('tasks.*') ? 'background-color: rgba(55, 86, 198, 0.15); color: #3756C6; font-weight: 700;' : 'color: #94A3B8;' }}">
+          المهام
         </a>
         <a href="{{ route('kanban.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-medium transition" style="{{ request()->routeIs('kanban.*') ? 'background-color: rgba(55, 86, 198, 0.15); color: #3756C6; font-weight: 700;' : 'color: #94A3B8;' }}">
           لوحة كانبان

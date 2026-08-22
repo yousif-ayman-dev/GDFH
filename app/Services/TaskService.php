@@ -20,12 +20,12 @@ class TaskService
      */
     protected array $allowedTransitions = [
         'todo' => ['in_progress', 'cancelled'],
-        'in_progress' => ['review', 'in_review', 'todo', 'cancelled'],
-        'review' => ['completed', 'done', 'in_progress', 'cancelled'],
-        'in_review' => ['completed', 'done', 'in_progress', 'cancelled'],
-        'completed' => ['review', 'in_progress'],
-        'done' => ['review', 'in_progress'],
-        'cancelled' => ['todo'],
+        'in_progress' => ['review', 'in_review', 'todo', 'completed', 'done', 'cancelled'],
+        'review' => ['completed', 'done', 'in_progress', 'todo', 'cancelled'],
+        'in_review' => ['completed', 'done', 'in_progress', 'todo', 'cancelled'],
+        'completed' => ['review', 'in_review', 'in_progress', 'todo'],
+        'done' => ['review', 'in_review', 'in_progress', 'todo'],
+        'cancelled' => ['todo', 'in_progress'],
     ];
 
     /**
