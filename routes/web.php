@@ -143,6 +143,21 @@ Route::middleware('auth')->group(function () {
             [CalendarController::class, 'index']
         )->name('calendar.index');
 
+        Route::post(
+            '/calendar/events',
+            [CalendarController::class, 'storeEvent']
+        )->name('calendar.events.store');
+
+        Route::put(
+            '/calendar/events/{event}',
+            [CalendarController::class, 'updateEvent']
+        )->name('calendar.events.update');
+
+        Route::delete(
+            '/calendar/events/{event}',
+            [CalendarController::class, 'destroyEvent']
+        )->name('calendar.events.destroy');
+
         Route::get(
             '/tasks',
             [TaskController::class, 'all']

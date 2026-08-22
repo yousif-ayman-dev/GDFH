@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -34,6 +35,7 @@ class EnterpriseCalendarSchedulingEngineTest extends TestCase
         $response->assertSee('الشهر');
         $response->assertSee('الأسبوع');
         $response->assertSee('الأجندة');
+        $response->assertSee('حدث جديد');
     }
 
     public function test_unauthenticated_user_cannot_access_calendar(): void
@@ -126,5 +128,93 @@ class EnterpriseCalendarSchedulingEngineTest extends TestCase
         $user2Events = $calendarService->getEvents($user2);
 
         $this->assertFalse($user2Events->contains(fn ($evt) => str_contains($evt['title'], 'User 1 Private Project Event')));
+    }
+
+    public function test_authenticated_user_can_create_custom_calendar_event(): void
+    {
+        $user = $this->createOnboardedUser();
+
+        $response = $this->actingAs($user)->post(route('calendar.events.store'), [
+            'title' => 'اجتماع تخطيط الفريق',
+            'description' => 'مناقشة خطة الربع القادم',
+            'start_at' => now()->addDays(2)->format('Y-m-d H:i:s'),
+            'color' => 'blue',
+            'location' => 'غرفة الاجتماعات 1',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('events', [
+            'user_id' => $user->id,
+            'title' => 'اجتماع تخطيط الفريق',
+            'color' => 'blue',
+        ]);
+    }
+
+    public function test_custom_events_appear_in_calendar_service(): void
+    {
+        $user = $this->createOnboardedUser();
+
+        $event = Event::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'حدث مخصص متميز',
+            'start_at' => now()->addDays(3),
+        ]);
+
+        $calendarService = app(CalendarService::class);
+        $events = $calendarService->getEvents($user);
+
+        $this->assertTrue($events->contains(fn ($evt) => $evt['title'] === 'حدث مخصص متميز'));
+    }
+
+    public function test_user_can_update_own_calendar_event(): void
+    {
+        $user = $this->createOnboardedUser();
+        $event = Event::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'عنوان قديم',
+        ]);
+
+        $response = $this->actingAs($user)->put(route('calendar.events.update', $event), [
+            'title' => 'عنوان معدل جديد',
+            'start_at' => now()->addDays(4)->format('Y-m-d H:i:s'),
+            'color' => 'emerald',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals('عنوان معدل جديد', $event->fresh()->title);
+        $this->assertEquals('emerald', $event->fresh()->color);
+    }
+
+    public function test_user_can_delete_own_calendar_event(): void
+    {
+        $user = $this->createOnboardedUser();
+        $event = Event::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->delete(route('calendar.events.destroy', $event));
+
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('events', ['id' => $event->id]);
+    }
+
+    public function test_user_cannot_update_or_delete_other_users_event(): void
+    {
+        $owner = $this->createOnboardedUser();
+        $stranger = $this->createOnboardedUser();
+
+        $event = Event::factory()->create(['user_id' => $owner->id, 'title' => 'حدث أصلي']);
+
+        $updateResponse = $this->actingAs($stranger)->put(route('calendar.events.update', $event), [
+            'title' => 'محاولة اختراق',
+            'start_at' => now()->addDay()->format('Y-m-d H:i:s'),
+        ]);
+
+        $updateResponse->assertStatus(403);
+        $this->assertEquals('حدث أصلي', $event->fresh()->title);
+
+        $deleteResponse = $this->actingAs($stranger)->delete(route('calendar.events.destroy', $event));
+        $deleteResponse->assertStatus(403);
+        $this->assertDatabaseHas('events', ['id' => $event->id]);
     }
 }
