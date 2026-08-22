@@ -301,10 +301,6 @@ Route::middleware('auth')->group(function () {
             [ProjectTeamController::class, 'destroy']
         )->name('projects.teams.destroy');
 
-        Route::resource('projects.reviews', ReviewController::class)
-            ->scoped()
-            ->names('projects.reviews');
-
         Route::post(
             '/projects/{project}/members',
             [ProjectMemberController::class, 'store']

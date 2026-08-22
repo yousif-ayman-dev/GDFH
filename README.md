@@ -1,223 +1,141 @@
-# GDFH Project
+# Tasker Enterprise
 
-GDFH is a web application developed using Laravel as part of an academic software development project.
-
-This repository contains the current development stage of the system.
-
-## Current Development Stage
-
-The current version includes:
-
-- User authentication
-- User registration and login
-- User profile management
-- Project creation
-- Project listing and viewing
-- Project editing
-- Project deletion
-- Project ownership authorization
-- Project member management
-- Adding members to projects
-- Updating project member roles and statuses
-- Removing project members
-- Validation and authorization rules
-- Automated feature tests
-
-At the time this stage was completed, the automated test suite passed:
-
-```text
-57 tests passed
-183 assertions
-```
+Tasker is a full-featured enterprise project management platform built with Laravel. It supports projects, teams, tasks, time tracking, Kanban boards, Gantt charts, calendar, AI assistant, marketplace, messaging, and reporting.
 
 ## Technologies
 
-The project is built using:
-
 - Laravel 12
 - PHP 8.2+
-- SQLite
-- Laravel Breeze
+- MySQL
+- Laravel Breeze (Authentication)
 - Blade
 - Tailwind CSS
+- Alpine.js
 - Vite
 - Node.js / NPM
+- PHPUnit 11
+- Playwright (E2E)
 
-Development environment used:
+Development environment:
 
 ```text
 PHP 8.2.12
 Laravel 12.64.0
 Node.js 24.18.0
+npm 11.16.0
 ```
-
-Exact development versions are not necessarily required as long as the project dependencies are supported.
 
 ## Project Setup
 
-### 1. Extract the Project
-
-Extract the ZIP file to any directory.
-
-Example:
-
-```text
-C:\Projects\GDFH
-```
-
-Open a terminal inside the project directory.
-
-### 2. Install PHP Dependencies
-
-If the `vendor` directory is already included in the provided package, this step may not be necessary.
-
-Otherwise run:
+### 1. Install PHP Dependencies
 
 ```bash
 composer install
 ```
 
-Composer must be installed on the computer.
-
-### 3. Install JavaScript Dependencies
-
-If the `node_modules` directory is already included in the provided package, this step may not be necessary.
-
-Otherwise run:
+### 2. Install JavaScript Dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Create the Environment File
-
-Copy:
-
-```text
-.env.example
-```
-
-and create:
-
-```text
-.env
-```
-
-On Windows PowerShell:
+### 3. Create the Environment File
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-### 5. Generate Application Key
-
-Run:
+### 4. Generate Application Key
 
 ```bash
 php artisan key:generate
 ```
 
-### 6. Create SQLite Database
+### 5. Configure Database
 
-Create an empty file named:
-
-```text
-database.sqlite
-```
-
-inside:
-
-```text
-database/
-```
-
-On Windows PowerShell:
-
-```powershell
-New-Item database/database.sqlite -ItemType File
-```
-
-The default `.env.example` is configured to use SQLite:
+The project uses **MySQL**. Update your `.env` with your local MySQL credentials:
 
 ```env
-DB_CONNECTION=sqlite
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gdfh
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-### 7. Run Database Migrations
-
-Run:
+### 6. Run Database Migrations
 
 ```bash
 php artisan migrate
 ```
 
-This will create the required database tables.
+### 7. Build Front-End Assets
 
-### 8. Build Front-End Assets
-
-Run:
-
-```bash
-npm run build
-```
-
-Alternatively, during development:
+For development (keep running):
 
 ```bash
 npm run dev
 ```
 
-Keep the development process running if `npm run dev` is used.
+For production build:
 
-### 9. Start Laravel
+```bash
+npm run build
+```
 
-Run:
+### 8. Start Laravel
 
 ```bash
 php artisan serve
 ```
 
-Laravel should display a local address similar to:
+The application will be available at:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Open that address in a web browser.
-
 ## Running Automated Tests
 
-To verify the implemented functionality:
+### PHPUnit (Feature Tests)
 
 ```bash
 php artisan test
 ```
 
-At the completion of this development stage, the expected result was:
+Current test suite result:
 
 ```text
-Tests: 57 passed (183 assertions)
+278 tests, 873 assertions — OK
 ```
 
-## Important Notes
+### Playwright (E2E Tests)
 
-This package represents a development-stage version of the project and is not the final release.
+```bash
+npx playwright test
+```
 
-If `vendor` and `node_modules` are included in the provided ZIP file, the project dependencies are already present. However, running `composer install` and `npm install` may still be appropriate if the project is moved to a different development environment.
+## Key Features
 
-The `.env` file is intentionally not included because environment configuration may differ between computers.
+- User authentication with onboarding (account type: client / freelancer)
+- Projects: full CRUD, archive, members, teams, comments, attachments, proposals, reviews, activity timeline
+- Teams: full CRUD, members, roles, ownership transfer, invitations
+- Kanban board (4 columns: Todo / In Progress / Review / Done)
+- Gantt chart (Day / Week / Month zoom)
+- Calendar (Month / Week / Agenda views)
+- Time tracking (Start / Pause / Resume / Stop / Manual entry)
+- AI Assistant (Google Gemini 2.5 Flash with rule-based fallback)
+- Reports & Analytics with multi-filter support
+- Direct messaging between users
+- Notifications center
+- Marketplace (freelancer profiles, services, proposals, contracts)
+- Full RTL / Arabic-first interface
+- Light Mode / Dark Mode / System Mode
 
-SQLite is used for the current development environment, so no MySQL server configuration is required for the default setup.
+## Development Notes
 
-## Development Status
-
-Completed in this stage:
-
-- Authentication
-- Project CRUD
-- Project authorization
-- Project member backend management
-- Validation
-- Feature testing
-
-Further interface development and additional system modules are still in progress.
+- The design system is defined in `resources/css/app.css` using CSS custom properties.
+- Dark mode is managed via an Alpine.js store (`Alpine.store('theme')`) with `localStorage` persistence.
+- All business logic is separated into Service classes under `app/Services/`.
+- Authorization is handled through Laravel Policies under `app/Policies/`.

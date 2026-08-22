@@ -180,19 +180,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Reviews received by user.
+     * Reviews submitted by user (reviews written).
      */
-    public function receivedReviews(): HasMany
+    public function reviewsWritten(): HasMany
     {
-        return $this->hasMany(Review::class, 'reviewee_id');
+        return $this->hasMany(Review::class, 'reviewer_id');
     }
 
     /**
-     * Reviews submitted by user.
+     * Reviews received by user.
      */
-    public function submittedReviews(): HasMany
+    public function reviewsReceived(): HasMany
     {
-        return $this->hasMany(Review::class, 'reviewer_id');
+        return $this->hasMany(Review::class, 'reviewee_id');
     }
 
     /**
@@ -219,18 +219,6 @@ class User extends Authenticatable
         return $this->hasMany(Attachment::class, 'uploaded_by');
     }
 
-    /**
-     * Reviews created by the user.
-     */
-    public function reviewsWritten(): HasMany
-{
-    return $this->hasMany(Review::class, 'reviewer_id');
-}
-
-public function reviewsReceived(): HasMany
-{
-    return $this->hasMany(Review::class, 'reviewee_id');
-}
     /**
      * Comments created by the user.
      */

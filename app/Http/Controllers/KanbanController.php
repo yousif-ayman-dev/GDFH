@@ -39,7 +39,7 @@ class KanbanController extends Controller
         $this->authorize('update', $task);
 
         $request->validate([
-            'status' => ['required', 'string', 'in:todo,in_progress,review,done,completed,in_review'],
+            'status' => ['required', 'string', 'in:todo,in_progress,review,done'],
         ]);
 
         $updatedTask = $this->kanbanService->updateTaskStatus(
