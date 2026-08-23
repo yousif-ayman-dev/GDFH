@@ -14,6 +14,7 @@ use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectTeamController;
 use App\Http\Controllers\ProposalController;
@@ -54,6 +55,15 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
+    Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])
+        ->name('profile.avatar.destroy');
+
+    Route::get('/settings', [SettingsController::class, 'index'])
+        ->name('settings.index');
+
+    Route::patch('/settings/notifications', [SettingsController::class, 'updateNotifications'])
+        ->name('settings.notifications.update');
 
     Route::middleware('onboarded')->group(function () {
         Route::resource('projects', ProjectController::class);

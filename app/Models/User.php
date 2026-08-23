@@ -23,6 +23,9 @@ class User extends Authenticatable
         'username',
         'account_type',
         'onboarded_at',
+        'avatar_path',
+        'bio',
+        'notification_preferences',
     ];
 
     protected $hidden = [
@@ -36,7 +39,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'onboarded_at' => 'datetime',
+            'notification_preferences' => 'array',
         ];
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if ($this->avatar_path) {
+            return asset('storage/' . $this->avatar_path);
+        }
+
+        return null;
+    }
+
+    public function getNotificationPreference(string $key, bool $default = true): bool
+    {
+        $prefs = $this->notification_preferences ?? [];
+
+        return isset($prefs[$key]) ? (bool) $prefs[$key] : $default;
     }
 
     public function activities(): \Illuminate\Database\Eloquent\Relations\HasMany
