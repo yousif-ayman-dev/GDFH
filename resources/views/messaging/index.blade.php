@@ -12,7 +12,93 @@
     </div>
   </x-slot>
 
-  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-6">
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-6"
+    x-data="{
+      activeConversationId: {{ $activeConversation ? $activeConversation->id : 'null' }},
+      newMessageContent: '',
+      isSending: false,
+      messages: [
+        @if ($activeConversation)
+          @foreach ($activeConversation->messages as $msg)
+            {
+              id: {{ $msg->id }},
+              sender_id: {{ $msg->sender_id }},
+              sender_name: '{{ e($msg->sender?->name) }}',
+              content: {!! json_encode($msg->content) !!},
+              is_mine: {{ (int) $msg->sender_id === (int) Auth::id() ? 'true' : 'false' }},
+              created_at_human: '{{ $msg->created_at->format('H:i') }}'
+            },
+          @endforeach
+        @endif
+      ],
+      scrollToBottom() {
+        this.$nextTick(() => {
+          const container = this.$refs.messagesContainer;
+          if (container) {
+            container.scrollTop = container.scrollHeight;
+          }
+        });
+      },
+      async sendMessage() {
+        if (!this.newMessageContent.trim() || this.isSending || !this.activeConversationId) return;
+        this.isSending = true;
+        const text = this.newMessageContent.trim();
+        this.newMessageContent = '';
+
+        try {
+          const response = await fetch('/chat/' + this.activeConversationId + '/messages-json', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ content: text })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.message) {
+              this.messages.push(data.message);
+              this.scrollToBottom();
+            }
+          }
+        } catch(e) {
+        } finally {
+          this.isSending = false;
+        }
+      },
+      async pollMessages() {
+        if (!this.activeConversationId) return;
+        try {
+          const response = await fetch('/chat/' + this.activeConversationId + '/poll');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.messages && data.messages.length > 0) {
+              const currentIds = this.messages.map(m => m.id);
+              let hasNew = false;
+              data.messages.forEach(m => {
+                if (!currentIds.includes(m.id)) {
+                  this.messages.push(m);
+                  hasNew = true;
+                }
+              });
+              if (hasNew) {
+                this.scrollToBottom();
+              }
+            }
+          }
+        } catch(e) {}
+      },
+      initChat() {
+        if (this.activeConversationId) {
+          this.scrollToBottom();
+          setInterval(() => this.pollMessages(), 4000);
+        }
+      }
+    }"
+    x-init="initChat()"
+  >
     <div class="mx-auto max-w-7xl space-y-6">
 
       <div class="gdfh-card overflow-hidden grid grid-cols-1 md:grid-cols-4 min-h-[600px]">
@@ -83,38 +169,38 @@
           </div>
 
           {{-- Messages List Window --}}
-          <div class="p-6 space-y-4 overflow-y-auto max-h-[460px] flex-1">
-            @forelse ($activeConversation->messages as $msg)
-            @php
-            $isMine = (int) $msg->sender_id === (int) Auth::id();
-            @endphp
-            <div class="flex flex-col {{ $isMine ? 'items-end' : 'items-start' }}">
-              <div class="max-w-xl rounded-2xl p-4 text-xs leading-relaxed {{ $isMine ? 'bg-[rgb(var(--color-copper))] text-white rounded-br-none' : 'bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-primary))] border border-[rgb(var(--color-border))] rounded-bl-none' }}">
-                <div class="whitespace-pre-line">{{ $msg->content }}</div>
+          <div class="p-6 space-y-4 overflow-y-auto max-h-[460px] flex-1" x-ref="messagesContainer" id="chat-messages-container">
+            <template x-if="messages.length === 0">
+              <div class="p-12 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+                بداية المحادثة المباشرة مع {{ $recipient->name }}. أرسل أول رسالة الآن!
               </div>
-              <div class="flex items-center gap-1.5 mt-1 text-[10px] text-[rgb(var(--color-text-secondary))] px-1">
-                <span>{{ $msg->created_at->format('H:i') }}</span>
-                @if ($isMine)
-                <span class="flex items-center text-blue-500 font-semibold">
-                  <svg class="h-3.5 w-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5{{ $msg->isRead() ? 'm-10.5 0 6 6 9-13.5' : '' }}"/></svg>
-                </span>
-                @endif
+            </template>
+
+            <template x-for="msg in messages" :key="msg.id">
+              <div class="flex flex-col mb-3" :class="msg.is_mine ? 'items-end' : 'items-start'">
+                <div class="max-w-xl rounded-2xl p-4 text-xs leading-relaxed"
+                  :class="msg.is_mine ? 'bg-[rgb(var(--color-copper))] text-white rounded-br-none' : 'bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-primary))] border border-[rgb(var(--color-border))] rounded-bl-none'">
+                  <div class="whitespace-pre-line" x-text="msg.content"></div>
+                </div>
+                <div class="flex items-center gap-1.5 mt-1 text-[10px] text-[rgb(var(--color-text-secondary))] px-1">
+                  <span x-text="msg.created_at_human"></span>
+                  <template x-if="msg.is_mine">
+                    <span class="flex items-center text-blue-500 font-semibold">
+                      <svg class="h-3.5 w-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5m-10.5 0 6 6 9-13.5"/></svg>
+                    </span>
+                  </template>
+                </div>
               </div>
-            </div>
-            @empty
-            <div class="p-12 text-center text-xs text-[rgb(var(--color-text-secondary))]">
-              بداية المحادثة المباشرة مع {{ $recipient->name }}. أرسل أول رسالة الآن!
-            </div>
-            @endforelse
+            </template>
           </div>
 
           {{-- Message Input Form --}}
-          <form method="POST" action="{{ route('messaging.send', $activeConversation) }}" class="p-4 border-t border-[rgb(var(--color-border))] flex items-center gap-3">
-            @csrf
-            <input type="text" name="content" required placeholder="اكتب رسالتك المباشرة هنا..." class="flex-1 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft))] p-3 text-xs text-[rgb(var(--color-text-primary))] placeholder:text-[rgb(var(--color-text-secondary))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--color-copper))]">
+          <form @submit.prevent="sendMessage()" class="p-4 border-t border-[rgb(var(--color-border))] flex items-center gap-3">
+            <input type="text" x-model="newMessageContent" required placeholder="اكتب رسالتك المباشرة هنا..." class="flex-1 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft))] p-3 text-xs text-[rgb(var(--color-text-primary))] placeholder:text-[rgb(var(--color-text-secondary))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--color-copper))]" id="chat-message-input">
             
-            <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-3 px-6 font-bold">
-              إرسال
+            <button type="submit" :disabled="isSending || !newMessageContent.trim()" class="gdfh-btn gdfh-btn-brand text-xs py-3 px-6 font-bold disabled:opacity-50" id="chat-send-btn">
+              <span x-show="!isSending">إرسال</span>
+              <span x-cloak x-show="isSending">جاري...</span>
             </button>
           </form>
 

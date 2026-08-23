@@ -79,4 +79,63 @@ class MessagingController extends Controller
 
         return redirect()->route('messaging.index', ['conversation_id' => $conversation->id]);
     }
+
+    public function pollMessages(Conversation $conversation): \Illuminate\Http\JsonResponse
+    {
+        $user = Auth::user();
+
+        if ((int) $conversation->user_one_id !== (int) $user->id && (int) $conversation->user_two_id !== (int) $user->id) {
+            abort(403, 'غير مصرح لك باستعراض هذه المحادثة.');
+        }
+
+        $this->messagingService->markConversationAsRead($conversation, $user);
+
+        $messages = $conversation->messages()
+            ->with('sender')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($msg) use ($user) {
+                return [
+                    'id' => $msg->id,
+                    'sender_id' => $msg->sender_id,
+                    'sender_name' => $msg->sender?->name,
+                    'sender_avatar' => $msg->sender?->avatar_url,
+                    'content' => $msg->content,
+                    'is_mine' => (int) $msg->sender_id === (int) $user->id,
+                    'created_at_human' => $msg->created_at->format('H:i'),
+                ];
+            });
+
+        return response()->json([
+            'messages' => $messages,
+        ]);
+    }
+
+    public function sendMessageJson(Request $request, Conversation $conversation): \Illuminate\Http\JsonResponse
+    {
+        $user = Auth::user();
+
+        if ((int) $conversation->user_one_id !== (int) $user->id && (int) $conversation->user_two_id !== (int) $user->id) {
+            abort(403, 'غير مصرح لك بإرسال رسائل في هذه المحادثة.');
+        }
+
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $msg = $this->messagingService->sendMessage($conversation, $user, $validated['content']);
+
+        return response()->json([
+            'success' => true,
+            'message' => [
+                'id' => $msg->id,
+                'sender_id' => $user->id,
+                'sender_name' => $user->name,
+                'sender_avatar' => $user->avatar_url,
+                'content' => $msg->content,
+                'is_mine' => true,
+                'created_at_human' => $msg->created_at->format('H:i'),
+            ],
+        ]);
+    }
 }

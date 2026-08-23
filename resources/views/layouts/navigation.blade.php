@@ -213,10 +213,8 @@ $navigationSections = [
 
         <span class="truncate">{{ $item['label'] }}</span>
 
-        @if ($item['icon'] === 'notifications' && Auth::user() && Auth::user()->unreadNotificationsCount() > 0)
-        <span class="ms-auto flex h-4 px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-[rgb(var(--color-copper))] text-white">
-          {{ Auth::user()->unreadNotificationsCount() }}
-        </span>
+        @if ($item['icon'] === 'notifications')
+        <span x-cloak x-show="unreadNotificationsCount > 0" class="ms-auto flex h-4 px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-[rgb(var(--color-copper))] text-white" x-text="unreadNotificationsCount"></span>
         @endif
       </a>
       @endforeach

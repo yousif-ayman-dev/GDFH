@@ -4,9 +4,58 @@
         mobileNavigation: false,
         userMenu: false,
         quickCreateMenu: false,
+        notificationsMenu: false,
+        unreadNotificationsCount: {{ Auth::user() ? Auth::user()->unreadNotificationsCount() : 0 }},
+        notificationsList: [],
         commandPalette: false,
         searchQuery: '',
         selectedIndex: 0,
+        async fetchNotifications() {
+            try {
+                const res = await fetch('{{ route('notifications.poll') }}');
+                if (res.ok) {
+                    const data = await res.json();
+                    this.unreadNotificationsCount = data.unread_count;
+                    this.notificationsList = data.notifications;
+                }
+            } catch(e) {}
+        },
+        async markAllNotificationsRead() {
+            try {
+                const res = await fetch('{{ route('notifications.read-all-json') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                if (res.ok) {
+                    this.unreadNotificationsCount = 0;
+                    this.notificationsList = [];
+                }
+            } catch(e) {}
+        },
+        async markNotificationRead(id, actionUrl) {
+            try {
+                await fetch('/notifications/' + id + '/read-json', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                this.fetchNotifications();
+                if (actionUrl) {
+                    window.location.href = actionUrl;
+                }
+            } catch(e) {}
+        },
+        initNotificationsPolling() {
+            this.fetchNotifications();
+            setInterval(() => this.fetchNotifications(), 20000);
+        },
         items: [
             { title: 'بوابة البحث الشاملة (Search Portal)', type: 'بحث', url: '{{ route('search.index') }}', category: 'البحث' },
             { title: 'الرئيسية (Dashboard)', type: 'صفحة', url: '{{ route('dashboard') }}', category: 'التنقل الرئيسي' },
@@ -246,6 +295,69 @@
                   <path stroke-linecap="round" d="M8 21h8M12 17v4" />
                 </svg>
               </button>
+            </div>
+
+            {{-- Notifications Bell Dropdown --}}
+            <div class="relative" x-init="initNotificationsPolling()">
+              <button type="button" 
+                @click="notificationsMenu = !notificationsMenu; if (notificationsMenu) fetchNotifications()" 
+                @click.outside="notificationsMenu = false" 
+                class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-copper)/0.4)] transition text-[rgb(var(--color-text-secondary))]" 
+                aria-label="الإشعارات" title="الإشعارات" id="notification-bell-btn">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+
+                <template x-if="unreadNotificationsCount > 0">
+                  <span class="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-md">
+                    <span x-text="unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount"></span>
+                  </span>
+                </template>
+              </button>
+
+              <div x-cloak x-show="notificationsMenu" x-transition 
+                class="absolute end-0 mt-2 w-80 sm:w-96 overflow-hidden rounded-2xl p-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-2xl z-50" id="notification-dropdown">
+                <div class="flex items-center justify-between px-3 py-2 border-b border-[rgb(var(--color-border))]">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold">الإشعارات</span>
+                    <span class="rounded-full px-2 py-0.5 text-xs font-semibold bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))]" x-text="unreadNotificationsCount + ' غير مقروء'"></span>
+                  </div>
+                  <template x-if="unreadNotificationsCount > 0">
+                    <button type="button" @click="markAllNotificationsRead()" class="text-xs font-semibold text-[rgb(var(--color-copper))] hover:underline" id="mark-all-notifications-read-btn">
+                      تحديد الكل كمقروء
+                    </button>
+                  </template>
+                </div>
+
+                <div class="max-h-80 overflow-y-auto divide-y divide-[rgb(var(--color-border)/0.5)]">
+                  <template x-if="notificationsList.length === 0">
+                    <div class="p-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+                      لا توجد إشعارات غير مقروءة حالياً 🎉
+                    </div>
+                  </template>
+
+                  <template x-for="item in notificationsList" :key="item.id">
+                    <div class="p-3 hover:bg-[rgb(var(--color-surface-soft))] transition rounded-xl flex items-start gap-3 group cursor-pointer" @click="markNotificationRead(item.id, item.action_url)">
+                      <div class="h-8 w-8 rounded-full bg-[rgb(var(--color-mineral-soft))] text-[rgb(var(--color-mineral))] flex items-center justify-center text-xs font-bold shrink-0">
+                        <span x-text="item.sender_name.charAt(0)"></span>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-1">
+                          <span class="text-xs font-bold truncate text-[rgb(var(--color-text-primary))]" x-text="item.title"></span>
+                          <span class="text-[10px] text-[rgb(var(--color-text-secondary))]" x-text="item.created_at_human"></span>
+                        </div>
+                        <p class="text-xs text-[rgb(var(--color-text-secondary))] truncate mt-0.5" x-text="item.description"></p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <div class="p-2 border-t border-[rgb(var(--color-border))] text-center bg-[rgb(var(--color-surface-soft))] rounded-b-xl">
+                  <a href="{{ route('notifications.index') }}" class="text-xs font-bold text-[rgb(var(--color-copper))] hover:underline block py-1">
+                    عرض جميع الإشعارات
+                  </a>
+                </div>
+              </div>
             </div>
 
             {{-- User Menu --}}

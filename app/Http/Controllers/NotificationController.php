@@ -53,4 +53,58 @@ class NotificationController extends Controller
 
         return back()->with('success', 'تم حذف الإشعار بنجاح.');
     }
+
+    public function poll(): \Illuminate\Http\JsonResponse
+    {
+        $user = Auth::user();
+        $unreadCount = $this->notificationService->unreadCount($user);
+
+        $notifications = $user->appNotifications()
+            ->with('sender')
+            ->unread()
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function (AppNotification $n) {
+                return [
+                    'id' => $n->id,
+                    'title' => $n->title,
+                    'description' => $n->description,
+                    'type' => $n->type,
+                    'priority' => $n->priority,
+                    'action_url' => $n->action_url,
+                    'created_at_human' => $n->created_at->diffForHumans(),
+                    'sender_name' => $n->sender?->name ?? 'نظام Tasker',
+                    'sender_avatar' => $n->sender?->avatar_url,
+                ];
+            });
+
+        return response()->json([
+            'unread_count' => $unreadCount,
+            'notifications' => $notifications,
+        ]);
+    }
+
+    public function markAsReadJson(AppNotification $notification): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $notification);
+
+        $this->notificationService->markAsRead($notification);
+        $unreadCount = $this->notificationService->unreadCount(Auth::user());
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+        ]);
+    }
+
+    public function markAllAsReadJson(): \Illuminate\Http\JsonResponse
+    {
+        $this->notificationService->markAllAsRead(Auth::user());
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => 0,
+        ]);
+    }
 }

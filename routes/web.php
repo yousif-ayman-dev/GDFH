@@ -150,6 +150,21 @@ Route::middleware('auth')->group(function () {
         )->name('notifications.destroy');
 
         Route::get(
+            '/notifications/poll',
+            [NotificationController::class, 'poll']
+        )->name('notifications.poll');
+
+        Route::post(
+            '/notifications/{notification}/read-json',
+            [NotificationController::class, 'markAsReadJson']
+        )->name('notifications.read-json');
+
+        Route::post(
+            '/notifications/read-all-json',
+            [NotificationController::class, 'markAllAsReadJson']
+        )->name('notifications.read-all-json');
+
+        Route::get(
             '/calendar',
             [CalendarController::class, 'index']
         )->name('calendar.index');
@@ -368,6 +383,16 @@ Route::middleware('auth')->group(function () {
             '/chat/{conversation}/messages',
             [MessagingController::class, 'sendMessage']
         )->name('messaging.send');
+
+        Route::get(
+            '/chat/{conversation}/poll',
+            [MessagingController::class, 'pollMessages']
+        )->name('messaging.poll');
+
+        Route::post(
+            '/chat/{conversation}/messages-json',
+            [MessagingController::class, 'sendMessageJson']
+        )->name('messaging.send-json');
 
         Route::resource('projects.reviews', ReviewController::class)
             ->scoped()
