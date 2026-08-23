@@ -8,6 +8,7 @@
         searchQuery: '',
         selectedIndex: 0,
         items: [
+            { title: 'بوابة البحث الشاملة (Search Portal)', type: 'بحث', url: '{{ route('search.index') }}', category: 'البحث' },
             { title: 'الرئيسية (Dashboard)', type: 'صفحة', url: '{{ route('dashboard') }}', category: 'التنقل الرئيسي' },
             { title: 'المشاريع (Projects)', type: 'صفحة', url: '{{ route('projects.index') }}', category: 'إدارة العمل' },
             { title: 'إنشاء مشروع جديد (New Project)', type: 'إجراء سريع', url: '{{ route('projects.create') }}', category: 'اختصارات' },
@@ -31,6 +32,8 @@
             const list = this.filteredItems;
             if (list.length > 0 && list[this.selectedIndex]) {
                 window.location.href = list[this.selectedIndex].url;
+            } else if (this.searchQuery.trim()) {
+                window.location.href = '{{ route('search.index') }}?q=' + encodeURIComponent(this.searchQuery.trim());
             }
         }
     }"
@@ -361,7 +364,9 @@
           <span><kbd class="px-1.5 py-0.5 rounded bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] font-mono">↑↓</kbd> للتنقل</span>
           <span><kbd class="px-1.5 py-0.5 rounded bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] font-mono">↵</kbd> للاختيار</span>
         </div>
-        <span class="font-semibold text-[rgb(var(--color-copper))]">Tasker Command Engine</span>
+        <a href="{{ route('search.index') }}" class="font-semibold text-[rgb(var(--color-copper))] hover:underline flex items-center gap-1">
+          <span>عرض بوابة البحث الشاملة ←</span>
+        </a>
       </div>
 
     </div>

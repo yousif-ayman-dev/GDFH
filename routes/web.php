@@ -20,6 +20,7 @@ use App\Http\Controllers\ProjectTeamController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamInvitationController;
@@ -257,6 +258,11 @@ Route::middleware('auth')->group(function () {
             '/ai/conversations/{conversation}',
             [AIController::class, 'destroyConversation']
         )->name('ai.conversations.destroy');
+
+        Route::get(
+            '/search',
+            [SearchController::class, 'index']
+        )->name('search.index');
 
         Route::get(
             '/marketplace',
