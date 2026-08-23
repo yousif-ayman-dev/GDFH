@@ -163,7 +163,7 @@
       <div class="flex h-20 items-center justify-between px-5">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-xl font-extrabold text-sm bg-[rgb(var(--color-copper))] text-white">
-            G
+            T
           </div>
           <div>
             <div class="font-bold text-white">Tasker Enterprise</div>

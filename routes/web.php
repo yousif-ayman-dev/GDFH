@@ -6,6 +6,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\MarketplaceController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\TeamInvitationController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamProjectController;
 use App\Http\Controllers\Auth\OnboardingController;
+use App\Http\Controllers\AIFeatureController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -491,4 +493,21 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+
 require __DIR__.'/auth.php';
+
+// ─── Admin Panel (System Administrators only) ─────────────────────────────
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::post('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('users.toggle-admin');
+    Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('users.toggle-ban');
+    Route::get('/projects', [AdminController::class, 'projects'])->name('projects');
+});
+
+// ─── AI Feature Endpoints ─────────────────────────────────────────────────
+Route::middleware(['auth', 'onboarded'])->group(function () {
+    Route::post('/ai/analyze-project', [AIFeatureController::class, 'analyzeProject'])->name('ai.analyze-project');
+    Route::post('/ai/suggest-members', [AIFeatureController::class, 'suggestMembers'])->name('ai.suggest-members');
+    Route::get('/ai/recommended-projects', [AIFeatureController::class, 'recommendedProjects'])->name('ai.recommended-projects');
+});

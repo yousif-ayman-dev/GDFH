@@ -154,6 +154,24 @@
                   {{ $message }}
                 </p>
                 @enderror
+
+                {{-- AI Analysis Button (Requirement #15) --}}
+                <div class="mt-3" id="ai-analyze-project-section">
+                  <button type="button" id="ai-analyze-project-btn"
+                    class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition border border-[rgb(var(--color-copper)/0.40)] bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] hover:bg-[rgb(var(--color-copper)/0.15)]"
+                    onclick="analyzeProjectDescription()">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                    <span id="ai-analyze-btn-text">تحليل الوصف بالذكاء الاصطناعي 🤖</span>
+                  </button>
+
+                  <div id="ai-analysis-result" class="hidden mt-3 rounded-xl border border-[rgb(var(--color-copper)/0.20)] bg-[rgb(var(--color-copper-soft))] p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                      <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                      <span class="text-xs font-bold text-[rgb(var(--color-copper))]">تحليل الذكاء الاصطناعي — المهارات والتخصصات المطلوبة</span>
+                    </div>
+                    <div id="ai-analysis-text" class="text-xs leading-6 text-[rgb(var(--color-text-primary))] whitespace-pre-line"></div>
+                  </div>
+                </div>
               </div>
 
               {{-- Category --}}
@@ -483,4 +501,51 @@
       </form>
     </div>
   </div>
+
+  {{-- AI Project Analysis Script (Requirement #15) --}}
+  <script>
+  async function analyzeProjectDescription() {
+    const description = document.getElementById('description').value.trim();
+    const btn = document.getElementById('ai-analyze-project-btn');
+    const btnText = document.getElementById('ai-analyze-btn-text');
+    const resultDiv = document.getElementById('ai-analysis-result');
+    const resultText = document.getElementById('ai-analysis-text');
+
+    if (description.length < 20) {
+      alert('يرجى كتابة وصف للمشروع (20 حرفاً على الأقل) قبل تحليله.');
+      return;
+    }
+
+    btn.disabled = true;
+    btnText.textContent = 'جاري التحليل بالذكاء الاصطناعي...';
+
+    try {
+      const res = await fetch('{{ route('ai.analyze-project') }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ description }),
+      });
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (data.success) {
+        resultText.textContent = data.suggestions;
+        resultDiv.classList.remove('hidden');
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        alert('حدث خطأ أثناء تحليل الوصف، حاول مجدداً.');
+      }
+    } catch (e) {
+      alert('تعذّر الاتصال بالذكاء الاصطناعي. تحقق من الاتصال بالإنترنت.');
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'تحليل الوصف بالذكاء الاصطناعي 🤖';
+    }
+  }
+  </script>
 </x-app-layout>

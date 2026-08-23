@@ -119,7 +119,7 @@ $navigationSections = [
   <div class="flex h-16 shrink-0 items-center justify-between px-6 border-b border-slate-700/60">
     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group" aria-label="Tasker Enterprise Workspace">
       <div class="flex h-9 w-9 items-center justify-center rounded-xl font-black text-sm bg-[rgb(var(--color-copper))] text-white shadow-md group-hover:scale-105 transition-transform">
-        G
+        T
       </div>
 
       <div class="min-w-0">
@@ -139,7 +139,7 @@ $navigationSections = [
     
     @foreach ($navigationSections as $section)
     <div class="space-y-1">
-      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
         {{ $section['title'] }}
       </div>
 
@@ -153,15 +153,15 @@ $navigationSections = [
           'group relative flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150',
         ])
         style="{{ $isActive 
-          ? 'background-color: rgba(55, 86, 198, 0.15); color: #3756C6; font-weight: 700;' 
-          : 'color: #94A3B8;' 
+          ? 'background-color: rgba(55, 86, 198, 0.25); color: #60A5FA; font-weight: 700;' 
+          : 'color: #CBD5E1;' 
         }}">
         
         @if ($isActive)
-        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-[rgb(var(--color-mineral))]"></span>
+        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-blue-400"></span>
         @endif
 
-        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110" @if ($isActive) style="color: #3756C6;" @endif>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110" @if ($isActive) style="color: #60A5FA;" @endif>
           @switch($item['icon'])
             @case('home')
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -222,6 +222,31 @@ $navigationSections = [
     @endforeach
 
   </nav>
+
+  {{-- Admin Panel Link (Only for system admins) --}}
+  @if (Auth::check() && Auth::user()->isAdmin())
+  <div class="px-4 pb-2">
+    <div class="space-y-1">
+      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[rgb(var(--color-copper))]">
+        إدارة النظام
+      </div>
+      <a href="{{ route('admin.index') }}"
+        class="group relative flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150"
+        style="{{ request()->routeIs('admin.*') ? 'background-color: rgba(var(--color-copper-rgb, 201, 140, 80), 0.15); color: rgb(var(--color-copper));' : 'color: rgb(var(--color-copper));' }}"
+        id="admin-sidebar-link">
+        @if (request()->routeIs('admin.*'))
+        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-[rgb(var(--color-copper))]"></span>
+        @endif
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </span>
+        <span class="truncate">لوحة تحكم المشرف</span>
+      </a>
+    </div>
+  </div>
+  @endif
 
   {{-- Sidebar User Profile Footer Card --}}
   <div class="px-4 pb-4 pt-2 border-t border-slate-700/60">

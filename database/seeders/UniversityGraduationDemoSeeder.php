@@ -29,6 +29,23 @@ class UniversityGraduationDemoSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Key Demo Users
+
+        // Admin (System Administrator)
+        $admin = User::firstOrCreate([
+            'email' => 'admin@gdfh.edu',
+        ], [
+            'name' => 'مدير النظام (System Administrator)',
+            'username' => 'system_admin',
+            'password' => bcrypt('password'),
+            'account_type' => 'client',
+            'onboarded_at' => now(),
+            'is_admin' => true,
+        ]);
+        // Ensure existing admin record has is_admin set
+        if (! $admin->is_admin) {
+            $admin->update(['is_admin' => true]);
+        }
+
         $client = User::firstOrCreate([
             'email' => 'client@gdfh.edu',
         ], [

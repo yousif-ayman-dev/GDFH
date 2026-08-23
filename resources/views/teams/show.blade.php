@@ -472,12 +472,33 @@
           {{-- Team Members Section --}}
           <section class="gdfh-card overflow-hidden">
             <div class="border-b border-[rgb(var(--color-border))] p-5">
-              <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
-                أعضاء الفريق ({{ $membersCount }})
-              </h2>
-              <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
-                قائمة بأعضاء الفريق وأدوارهم مع إمكانية إدارة الصلاحيات.
-              </p>
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))]">
+                    أعضاء الفريق ({{ $membersCount }})
+                  </h2>
+                  <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">
+                    قائمة بأعضاء الفريق وأدوارهم مع إمكانية إدارة الصلاحيات.
+                  </p>
+                </div>
+                {{-- AI Suggest Members Button (Requirement #16) --}}
+                <button type="button" id="ai-suggest-members-btn"
+                  onclick="aiSuggestMembers({{ $team->id }})"
+                  class="shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-semibold border border-[rgb(var(--color-copper)/0.35)] bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] hover:bg-[rgb(var(--color-copper)/0.15)] transition whitespace-nowrap">
+                  <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                  <span id="ai-suggest-btn-text">اقتراح أعضاء بالذكاء الاصطناعي 🤖</span>
+                </button>
+              </div>
+
+              {{-- AI Member Suggestions Result Panel (Requirement #16) --}}
+              <div id="ai-suggest-result" class="hidden mt-4 rounded-xl border border-[rgb(var(--color-copper)/0.20)] bg-[rgb(var(--color-copper-soft))] p-4 space-y-3">
+                <div class="flex items-center gap-2">
+                  <svg class="h-4 w-4 text-[rgb(var(--color-copper))] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                  <span class="text-xs font-bold text-[rgb(var(--color-copper))]">اقتراحات الذكاء الاصطناعي لأفضل المستقلين</span>
+                </div>
+                <div id="ai-suggest-text" class="text-xs leading-6 text-[rgb(var(--color-text-primary))] whitespace-pre-line"></div>
+                <div id="ai-suggest-freelancers" class="grid gap-2"></div>
+              </div>
             </div>
 
             <div class="divide-y divide-[rgb(var(--color-border))]">
@@ -593,4 +614,66 @@
 
     </div>
   </div>
+
+  {{-- AI Suggest Team Members Script (Requirement #16) --}}
+  <script>
+  async function aiSuggestMembers(teamId) {
+    const btn = document.getElementById('ai-suggest-members-btn');
+    const btnText = document.getElementById('ai-suggest-btn-text');
+    const resultDiv = document.getElementById('ai-suggest-result');
+    const aiText = document.getElementById('ai-suggest-text');
+    const freelancersContainer = document.getElementById('ai-suggest-freelancers');
+
+    btn.disabled = true;
+    btnText.textContent = 'جاري التحليل...';
+
+    try {
+      const res = await fetch('{{ route('ai.suggest-members') }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ team_id: teamId }),
+      });
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (data.success) {
+        aiText.textContent = data.suggestions.text || '';
+        freelancersContainer.innerHTML = '';
+
+        if (data.suggestions.freelancers && data.suggestions.freelancers.length > 0) {
+          data.suggestions.freelancers.forEach(fl => {
+            const card = document.createElement('a');
+            card.href = fl.profile_url;
+            card.target = '_blank';
+            card.className = 'flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-white/40 hover:border-amber-400/40 transition';
+            card.innerHTML = `
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-bold">
+                ${fl.name ? fl.name.charAt(0) : '؟'}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="text-xs font-bold">${fl.name || '—'}</div>
+                <div class="text-[10px] text-gray-500">${fl.title || ''}</div>
+                <div class="text-[10px] text-gray-400 truncate">${(fl.skills || []).join(', ')}</div>
+              </div>
+              <div class="text-[10px] text-amber-600 font-bold">⭐ ${fl.rating}</div>`;
+            freelancersContainer.appendChild(card);
+          });
+        }
+
+        resultDiv.classList.remove('hidden');
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    } catch (e) {
+      alert('تعذّر الاتصال بالذكاء الاصطناعي. تحقق من الاتصال بالإنترنت.');
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'اقتراح أعضاء بالذكاء الاصطناعي 🤖';
+    }
+  }
+  </script>
 </x-app-layout>

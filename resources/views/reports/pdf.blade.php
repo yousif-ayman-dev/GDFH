@@ -264,7 +264,7 @@
     {{-- Brand Header --}}
     <div class="header">
       <div class="brand">
-        <div class="brand-logo">G</div>
+        <div class="brand-logo">T</div>
         <div>
           <div class="brand-title">Tasker</div>
           <div class="brand-subtitle">Enterprise SaaS — تقارير الإنتاجية</div>

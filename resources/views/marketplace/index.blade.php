@@ -52,6 +52,32 @@
       </div>
       @endif
 
+      {{-- AI Recommended Projects Widget (Requirement #17 — Freelancers Only) --}}
+      @if (auth()->user()->isFreelancer())
+      <div id="ai-recommended-projects-widget" class="gdfh-card overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[rgb(var(--color-border))]">
+          <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+            <span class="text-sm font-bold text-[rgb(var(--color-text-primary))]">مشاريع مقترحة لك بالذكاء الاصطناعي 🤖</span>
+            <span class="gdfh-badge gdfh-badge-copper text-[10px]">بناءً على مهاراتك</span>
+          </div>
+          <button type="button" id="ai-load-recommended-btn"
+            onclick="loadRecommendedProjects()"
+            class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border border-[rgb(var(--color-copper)/0.35)] bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] hover:bg-[rgb(var(--color-copper)/0.15)] transition">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span id="ai-recommended-btn-text">تحميل الاقتراحات</span>
+          </button>
+        </div>
+        <div id="ai-recommended-loading" class="hidden px-5 py-4 text-xs text-[rgb(var(--color-text-secondary))] text-center">
+          جاري تحليل مهاراتك واقتراح المشاريع المناسبة...
+        </div>
+        <div id="ai-recommended-results" class="hidden divide-y divide-[rgb(var(--color-border)/0.5)]"></div>
+        <div id="ai-recommended-empty" class="hidden px-5 py-6 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+          لا توجد مشاريع مفتوحة تتناسب مع مهاراتك حالياً. حدّث ملفك المهني لمزيد من الاقتراحات.
+        </div>
+      </div>
+      @endif
+
       {{-- Search & Filter Toolbar --}}
       <form method="GET" action="{{ route('marketplace.index') }}" class="gdfh-card p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <input type="hidden" name="tab" value="{{ $tab }}">
@@ -234,4 +260,63 @@
 
     </div>
   </div>
+
+  {{-- AI Recommended Projects Script (Requirement #17) --}}
+  @if (auth()->user()->isFreelancer())
+  <script>
+  async function loadRecommendedProjects() {
+    const btn = document.getElementById('ai-load-recommended-btn');
+    const btnText = document.getElementById('ai-recommended-btn-text');
+    const loadingDiv = document.getElementById('ai-recommended-loading');
+    const resultsDiv = document.getElementById('ai-recommended-results');
+    const emptyDiv = document.getElementById('ai-recommended-empty');
+
+    btn.disabled = true;
+    btnText.textContent = 'جاري التحليل...';
+    loadingDiv.classList.remove('hidden');
+    resultsDiv.classList.add('hidden');
+    emptyDiv.classList.add('hidden');
+
+    try {
+      const res = await fetch('{{ route('ai.recommended-projects') }}', {
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      loadingDiv.classList.add('hidden');
+
+      if (data.success && data.projects && data.projects.length > 0) {
+        resultsDiv.innerHTML = '';
+        data.projects.forEach(p => {
+          const row = document.createElement('a');
+          row.href = p.url;
+          row.className = 'flex items-center gap-4 px-5 py-3 hover:bg-[rgb(var(--color-surface-soft))] transition group';
+          row.innerHTML = `
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500 group-hover:scale-105 transition-transform">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-xs font-bold text-[rgb(var(--color-text-primary))] truncate group-hover:text-[rgb(var(--color-copper))]">${p.title || '—'}</div>
+              <div class="text-[10px] text-[rgb(var(--color-text-secondary))] truncate">${p.description || ''}</div>
+              <div class="text-[10px] text-[rgb(var(--color-text-secondary))]">المالك: <strong>${p.owner || '—'}</strong>${p.category ? ' • ' + p.category : ''}</div>
+            </div>
+            ${p.match_score > 0 ? `<span class="shrink-0 gdfh-badge gdfh-badge-copper text-[10px]">تطابق ${p.match_score} مهارة</span>` : ''}`;
+          resultsDiv.appendChild(row);
+        });
+        resultsDiv.classList.remove('hidden');
+      } else {
+        emptyDiv.classList.remove('hidden');
+      }
+    } catch (e) {
+      loadingDiv.classList.add('hidden');
+      emptyDiv.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'إعادة تحميل';
+    }
+  }
+  </script>
+  @endif
 </x-app-layout>

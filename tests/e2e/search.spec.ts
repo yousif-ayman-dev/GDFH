@@ -32,7 +32,7 @@ test.describe('Search Suite', () => {
 
     await expect(page).toHaveURL(/\/search\?q=%D8%AA%D8%B7%D9%88%D9%8A%D8%B1/);
 
-    const projectsTab = page.locator('a').filter({ hasText: /المشاريع/i }).first();
+    const projectsTab = page.locator('form a[href*="type=projects"]').first();
     await expect(projectsTab).toBeVisible();
     await projectsTab.click();
     await expect(page).toHaveURL(/type=projects/);

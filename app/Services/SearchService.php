@@ -94,7 +94,8 @@ class SearchService
             ->where(function (Builder $query) use ($term) {
                 $query->where('title', 'like', "%{$term}%")
                     ->orWhere('description', 'like', "%{$term}%")
-                    ->orWhere('code', 'like', "%{$term}%");
+                    ->orWhere('slug', 'like', "%{$term}%")
+                    ->orWhere('category', 'like', "%{$term}%");
             });
     }
 

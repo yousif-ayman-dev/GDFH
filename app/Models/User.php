@@ -26,6 +26,8 @@ class User extends Authenticatable
         'avatar_path',
         'bio',
         'notification_preferences',
+        'is_admin',
+        'is_banned',
     ];
 
     protected $hidden = [
@@ -40,7 +42,25 @@ class User extends Authenticatable
             'password' => 'hashed',
             'onboarded_at' => 'datetime',
             'notification_preferences' => 'array',
+            'is_admin' => 'boolean',
+            'is_banned' => 'boolean',
         ];
+    }
+
+    /**
+     * Check if user is a system administrator.
+     */
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
+    /**
+     * Check if user account is banned.
+     */
+    public function isBanned(): bool
+    {
+        return (bool) $this->is_banned;
     }
 
     public function getAvatarUrlAttribute(): ?string
