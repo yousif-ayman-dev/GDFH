@@ -110,4 +110,148 @@ class MarketplaceService
 
         return $query->latest()->paginate(12);
     }
+
+    /**
+     * Create a new marketplace service listing.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function createService(User $user, array $data, mixed $coverFile = null): Service
+    {
+        $baseSlug = \Illuminate\Support\Str::slug($data['title']);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (Service::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        $coverImagePath = null;
+        if ($coverFile) {
+            $coverImagePath = $coverFile->store('services', 'public');
+        }
+
+        $service = Service::create([
+            'user_id' => $user->id,
+            'title' => $data['title'],
+            'slug' => $slug,
+            'description' => $data['description'],
+            'price' => $data['price'],
+            'delivery_days' => $data['delivery_days'],
+            'category' => $data['category'] ?? 'تطوير البرمجيات',
+            'skills' => $data['skills'] ?? [],
+            'status' => 'active',
+            'cover_image' => $coverImagePath,
+        ]);
+
+        if ($user->account_type !== 'freelancer') {
+            $user->update(['account_type' => 'freelancer']);
+        }
+
+        return $service;
+    }
+
+    /**
+     * Update an existing service listing.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function updateService(Service $service, array $data, mixed $coverFile = null): Service
+    {
+        if ($coverFile) {
+            if ($service->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($service->cover_image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($service->cover_image);
+            }
+            $data['cover_image'] = $coverFile->store('services', 'public');
+        }
+
+        $service->update($data);
+
+        return $service->fresh();
+    }
+
+    /**
+     * Delete a service listing.
+     */
+    public function deleteService(Service $service): void
+    {
+        if ($service->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($service->cover_image)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($service->cover_image);
+        }
+
+        $service->delete();
+    }
+
+    /**
+     * Upsert freelancer profile for user.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function updateFreelancerProfile(User $user, array $data): FreelancerProfile
+    {
+        $profile = FreelancerProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'title' => $data['title'],
+                'hourly_rate' => $data['hourly_rate'],
+                'location' => $data['location'] ?? null,
+                'availability' => $data['availability'] ?? 'available',
+                'skills' => $data['skills'] ?? [],
+                'bio' => $data['bio'] ?? null,
+            ]
+        );
+
+        if ($user->account_type !== 'freelancer') {
+            $user->update(['account_type' => 'freelancer']);
+        }
+
+        return $profile;
+    }
+
+    /**
+     * Order a marketplace service using the existing Contract model.
+     */
+    public function orderService(User $client, Service $service): \App\Models\Contract
+    {
+        if ((int) $client->id === (int) $service->user_id) {
+            throw new \InvalidArgumentException('لا يمكنك شراء خدمتك الخاصة.');
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($client, $service) {
+            $project = \App\Models\Project::create([
+                'owner_id' => $client->id,
+                'title' => 'مشروع خدمة: ' . $service->title,
+                'description' => 'مشروع منفذ للخدمة المشتراة: ' . $service->title,
+                'status' => 'in_progress',
+                'visibility' => 'private',
+            ]);
+
+            $contract = \App\Models\Contract::create([
+                'project_id' => $project->id,
+                'client_id' => $client->id,
+                'freelancer_id' => $service->user_id,
+                'title' => 'طلب خدمة: ' . $service->title,
+                'amount' => $service->price,
+                'status' => 'active',
+                'start_date' => now(),
+                'end_date' => now()->addDays($service->delivery_days),
+            ]);
+
+            $service->increment('sales_count');
+
+            if ($service->user?->freelancerProfile) {
+                $service->user->freelancerProfile->increment('completed_projects_count');
+            }
+
+            $notificationService = app(NotificationService::class);
+            $notificationService->sendNotification(
+                $service->user,
+                'طلب خدمة جديد!',
+                "قام المشتري ({$client->name}) بطلب خدمتك ({$service->title}).",
+                route('contracts.show', $contract)
+            );
+
+            return $contract;
+        });
+    }
 }

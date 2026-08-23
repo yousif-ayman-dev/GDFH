@@ -32,6 +32,11 @@
               <div class="text-lg font-bold text-[rgb(var(--color-text-primary))]">${{ number_format($user->freelancerProfile?->hourly_rate ?? 25, 0) }}/h</div>
             </div>
 
+            @if (Auth::check() && (int) Auth::id() === (int) $user->id)
+            <a href="{{ route('marketplace.freelancers.profile.edit') }}" class="gdfh-btn gdfh-btn-secondary text-xs py-2.5 px-4 font-bold flex items-center gap-1.5">
+              <span>تعديل بروفايلي</span>
+            </a>
+            @else
             <form method="POST" action="{{ route('messaging.start', $user) }}">
               @csrf
               <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-4 font-bold flex items-center gap-1.5">
@@ -39,6 +44,7 @@
                 <span>تواصل مع المستقل</span>
               </button>
             </form>
+            @endif
           </div>
         </div>
 

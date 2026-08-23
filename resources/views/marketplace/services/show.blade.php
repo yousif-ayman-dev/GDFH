@@ -54,18 +54,37 @@
 
           <div class="pt-4 border-t border-[rgb(var(--color-border))] space-y-3">
             <div class="flex items-center gap-3">
+              @if ($service->user?->avatar_url)
+              <img src="{{ $service->user->avatar_url }}" alt="{{ $service->user->name }}" class="h-10 w-10 rounded-full object-cover border border-slate-600">
+              @else
               <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-xs font-bold text-[rgb(var(--color-copper))]">
                 {{ mb_substr($service->user?->name ?? 'م', 0, 1) }}
               </div>
+              @endif
               <div>
                 <h4 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">{{ $service->user?->name }}</h4>
                 <p class="text-[10px] text-[rgb(var(--color-text-secondary))]">مستقل معتمد</p>
               </div>
             </div>
 
-            <button type="button" onclick="alert('تم إرسال طلب الشراء إلى المستقل بنجاح!')" class="w-full gdfh-btn gdfh-btn-brand text-xs py-3 font-bold">
-              طلب هذه الخدمة الآن
-            </button>
+            @if ($errors->has('order'))
+            <div class="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-bold">
+              {{ $errors->first('order') }}
+            </div>
+            @endif
+
+            @if (Auth::check() && (int) Auth::id() === (int) $service->user_id)
+            <a href="{{ route('marketplace.services.edit', $service) }}" class="w-full gdfh-btn gdfh-btn-secondary text-xs py-3 font-bold text-center block">
+              تعديل تفاصيل الخدمة
+            </a>
+            @else
+            <form method="POST" action="{{ route('marketplace.services.order', $service) }}">
+              @csrf
+              <button type="submit" class="w-full gdfh-btn gdfh-btn-brand text-xs py-3 font-bold">
+                طلب هذه الخدمة الآن
+              </button>
+            </form>
+            @endif
           </div>
         </div>
 

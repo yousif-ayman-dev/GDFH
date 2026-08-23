@@ -264,9 +264,49 @@ Route::middleware('auth')->group(function () {
         )->name('marketplace.index');
 
         Route::get(
+            '/marketplace/services/create',
+            [MarketplaceController::class, 'createService']
+        )->name('marketplace.services.create');
+
+        Route::post(
+            '/marketplace/services',
+            [MarketplaceController::class, 'storeService']
+        )->name('marketplace.services.store');
+
+        Route::get(
             '/marketplace/services/{service}',
             [MarketplaceController::class, 'showService']
         )->name('marketplace.services.show');
+
+        Route::get(
+            '/marketplace/services/{service}/edit',
+            [MarketplaceController::class, 'editService']
+        )->name('marketplace.services.edit');
+
+        Route::put(
+            '/marketplace/services/{service}',
+            [MarketplaceController::class, 'updateService']
+        )->name('marketplace.services.update');
+
+        Route::delete(
+            '/marketplace/services/{service}',
+            [MarketplaceController::class, 'destroyService']
+        )->name('marketplace.services.destroy');
+
+        Route::post(
+            '/marketplace/services/{service}/order',
+            [MarketplaceController::class, 'orderService']
+        )->name('marketplace.services.order');
+
+        Route::get(
+            '/marketplace/freelancer/profile/edit',
+            [MarketplaceController::class, 'editFreelancerProfile']
+        )->name('marketplace.freelancers.profile.edit');
+
+        Route::put(
+            '/marketplace/freelancer/profile',
+            [MarketplaceController::class, 'updateFreelancerProfile']
+        )->name('marketplace.freelancers.profile.update');
 
         Route::get(
             '/marketplace/freelancers/{user}',
