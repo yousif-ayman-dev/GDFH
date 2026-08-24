@@ -118,19 +118,7 @@ $navigationSections = [
   {{-- Workspace Branding Header --}}
   <div class="flex h-16 shrink-0 items-center justify-between px-6 border-b border-slate-700/60">
     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group" aria-label="Tasker Enterprise Workspace">
-      <div class="flex h-9 w-9 items-center justify-center rounded-xl font-black text-sm bg-[rgb(var(--color-copper))] text-white shadow-md group-hover:scale-105 transition-transform">
-        T
-      </div>
-
-      <div class="min-w-0">
-        <div class="flex items-center gap-1.5">
-          <span class="text-sm font-bold tracking-tight text-white truncate">Tasker</span>
-        </div>
-        <div class="text-[11px] text-[rgb(var(--color-copper))] font-medium flex items-center gap-1">
-          <span class="h-1.5 w-1.5 rounded-full bg-[rgb(var(--color-copper))] animate-pulse"></span>
-          Enterprise SaaS
-        </div>
-      </div>
+      <x-application-logo class="h-9 w-auto" />
     </a>
   </div>
 
@@ -153,12 +141,12 @@ $navigationSections = [
           'group relative flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150',
         ])
         style="{{ $isActive 
-          ? 'background-color: rgba(55, 86, 198, 0.25); color: #60A5FA; font-weight: 700;' 
+          ? 'background-color: rgba(43, 88, 168, 0.3); color: #60A5FA; font-weight: 700;' 
           : 'color: #CBD5E1;' 
         }}">
         
         @if ($isActive)
-        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-blue-400"></span>
+        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-[#F38400]"></span>
         @endif
 
         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110" @if ($isActive) style="color: #60A5FA;" @endif>

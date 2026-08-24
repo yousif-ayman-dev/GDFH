@@ -7,9 +7,9 @@
   
   <style>
     :root {
-      --color-navy: 28, 43, 69;
-      --color-copper: 247, 147, 30;
-      --color-blue: 55, 86, 198;
+      --color-navy: 13, 34, 58;
+      --color-copper: 243, 132, 0;
+      --color-blue: 43, 88, 168;
     }
 
     * {
@@ -264,11 +264,7 @@
     {{-- Brand Header --}}
     <div class="header">
       <div class="brand">
-        <div class="brand-logo">T</div>
-        <div>
-          <div class="brand-title">Tasker</div>
-          <div class="brand-subtitle">Enterprise SaaS — تقارير الإنتاجية</div>
-        </div>
+        <x-application-logo class="h-10 w-auto" />
       </div>
 
       <div style="text-align: left;">

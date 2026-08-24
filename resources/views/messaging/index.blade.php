@@ -12,93 +12,7 @@
     </div>
   </x-slot>
 
-  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-6"
-    x-data="{
-      activeConversationId: {{ $activeConversation ? $activeConversation->id : 'null' }},
-      newMessageContent: '',
-      isSending: false,
-      messages: [
-        @if ($activeConversation)
-          @foreach ($activeConversation->messages as $msg)
-            {
-              id: {{ $msg->id }},
-              sender_id: {{ $msg->sender_id }},
-              sender_name: '{{ e($msg->sender?->name) }}',
-              content: {!! json_encode($msg->content) !!},
-              is_mine: {{ (int) $msg->sender_id === (int) Auth::id() ? 'true' : 'false' }},
-              created_at_human: '{{ $msg->created_at->format('H:i') }}'
-            },
-          @endforeach
-        @endif
-      ],
-      scrollToBottom() {
-        this.$nextTick(() => {
-          const container = this.$refs.messagesContainer;
-          if (container) {
-            container.scrollTop = container.scrollHeight;
-          }
-        });
-      },
-      async sendMessage() {
-        if (!this.newMessageContent.trim() || this.isSending || !this.activeConversationId) return;
-        this.isSending = true;
-        const text = this.newMessageContent.trim();
-        this.newMessageContent = '';
-
-        try {
-          const response = await fetch('/chat/' + this.activeConversationId + '/messages-json', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ content: text })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.message) {
-              this.messages.push(data.message);
-              this.scrollToBottom();
-            }
-          }
-        } catch(e) {
-        } finally {
-          this.isSending = false;
-        }
-      },
-      async pollMessages() {
-        if (!this.activeConversationId) return;
-        try {
-          const response = await fetch('/chat/' + this.activeConversationId + '/poll');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.messages && data.messages.length > 0) {
-              const currentIds = this.messages.map(m => m.id);
-              let hasNew = false;
-              data.messages.forEach(m => {
-                if (!currentIds.includes(m.id)) {
-                  this.messages.push(m);
-                  hasNew = true;
-                }
-              });
-              if (hasNew) {
-                this.scrollToBottom();
-              }
-            }
-          }
-        } catch(e) {}
-      },
-      initChat() {
-        if (this.activeConversationId) {
-          this.scrollToBottom();
-          setInterval(() => this.pollMessages(), 4000);
-        }
-      }
-    }"
-    x-init="initChat()"
-  >
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-6" x-data="directMessaging()" x-init="initChat()" x-cloak>
     <div class="mx-auto max-w-7xl space-y-6">
 
       <div class="gdfh-card overflow-hidden grid grid-cols-1 md:grid-cols-4 min-h-[600px]">
@@ -116,9 +30,9 @@
             $unreadCount = $conv->unreadCountFor(Auth::user());
             $isActive = $activeConversation && $activeConversation->id === $conv->id;
             @endphp
-            <a href="{{ route('messaging.index', ['conversation_id' => $conv->id]) }}" class="flex items-center justify-between p-3 rounded-xl transition text-xs {{ $isActive ? 'bg-[rgb(var(--color-surface))] font-bold text-[rgb(var(--color-copper))] shadow-sm border border-[rgb(var(--color-border))]' : 'text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-surface)/0.6)]' }}">
+            <a href="{{ route('messaging.index', ['conversation_id' => $conv->id]) }}" class="flex items-center justify-between p-3 rounded-xl transition text-xs {{ $isActive ? 'bg-[rgb(var(--color-surface))] font-bold text-[#F38400] shadow-sm border border-[rgb(var(--color-border))]' : 'text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-surface)/0.6)]' }}">
               <div class="flex items-center gap-3 min-w-0">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-xs font-bold text-[rgb(var(--color-copper))]">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-xs font-bold text-[#F38400]">
                   {{ mb_substr($otherUser->name, 0, 1) }}
                 </div>
                 <div class="min-w-0">
@@ -130,7 +44,7 @@
               </div>
 
               @if ($unreadCount > 0)
-              <span class="flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-[rgb(var(--color-copper))] text-white shrink-0">
+              <span class="flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-[#F38400] text-white shrink-0">
                 {{ $unreadCount }}
               </span>
               @endif
@@ -154,7 +68,7 @@
           {{-- Recipient Header --}}
           <div class="border-b border-[rgb(var(--color-border))] p-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-xs font-bold text-[rgb(var(--color-copper))]">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--color-copper-soft))] text-xs font-bold text-[#F38400]">
                 {{ mb_substr($recipient->name, 0, 1) }}
               </div>
               <div>
@@ -179,7 +93,7 @@
             <template x-for="msg in messages" :key="msg.id">
               <div class="flex flex-col mb-3" :class="msg.is_mine ? 'items-end' : 'items-start'">
                 <div class="max-w-xl rounded-2xl p-4 text-xs leading-relaxed"
-                  :class="msg.is_mine ? 'bg-[rgb(var(--color-copper))] text-white rounded-br-none' : 'bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-primary))] border border-[rgb(var(--color-border))] rounded-bl-none'">
+                  :class="msg.is_mine ? 'bg-[#2B58A8] text-white rounded-br-none shadow-sm' : 'bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-primary))] border border-[rgb(var(--color-border))] rounded-bl-none'">
                   <div class="whitespace-pre-line" x-text="msg.content"></div>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1 text-[10px] text-[rgb(var(--color-text-secondary))] px-1">
@@ -196,7 +110,7 @@
 
           {{-- Message Input Form --}}
           <form @submit.prevent="sendMessage()" class="p-4 border-t border-[rgb(var(--color-border))] flex items-center gap-3">
-            <input type="text" x-model="newMessageContent" required placeholder="اكتب رسالتك المباشرة هنا..." class="flex-1 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft))] p-3 text-xs text-[rgb(var(--color-text-primary))] placeholder:text-[rgb(var(--color-text-secondary))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--color-copper))]" id="chat-message-input">
+            <input type="text" x-model="newMessageContent" required placeholder="اكتب رسالتك المباشرة هنا..." class="flex-1 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft))] p-3 text-xs text-[rgb(var(--color-text-primary))] placeholder:text-[rgb(var(--color-text-secondary))] focus:outline-none focus:ring-1 focus:ring-[#2B58A8]" id="chat-message-input">
             
             <button type="submit" :disabled="isSending || !newMessageContent.trim()" class="gdfh-btn gdfh-btn-brand text-xs py-3 px-6 font-bold disabled:opacity-50" id="chat-send-btn">
               <span x-show="!isSending">إرسال</span>
@@ -219,4 +133,93 @@
 
     </div>
   </div>
+
+  <script>
+    function directMessaging() {
+      return {
+        activeConversationId: @json($activeConversation ? $activeConversation->id : null),
+        newMessageContent: '',
+        isSending: false,
+        messages: [
+          @if ($activeConversation)
+            @foreach ($activeConversation->messages as $msg)
+              {
+                id: @json($msg->id),
+                sender_id: @json($msg->sender_id),
+                sender_name: @json($msg->sender?->name ?? ''),
+                content: @json($msg->content),
+                is_mine: @json((int) $msg->sender_id === (int) Auth::id()),
+                created_at_human: @json($msg->created_at->format('H:i'))
+              },
+            @endforeach
+          @endif
+        ],
+        scrollToBottom() {
+          this.$nextTick(() => {
+            const container = this.$refs.messagesContainer;
+            if (container) {
+              container.scrollTop = container.scrollHeight;
+            }
+          });
+        },
+        async sendMessage() {
+          if (!this.newMessageContent.trim() || this.isSending || !this.activeConversationId) return;
+          this.isSending = true;
+          const text = this.newMessageContent.trim();
+          this.newMessageContent = '';
+
+          try {
+            const response = await fetch('/chat/' + this.activeConversationId + '/messages-json', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+              },
+              body: JSON.stringify({ content: text })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.message) {
+                this.messages.push(data.message);
+                this.scrollToBottom();
+              }
+            }
+          } catch(e) {
+          } finally {
+            this.isSending = false;
+          }
+        },
+        async pollMessages() {
+          if (!this.activeConversationId) return;
+          try {
+            const response = await fetch('/chat/' + this.activeConversationId + '/poll');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.messages && data.messages.length > 0) {
+                const currentIds = this.messages.map(m => m.id);
+                let hasNew = false;
+                data.messages.forEach(m => {
+                  if (!currentIds.includes(m.id)) {
+                    this.messages.push(m);
+                    hasNew = true;
+                  }
+                });
+                if (hasNew) {
+                  this.scrollToBottom();
+                }
+              }
+            }
+          } catch(e) {}
+        },
+        initChat() {
+          if (this.activeConversationId) {
+            this.scrollToBottom();
+            setInterval(() => this.pollMessages(), 4000);
+          }
+        }
+      }
+    }
+  </script>
 </x-app-layout>

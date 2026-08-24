@@ -8,6 +8,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\Worklog;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class RuleBasedAIProvider implements AIProviderInterface
 {
@@ -53,7 +54,6 @@ class RuleBasedAIProvider implements AIProviderInterface
         $riskAlerts = [];
         $insights = [];
 
-        // Rule 1: Overdue tasks rule
         if ($overdueTasks > 5) {
             $warnings[] = "يوجد عدد كبير من المهام المتأخرة ({$overdueTasks} مهمة متأخرة).";
             $riskAlerts[] = "خطر تأخير تسليم المخرجات بسبب تراكم {$overdueTasks} مهام متأخرة.";
@@ -64,7 +64,6 @@ class RuleBasedAIProvider implements AIProviderInterface
             $strengths[] = "جميع المهام الحالية تسير ضمن جدولها الزمني المخطط بدون أي تأخيرات.";
         }
 
-        // Rule 2: Weekly progress rule
         if ($completedThisWeek === 0 && $totalTasks > 0) {
             $weaknesses[] = "الإنتاجية منخفضة هذا الأسبوع لم يتم إكمال أي مهام حتى الآن.";
             $recommendations[] = "تركيز الجهود على إنهاء المهام المعلقة قيد المراجعة أولاً.";
@@ -72,14 +71,12 @@ class RuleBasedAIProvider implements AIProviderInterface
             $insights[] = "تم إنجاز {$completedThisWeek} مهام بنجاح خلال هذا الأسبوع.";
         }
 
-        // Rule 3: Nearly finished projects
         $nearlyDoneProject = $projects->first(fn ($p) => $p->progress() >= 90 && $p->status !== 'completed');
         if ($nearlyDoneProject) {
             $strengths[] = "المشروع '{$nearlyDoneProject->title}' اقترب من الإنجاز بنسبة {$nearlyDoneProject->progress()}%.";
             $recommendations[] = "إجراء المراجعة النهائية للمشروع '{$nearlyDoneProject->title}' لتسليمه رسمياً.";
         }
 
-        // Rule 4: Worklogs & Time tracking rule
         if ($totalTrackedHours > 0) {
             $insights[] = "إجمالي ساعات العمل المسجلة ببيئة العمل بلغ {$totalTrackedHours} ساعة.";
         } else {
@@ -87,7 +84,6 @@ class RuleBasedAIProvider implements AIProviderInterface
             $recommendations[] = "تفعيل المؤقت المباشر وتتبع الوقت بدقة للمهام اليومية.";
         }
 
-        // Calculate AI Health Score (0 - 100)
         $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 100;
         $overduePenalty = min(40, $overdueTasks * 5);
         $healthScore = (int) max(10, min(100, $completionRate - $overduePenalty + ($completedThisWeek > 0 ? 10 : 0)));
@@ -108,7 +104,7 @@ class RuleBasedAIProvider implements AIProviderInterface
     }
 
     /**
-     * Generate an AI response for a user prompt using internal rule-based inference.
+     * Generate dynamic AI responses based on specific user prompts and real-time workspace metrics.
      *
      * @param  array<string, mixed>  $context
      */
@@ -118,33 +114,43 @@ class RuleBasedAIProvider implements AIProviderInterface
         $cleanPrompt = mb_strtolower(trim($prompt));
 
         if (str_contains($cleanPrompt, 'مشروع') || str_contains($cleanPrompt, 'المشاريع')) {
-            return "بناءً على تحليل المشاريع الخاص بك:\n" .
+            return "تحليل المشاريع الخاص بك بـ Tasker:\n" .
                    "• إجمالي المشاريع النشطة: {$analysis['total_projects']} مشاريع.\n" .
-                   (! empty($analysis['strengths']) ? "• " . implode("\n• ", $analysis['strengths']) : "• جميع المشاريع تعمل بشكل مستقر.");
+                   (! empty($analysis['strengths']) ? "• " . implode("\n• ", $analysis['strengths']) : "• جميع المشاريع تعمل وفق الجدول المخطط.");
         }
 
-        if (str_contains($cleanPrompt, 'مهام') || str_contains($cleanPrompt, 'تأخير') || str_contains($cleanPrompt, 'متأخر')) {
-            return "بناءً على تحليل سريان المهام:\n" .
-                   "• إجمالي المهام: {$analysis['total_tasks']} مهمة.\n" .
-                   "• المهام المتأخرة: {$analysis['overdue_tasks']} مهام.\n" .
-                   (! empty($analysis['warnings']) ? "⚠️ " . implode("\n⚠️ ", $analysis['warnings']) : "✅ جميع المهام منجزة في الموعد المحدد.");
+        if (str_contains($cleanPrompt, 'مهمة') || str_contains($cleanPrompt, 'مهام') || str_contains($cleanPrompt, 'تأخير') || str_contains($cleanPrompt, 'متأخر')) {
+            return "تقرير متابعة المهام اليومي:\n" .
+                   "• إجمالي المهام المسجلة: {$analysis['total_tasks']} مهمة.\n" .
+                   "• المهام المتأخرة: {$analysis['overdue_tasks']} مهمة.\n" .
+                   (! empty($analysis['warnings']) ? "⚠️ " . implode("\n⚠️ ", $analysis['warnings']) : "✅ جميع المهام منجزة ضمن الموعد المحدد.");
         }
 
-        if (str_contains($cleanPrompt, 'إنتاجية') || str_contains($cleanPrompt, 'أداء') || str_contains($cleanPrompt, 'صحة')) {
-            return "مؤشر صحة وبيئة العمل الذكي (AI Health Score) هو {$analysis['health_score']}/100.\n\n" .
-                   (! empty($analysis['recommendations']) ? "التوصيات المقترحة لرفع الإنتاجية:\n💡 " . implode("\n💡 ", $analysis['recommendations']) : "أداء بيئة العمل ممتازة ومستقرة تماماً.");
+        if (str_contains($cleanPrompt, 'فريق') || str_contains($cleanPrompt, 'مستقل') || str_contains($cleanPrompt, 'أعضاء') || str_contains($cleanPrompt, 'توظيف')) {
+            return "توصية Tasker لإدارة فريق العمل والتوظيف:\n" .
+                   "• يمكنك زيارة سوق الخدمات المستقلة وتصفح أفضل المستقلين المتاحين لمشاريعك.\n" .
+                   "• ينصح بتعيين أدوار محددة للأعضاء الجدد لتسريع إنجاز المهام الذكية.";
         }
 
-        if (str_contains($cleanPrompt, 'وقت') || str_contains($cleanPrompt, 'ساعات') || str_contains($cleanPrompt, 'تتبع')) {
-            return "بناءً على محرك تتبع الوقت:\n" .
-                   "• تم رصد السجلات الزمنية للمشاريع والمهام بنجاح.\n" .
-                   (! empty($analysis['productivity_insights']) ? "• " . implode("\n• ", $analysis['productivity_insights']) : "• ينصح بالبدء في استخدام المؤقت المباشر لتسجيل الساعات.");
+        if (str_contains($cleanPrompt, 'إنتاجية') || str_contains($cleanPrompt, 'أداء') || str_contains($cleanPrompt, 'صحة') || str_contains($cleanPrompt, 'تقييم')) {
+            return "مؤشر أداء وصحة بيئة العمل الذكي (AI Health Score) هو {$analysis['health_score']}/100.\n\n" .
+                   (! empty($analysis['recommendations']) ? "💡 التوصيات التنفيذية لرفع الكفاءة:\n• " . implode("\n• ", $analysis['recommendations']) : "أداء بيئة العمل ممتاز ولا توجد عوائق تشغيلية.");
         }
 
-        // Generic intelligent rule-based response
-        return "أهلاً بك! أنا مساعد الذكاء الاصطناعي للمؤسسة. بناءً على قراءة بيانات بيئة العمل الخاصة بك:\n\n" .
-               "• درجة صحة الأداء الحالية: {$analysis['health_score']}/100\n" .
-               "• إجمالي المهام: {$analysis['total_tasks']} | المتأخرة: {$analysis['overdue_tasks']}\n\n" .
-               (! empty($analysis['recommendations']) ? "💡 النصيحة الأكثر أهمية لك الآن:\n" . $analysis['recommendations'][0] : "كل الأمور في بيئة العمل تسير بانتظام واحترافية عالية.");
+        if (str_contains($cleanPrompt, 'وقت') || str_contains($cleanPrompt, 'ساعات') || str_contains($cleanPrompt, 'تتبع') || str_contains($cleanPrompt, 'زمان')) {
+            return "تقرير تتبع الوقت والإنتاجية الزمنية:\n" .
+                   "• تم توثيق السجلات الزمنية بنجاح عبر النظام.\n" .
+                   (! empty($analysis['productivity_insights']) ? "• " . implode("\n• ", $analysis['productivity_insights']) : "• تذكر تفعيل المؤقت المباشر في شريط التتبع العلوي أثناء العمل.");
+        }
+
+        if (str_contains($cleanPrompt, 'مرحبا') || str_contains($cleanPrompt, 'السلام') || str_contains($cleanPrompt, 'أهلا') || str_contains($cleanPrompt, 'مين انت')) {
+            return "أهلاً بك يا {$user->name}! أنا مساعد Tasker الذكي، مستشارك الخاص لإدارة الأعمال والمشاريع. كيف يمكنني مساعدتك اليوم؟ يمكنك سؤالي عن أداء الفريق، المهام المتأخرة، أو نصائح رفع الإنتاجية.";
+        }
+
+        // Dynamic contextual response utilizing user prompt keywords
+        return "بناءً على طلبك حول (\"" . Str::limit($prompt, 50) . "\") وقراءة بيانات بيئة العمل الخاصة بك:\n\n" .
+               "• مؤشر الأداء الحالي: {$analysis['health_score']}/100\n" .
+               "• المشاريع النشطة: {$analysis['total_projects']} | المهام الإجمالية: {$analysis['total_tasks']}\n\n" .
+               (! empty($analysis['recommendations']) ? "💡 التوصية المقترحة الآن:\n" . $analysis['recommendations'][0] : "يسرنا أن بيئة العمل لديك تسير بأعلى كفاءة واحترافية.");
     }
 }

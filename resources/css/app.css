@@ -15,26 +15,26 @@
         /* ─── Surfaces ─── */
         --color-background: 248 250 252;    /* #F8FAFC */
         --color-surface:    255 255 255;    /* #FFFFFF */
-        --color-surface-soft: 241 245 249;
+        --color-surface-soft: 241 245 249;  /* #F1F5F9 */
         /* ─── Typography ─── */
-        --color-text-primary:   28 43 69;   /* #1C2B45 — Tasker Navy */
-        --color-text-secondary: 107 114 128; /* #6B7280 — Neutral Gray */
+        --color-text-primary:   13 34 58;    /* #0D223A — Tasker Dark Navy */
+        --color-text-secondary: 101 111 124; /* #656F7C — Tasker Secondary Text Gray */
         /* ─── Borders ─── */
         --color-border: 226 232 240;
-        /* ─── Tasker Navy  #1C2B45 ─── */
-        --color-navy:      28 43 69;
-        --color-navy-soft: 38 58 92;
-        /* ─── Tasker Orange  #F7931E ─── */
-        --color-copper:      247 147 30;
+        /* ─── Tasker Dark Navy #0D223A ─── */
+        --color-navy:      13 34 58;
+        --color-navy-soft: 25 61 119;
+        /* ─── Tasker Accent Orange #F38400 ─── */
+        --color-copper:      243 132 0;
         --color-copper-soft: 254 243 199;
-        /* ─── Tasker Blue  #3756C6 ─── */
-        --color-mineral:      55 86 198;
+        /* ─── Tasker Primary Blue #2B58A8 ─── */
+        --color-mineral:      43 88 168;
         --color-mineral-soft: 219 234 254;
         /* ─── Semantic ─── */
         --color-success: 16 185 129;
-        --color-warning: 247 147 30;
+        --color-warning: 243 132 0;
         --color-error:   239 68 68;
-        --color-info:    55 86 198;
+        --color-info:    43 88 168;
         /* ─── Radius ─── */
         --radius-xs: 6px;
         --radius-sm: 8px;
@@ -46,29 +46,29 @@
         --duration-normal: 180ms;
         --duration-slow:   260ms;
         /* ─── Shadows ─── */
-        --dashboard-shadow:       0 1px 3px rgba(28, 43, 69, 0.05), 0 10px 30px rgba(28, 43, 69, 0.04);
-        --dashboard-shadow-hover: 0 4px 6px rgba(28, 43, 69, 0.06), 0 16px 40px rgba(28, 43, 69, 0.08);
+        --dashboard-shadow:       0 1px 3px rgba(13, 34, 58, 0.05), 0 10px 30px rgba(13, 34, 58, 0.04);
+        --dashboard-shadow-hover: 0 4px 6px rgba(13, 34, 58, 0.06), 0 16px 40px rgba(13, 34, 58, 0.08);
     }
     .dark {
-        /* ─── Dark surfaces ─── */
-        --color-background:   17 24 39;
-        --color-surface:      31 41 55;
-        --color-surface-soft: 55 65 81;
+        /* ─── Dark surfaces (Main Dark Navy Surface #0D223A) ─── */
+        --color-background:   13 34 58;     /* #0D223A */
+        --color-surface:      19 46 76;     /* #132E4C — Card surface */
+        --color-surface-soft: 25 61 119;    /* #193D77 — Soft panel */
         /* ─── Dark typography ─── */
-        --color-text-primary:   248 250 252;
-        --color-text-secondary: 156 163 175;
+        --color-text-primary:   255 255 255; /* #FFFFFF */
+        --color-text-secondary: 203 213 225; /* #CBD5E1 */
         /* ─── Dark borders ─── */
-        --color-border: 55 65 81;
-        /* ─── Brand (same hues, dark variants) ─── */
-        --color-navy:      28 43 69;
-        --color-navy-soft: 38 58 92;
-        --color-copper:      247 147 30;
-        --color-copper-soft: 69 39 8;
-        --color-mineral:      55 86 198;
-        --color-mineral-soft: 30 58 138;
+        --color-border: 34 68 106;
+        /* ─── Brand (Dark Variants) ─── */
+        --color-navy:      13 34 58;
+        --color-navy-soft: 25 61 119;
+        --color-copper:      243 132 0;      /* #F38400 */
+        --color-copper-soft: 75 42 6;
+        --color-mineral:      43 88 168;     /* #2B58A8 */
+        --color-mineral-soft: 25 61 119;     /* #193D77 */
         /* ─── Semantic dark ─── */
         --color-success: 52 211 153;
-        --color-warning: 251 191 36;
+        --color-warning: 243 132 0;
         --color-error:   248 113 113;
         --color-info:    96 165 250;
         /* ─── Shadows dark ─── */
@@ -95,7 +95,7 @@
         outline-offset: 3px;
     }
 
-    /* Motion System Keyframes */
+    /* Motion System Keyframes & Micro-interactions */
     @keyframes gdfhFadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -104,11 +104,29 @@
         from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes taskerScaleIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes taskerPulseGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(43, 88, 168, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(43, 88, 168, 0); }
+    }
+
     .animate-fade-in {
         animation: gdfhFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .animate-slide-up {
         animation: gdfhSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-scale-in {
+        animation: taskerScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .hover-lift {
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
     }
 }
 
@@ -130,6 +148,7 @@
     }
     .gdfh-card:hover {
         box-shadow: var(--dashboard-shadow-hover);
+        transform: translateY(-1px);
     }
     .gdfh-panel {
         background-color: rgb(var(--color-surface-soft));

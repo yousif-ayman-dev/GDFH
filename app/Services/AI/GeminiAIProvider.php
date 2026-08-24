@@ -20,7 +20,7 @@ class GeminiAIProvider implements AIProviderInterface
     public function generateResponse(User $user, string $prompt, array $context = []): string
     {
         $apiKey = config('services.gemini.api_key');
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $model = config('services.gemini.model', 'gemini-flash-latest');
 
         if (empty($apiKey)) {
             return $this->fallbackProvider->generateResponse($user, $prompt, $context);
@@ -71,7 +71,7 @@ class GeminiAIProvider implements AIProviderInterface
     public function analyzeWorkspace(User $user): array
     {
         $apiKey = config('services.gemini.api_key');
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $model = config('services.gemini.model', 'gemini-flash-latest');
 
         if (empty($apiKey)) {
             return $this->fallbackProvider->analyzeWorkspace($user);

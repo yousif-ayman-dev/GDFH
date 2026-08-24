@@ -395,7 +395,7 @@
           toolbar: { show: false },
           fontFamily: 'Alexandria, Inter, sans-serif'
         },
-        colors: ['#c58a5b', '#2f8f6d'],
+        colors: ['#2B58A8', '#F38400'],
         fill: {
           type: 'gradient',
           gradient: {
@@ -425,7 +425,7 @@
           fontFamily: 'Alexandria, Inter, sans-serif'
         },
         labels: ['مكتملة', 'متأخرة', 'تستحق اليوم', 'قيد التنفيذ'],
-        colors: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
+        colors: ['#10b981', '#ef4444', '#F38400', '#2B58A8'],
         legend: { position: 'bottom', fontSize: '11px' },
         dataLabels: { enabled: false }
       };

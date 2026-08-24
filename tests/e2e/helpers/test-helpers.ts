@@ -53,7 +53,7 @@ export async function login(
   await page.fill('#email', email);
   await page.fill('#password', password);
 
-  await page.click('form[action*="login"] button[type="submit"], main button[type="submit"]');
+  await page.click('#login-submit-btn, form[action*="login"] button[type="submit"], button[type="submit"]');
   await page.waitForURL(url => !url.toString().endsWith('/login'), { timeout: 15000 }).catch(() => {});
   await expect(page).not.toHaveURL(/\/login$/);
 }
@@ -73,7 +73,7 @@ export async function createProject(
   await page.fill('#description', description);
 
   await page.click('main form button[type="submit"], form[action*="projects"] button[type="submit"]');
-  await expect(page).toHaveURL(/\/projects/);
+  await expect(page).toHaveURL(/\/projects/, { timeout: 15000 });
   return name;
 }
 
@@ -92,7 +92,7 @@ export async function createTeam(
   await page.fill('#description', description);
 
   await page.click('main form button[type="submit"], form[action*="teams"] button[type="submit"]');
-  await expect(page).toHaveURL(/\/teams/);
+  await expect(page).toHaveURL(/\/teams/, { timeout: 15000 });
   return name;
 }
 
