@@ -134,28 +134,28 @@
 
 /*
 |--------------------------------------------------------------------------
-| GDFH Base Components
+| Tasker SaaS Base Components & Utilities
 |--------------------------------------------------------------------------
 */
 
 @layer components {
-    .gdfh-card {
+    .gdfh-card, .tasker-card {
         background-color: rgb(var(--color-surface));
         border: 1px solid rgb(var(--color-border));
         border-radius: var(--radius-md);
         box-shadow: var(--dashboard-shadow);
         transition: box-shadow var(--duration-normal) ease, border-color var(--duration-normal) ease, transform var(--duration-fast) ease;
     }
-    .gdfh-card:hover {
+    .gdfh-card:hover, .tasker-card:hover {
         box-shadow: var(--dashboard-shadow-hover);
         transform: translateY(-1px);
     }
-    .gdfh-panel {
+    .gdfh-panel, .tasker-panel {
         background-color: rgb(var(--color-surface-soft));
         border: 1px solid rgb(var(--color-border));
         border-radius: var(--radius-md);
     }
-    .gdfh-btn {
+    .gdfh-btn, .tasker-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;

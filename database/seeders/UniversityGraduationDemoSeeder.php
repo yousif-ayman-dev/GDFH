@@ -123,10 +123,10 @@ class UniversityGraduationDemoSeeder extends Seeder
         ]);
 
         // 4. Create Team & Members
-        $team = Team::firstOrCreate(['slug' => 'gdfh-core-engineering-team'], [
-            'owner_id' => $freelancer1->id,
-            'name' => 'فريق هندسة منصة GDFH',
-            'description' => 'الفريق الهندسي المطور لمنصة إدارة المشاريع وسوق العمل الذكي مشروع التخرج الجامعي.',
+        $team = Team::firstOrCreate(['slug' => 'tasker-core-engineering-team'], [
+            'owner_id' => $client->id,
+            'name' => 'فريق هندسة منصة Tasker',
+            'description' => 'فريق التطوير البرمجي وإدارة الجودة لمنصة Tasker.',
         ]);
 
         TeamMember::firstOrCreate(['team_id' => $team->id, 'user_id' => $freelancer1->id], [
@@ -142,9 +142,9 @@ class UniversityGraduationDemoSeeder extends Seeder
         ]);
 
         // 5. Create Demo Projects
-        $projectActive = Project::firstOrCreate(['slug' => 'gdfh-university-graduation-platform'], [
+        $projectActive = Project::firstOrCreate(['slug' => 'tasker-university-graduation-platform'], [
             'owner_id' => $client->id,
-            'title' => 'مشروع التخرج: منصة GDFH لإدارة المشاريع وسوق العمل الذكي',
+            'title' => 'مشروع التخرج: منصة Tasker لإدارة المشاريع وسوق العمل الذكي',
             'description' => 'نظام مؤسسي شامل لإدارة المشاريع، اللوحات الزمانية Kanban & Gantt، تتبع الوقت، ومساعد الذكاء الاصطناعي مع سوق الخدمات المصغرة.',
             'visibility' => 'private',
             'status' => 'in_progress',
@@ -269,7 +269,7 @@ class UniversityGraduationDemoSeeder extends Seeder
         // 11. Create AI Assistant Conversation Demo
         $aiConv = AIConversation::create([
             'user_id' => $client->id,
-            'title' => 'تحليل صحة مشروع التخرج منصة GDFH',
+            'title' => 'تحليل صحة مشروع التخرج منصة Tasker',
         ]);
 
         AIMessage::create([

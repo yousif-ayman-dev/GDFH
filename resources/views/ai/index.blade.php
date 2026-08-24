@@ -16,6 +16,10 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 shadow-sm">
+          <span class="flex h-2 w-2 rounded-full bg-sky-500 animate-pulse"></span>
+          <span>Google Gemini AI — متصل حي 🟢</span>
+        </span>
         <span class="gdfh-badge gdfh-badge-copper text-xs font-bold px-3 py-1.5 shadow-sm">
           مؤشر صحة الأداء (Health Score): {{ $analysis['health_score'] }}/100
         </span>

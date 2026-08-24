@@ -142,7 +142,7 @@ class GeminiAIProvider implements AIProviderInterface
         $healthScore = $fallbackAnalysis['health_score'] ?? 80;
 
         return <<<PROMPT
-قم بتحليل بيانات بيئة العمل للمستخدم {$user->name} بلغة عربية احترافية ودقيقة للمشروع الجامعي GDFH:
+قم بتحليل بيانات بيئة العمل للمستخدم {$user->name} بلغة عربية احترافية ودقيقة لمنصة Tasker:
 - إجمالي المشاريع: {$totalProjects}
 - إجمالي المهام: {$totalTasks}
 - المهام المتأخرة: {$overdueTasks}
