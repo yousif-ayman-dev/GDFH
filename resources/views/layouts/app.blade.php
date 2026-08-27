@@ -222,11 +222,20 @@
       <header class="sticky top-0 z-30 bg-[rgb(var(--color-background)/0.8)] border-b border-[rgb(var(--color-border))] backdrop-blur-md">
         <div class="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           
-          <div class="flex items-center gap-3 min-w-0">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             {{-- Mobile Hamburger Button --}}
             <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:hidden bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]" @click="mobileNavigation = true" aria-label="فتح القائمة">
               <svg class="h-5 w-5 text-[rgb(var(--color-text-primary))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14" />
+              </svg>
+            </button>
+
+            {{-- Mobile Search Icon Button --}}
+            <button type="button" @click="commandPalette = true; $nextTick(() => $refs.commandInput?.focus())"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:hidden bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-copper))] shadow-sm" aria-label="البحث" title="البحث الشامل والأوامر السريعة">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="6" />
+                <path stroke-linecap="round" d="m16 16 4 4" />
               </svg>
             </button>
 
