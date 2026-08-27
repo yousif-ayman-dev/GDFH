@@ -4,6 +4,8 @@ nixPkgs = [
     "php82Extensions.mbstring",
     "php82Extensions.pdo_sqlite",
     "php82Extensions.sqlite3",
+    "php82Extensions.pdo_mysql",
+    "php82Extensions.mysqlnd",
     "php82Extensions.curl",
     "composer",
     "nodejs_20"
