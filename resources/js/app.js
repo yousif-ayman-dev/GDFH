@@ -5,18 +5,14 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
 Alpine.store('theme', {
-    mode: localStorage.getItem('gdfh-theme') || 'system',
+    mode: localStorage.getItem('gdfh-theme') || 'light',
 
     get isDark() {
         if (this.mode === 'dark') {
             return true;
         }
 
-        if (this.mode === 'light') {
-            return false;
-        }
-
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return false;
     },
 
     set(mode) {

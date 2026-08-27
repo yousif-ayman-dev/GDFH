@@ -193,12 +193,6 @@ class SearchService
     protected function getFreelancersQuery(string $term): Builder
     {
         return User::query()
-            ->where(function (Builder $query) {
-                $query->where('account_type', 'freelancer')
-                    ->orWhereHas('freelancerProfile')
-                    ->orWhereHas('portfolioItems')
-                    ->orWhereHas('services');
-            })
             ->where(function (Builder $query) use ($term) {
                 $query->where('name', 'like', "%{$term}%")
                     ->orWhere('username', 'like', "%{$term}%")

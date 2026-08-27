@@ -16,14 +16,8 @@
 
   <script>
   (() => {
-    const savedTheme = localStorage.getItem('gdfh-theme') || 'system';
-
-    const isDark =
-      savedTheme === 'dark' ||
-      (
-        savedTheme === 'system' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
-      );
+    const savedTheme = localStorage.getItem('gdfh-theme') || 'light';
+    const isDark = savedTheme === 'dark';
 
     if (isDark) {
       document.documentElement.classList.add('dark');
