@@ -219,10 +219,6 @@ class OnboardingTest extends TestCase
 
         $this->assertAuthenticated();
 
-        $registeredUser = User::where('email', 'flow@example.com')->first();
-        $registeredUser->markEmailAsVerified();
-        $this->actingAs($registeredUser->fresh());
-
         // 2. Access dashboard -> redirected to onboarding
         $dashboardResponse = $this->get(route('dashboard'));
         $dashboardResponse->assertRedirect(route('onboarding'));
