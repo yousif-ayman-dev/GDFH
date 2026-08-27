@@ -57,11 +57,15 @@ class MessagingService
             throw new InvalidArgumentException('غير مصرح لك بإرسال رسائل في هذه المحادثة.');
         }
 
-        return DB::transaction(function () use ($conversation, $sender, $content) {
+        $detector = new \App\Services\Security\OffPlatformDetectorService();
+        $inspection = $detector->inspectAndFilter($content);
+        $cleanContent = $inspection['clean_text'];
+
+        return DB::transaction(function () use ($conversation, $sender, $cleanContent) {
             $message = Message::create([
                 'conversation_id' => $conversation->id,
                 'sender_id' => $sender->id,
-                'content' => $content,
+                'content' => $cleanContent,
                 'read_at' => null,
             ]);
 
@@ -74,7 +78,7 @@ class MessagingService
             $this->notificationService->sendNotification(
                 $recipient,
                 'رسالة مباشرة جديدة',
-                "أرسل لك {$sender->name} رسالة جديدة: " . \Illuminate\Support\Str::limit($content, 40),
+                "أرسل لك {$sender->name} رسالة جديدة: " . \Illuminate\Support\Str::limit($cleanContent, 40),
                 route('messaging.index', ['conversation_id' => $conversation->id])
             );
 

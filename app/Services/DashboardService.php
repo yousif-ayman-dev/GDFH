@@ -216,6 +216,27 @@ class DashboardService
             ->where('due_at', '<', now())
             ->count();
 
+        // Client Specific Metrics
+        $clientProposalsCount = \App\Models\Proposal::query()
+            ->whereIn('project_id', $projectIds)
+            ->count();
+
+        $clientContractsCount = \App\Models\Contract::query()
+            ->whereIn('project_id', $projectIds)
+            ->where('status', 'active')
+            ->count();
+
+        $clientTotalBudget = \App\Models\Project::query()
+            ->whereIn('id', $projectIds)
+            ->sum('budget');
+
+        $recentProposals = \App\Models\Proposal::query()
+            ->whereIn('project_id', $projectIds)
+            ->with(['freelancer', 'project'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return [
             'stats' => [
                 'active_projects' => $activeProjectsCount,
@@ -239,6 +260,9 @@ class DashboardService
                 'teams_count' => $teamsCount,
                 'unread_notifications' => $unreadNotifications,
                 'overall_progress' => $overallProgress,
+                'client_proposals_count' => $clientProposalsCount,
+                'client_contracts_count' => $clientContractsCount,
+                'client_total_budget' => $clientTotalBudget,
             ],
             'analytics' => [
                 'project_completion_rate' => $projectCompletionRate,
@@ -253,6 +277,7 @@ class DashboardService
                 'activities' => $recentActivities,
                 'attachments' => $recentAttachments,
                 'notifications' => $recentNotifications,
+                'proposals' => $recentProposals,
             ],
         ];
     }

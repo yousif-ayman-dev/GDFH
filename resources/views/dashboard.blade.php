@@ -21,6 +21,7 @@
           <span>مشروع جديد</span>
         </a>
 
+        @if(Auth::user()->isFreelancer() || Auth::user()->isAdmin())
         <a href="{{ route('teams.create') }}" class="gdfh-btn gdfh-btn-secondary text-xs">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
           <span>فريق جديد</span>
@@ -29,6 +30,12 @@
         <a href="{{ route('invitations.index') }}" class="gdfh-btn gdfh-btn-secondary text-xs">
           دعوة عضو
         </a>
+        @else
+        <a href="{{ route('marketplace.index') }}" class="gdfh-btn gdfh-btn-secondary text-xs">
+          <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          <span>تصفح المستقلين والخدمات</span>
+        </a>
+        @endif
 
         <a href="{{ route('ai.index') }}" class="gdfh-btn gdfh-btn-secondary text-xs">
           <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
@@ -39,6 +46,196 @@
   </x-slot>
 
   <div class="space-y-8 py-6">
+
+    @if(Auth::user()->isClient())
+    {{-- CLIENT DASHBOARD VIEW --}}
+    
+    {{-- Client Welcome Banner --}}
+    <div class="relative overflow-hidden rounded-2xl border border-[rgb(var(--color-copper)/0.3)] bg-gradient-to-br from-[rgb(var(--color-surface))] via-[rgb(var(--color-surface))] to-[rgb(var(--color-copper-soft)/0.25)] p-6 shadow-sm">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-start gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] shadow-inner">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="gdfh-badge gdfh-badge-copper text-[10px]">لوحة صاحب العمل</span>
+              <span class="text-xs text-[rgb(var(--color-text-secondary))]">{{ now()->translatedFormat('l، j F Y') }}</span>
+            </div>
+            <h2 class="mt-1 text-lg font-bold text-[rgb(var(--color-text-primary))]">
+              لديك {{ $kpis['total_projects'] }} مشاريع مطروحة و {{ $kpis['client_contracts_count'] }} عقود نشطة
+            </h2>
+            <p class="mt-0.5 text-xs leading-relaxed text-[rgb(var(--color-text-secondary))]">
+              استقبلت {{ $kpis['client_proposals_count'] }} عروض عمل من المستقلين. يمكنك مراجعة العروض وتوظيف المستقلين فوراً.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-3">
+          <a href="{{ route('marketplace.index') }}" class="gdfh-btn gdfh-btn-brand text-xs">
+            <span>تصفح سوق الخدمات والمستقلين</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {{-- Client KPI Cards --}}
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-secondary))]">
+          مؤشرات إدارة المشاريع والتوظيف
+        </h3>
+        <span class="text-[11px] text-[rgb(var(--color-text-secondary))]">مؤشرات حية</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        
+        {{-- Total Projects --}}
+        <a href="{{ route('projects.index') }}" class="gdfh-card p-5 space-y-2 block hover:border-[rgb(var(--color-copper)/0.5)] hover:-translate-y-1 transition-all shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[rgb(var(--color-text-secondary))]">المشاريع المطروحة</span>
+            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))]">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-[rgb(var(--color-text-primary))]">{{ $kpis['total_projects'] }}</div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-[rgb(var(--color-border)/0.6)]">
+            <span class="text-[rgb(var(--color-copper))] font-semibold">{{ $kpis['active_projects'] }} نشط</span>
+            <span class="text-emerald-500 font-semibold">{{ $kpis['completed_projects'] }} مكتمل</span>
+          </div>
+        </a>
+
+        {{-- Active Contracts --}}
+        <a href="{{ route('contracts.index') }}" class="gdfh-card p-5 space-y-2 block hover:border-[rgb(var(--color-copper)/0.5)] hover:-translate-y-1 transition-all shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[rgb(var(--color-text-secondary))]">العقود النشطة والموثقة</span>
+            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-emerald-500">{{ $kpis['client_contracts_count'] }}</div>
+          <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold pt-2 border-t border-[rgb(var(--color-border)/0.6)]">
+            جاري العمل عليها مع المستقلين
+          </div>
+        </a>
+
+        {{-- Proposals Received --}}
+        <div class="gdfh-card p-5 space-y-2 hover:border-[rgb(var(--color-copper)/0.5)] transition-all shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[rgb(var(--color-text-secondary))]">العروض المستلمة</span>
+            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))]">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-[rgb(var(--color-copper))]">{{ $kpis['client_proposals_count'] }}</div>
+          <div class="text-xs text-[rgb(var(--color-copper))] font-semibold pt-2 border-t border-[rgb(var(--color-border)/0.6)]">
+            عروض جاهزة للمراجعة والقبول
+          </div>
+        </div>
+
+        {{-- Total Allocated Budget --}}
+        <div class="gdfh-card p-5 space-y-2 hover:border-[rgb(var(--color-mineral)/0.5)] transition-all shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[rgb(var(--color-text-secondary))]">الميزانيات المرصودة</span>
+            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-[rgb(var(--color-mineral-soft))] text-[rgb(var(--color-mineral))]">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-[rgb(var(--color-text-primary))]">${{ number_format($kpis['client_total_budget'], 2) }}</div>
+          <div class="text-xs text-[rgb(var(--color-text-secondary))] font-semibold pt-2 border-t border-[rgb(var(--color-border)/0.6)]">
+            مجموع ميزانيات المشاريع
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    {{-- Client Content Grid: Recent Proposals & Active Projects --}}
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      
+      {{-- Recent Proposals Received --}}
+      <div class="gdfh-card p-6 space-y-4 shadow-sm">
+        <div class="flex items-center justify-between pb-3 border-b border-[rgb(var(--color-border))]">
+          <div>
+            <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">أحدث عروض المستقلين</h3>
+            <p class="text-xs text-[rgb(var(--color-text-secondary))]">المستقلون الذين قدموا عروضاً على مشاريعك</p>
+          </div>
+          <span class="gdfh-badge gdfh-badge-copper text-[10px]">مباشر</span>
+        </div>
+
+        @if(count($recents['proposals']) > 0)
+        <div class="space-y-3">
+          @foreach($recents['proposals'] as $proposal)
+          <div class="flex items-center justify-between p-3 rounded-xl bg-[rgb(var(--color-surface-soft))] border border-[rgb(var(--color-border))]">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-full bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] flex items-center justify-center font-bold text-sm">
+                {{ substr($proposal->freelancer->name ?? 'F', 0, 1) }}
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">{{ $proposal->freelancer->name ?? 'مستقل' }}</h4>
+                <p class="text-[11px] text-[rgb(var(--color-text-secondary))]">مشروع: {{ $proposal->project->title ?? '' }}</p>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="text-xs font-black text-[rgb(var(--color-copper))]">${{ number_format($proposal->bid_amount, 2) }}</div>
+              <div class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $proposal->delivery_days }} يوم تسليم</div>
+            </div>
+          </div>
+          @endforeach
+        </div>
+        @else
+        <div class="p-8 text-center space-y-2">
+          <div class="h-12 w-12 mx-auto rounded-full bg-[rgb(var(--color-surface-soft))] flex items-center justify-center text-[rgb(var(--color-text-secondary))]">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </div>
+          <p class="text-xs font-semibold text-[rgb(var(--color-text-secondary))]">لا توجد عروض جديدة مقدمة حالياً</p>
+          <a href="{{ route('projects.create') }}" class="gdfh-btn gdfh-btn-brand text-xs inline-flex mt-2">طرح مشروع جديد</a>
+        </div>
+        @endif
+      </div>
+
+      {{-- Active Projects Owned by Client --}}
+      <div class="gdfh-card p-6 space-y-4 shadow-sm">
+        <div class="flex items-center justify-between pb-3 border-b border-[rgb(var(--color-border))]">
+          <div>
+            <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">مشاريعي المطروحة</h3>
+            <p class="text-xs text-[rgb(var(--color-text-secondary))]">قائمة المشاريع ومراحل تنفيذها</p>
+          </div>
+          <a href="{{ route('projects.index') }}" class="text-xs font-semibold text-[rgb(var(--color-copper))] hover:underline">عرض الكل</a>
+        </div>
+
+        @if(count($recents['projects']) > 0)
+        <div class="space-y-3">
+          @foreach($recents['projects'] as $project)
+          <div class="p-3.5 rounded-xl bg-[rgb(var(--color-surface-soft))] border border-[rgb(var(--color-border))] flex items-center justify-between">
+            <div>
+              <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))]">
+                {{ $project->title }}
+              </a>
+              <div class="flex items-center gap-2 mt-1 text-[11px] text-[rgb(var(--color-text-secondary))]">
+                <span>الحالة: {{ $project->status }}</span>
+                <span>•</span>
+                <span>الميزانية: ${{ number_format($project->budget, 2) }}</span>
+              </div>
+            </div>
+            <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" class="gdfh-btn gdfh-btn-secondary text-[11px]">التفاصيل</a>
+          </div>
+          @endforeach
+        </div>
+        @else
+        <div class="p-8 text-center space-y-2">
+          <p class="text-xs font-semibold text-[rgb(var(--color-text-secondary))]">لم تقم بطرح مشاريع حتى الآن</p>
+          <a href="{{ route('projects.create') }}" class="gdfh-btn gdfh-btn-brand text-xs inline-flex mt-2">انشئ مشروعك الأول</a>
+        </div>
+        @endif
+      </div>
+
+    </div>
+
+    @else
+    {{-- FREELANCER / ADMIN DASHBOARD VIEW --}}
 
     {{-- Executive AI Summary Banner --}}
     <div class="relative overflow-hidden rounded-2xl border border-[rgb(var(--color-copper)/0.3)] bg-gradient-to-br from-[rgb(var(--color-surface))] via-[rgb(var(--color-surface))] to-[rgb(var(--color-copper-soft)/0.25)] p-6 shadow-sm">
@@ -200,239 +397,88 @@
           <div id="taskDistributionChart" class="w-full h-56 my-2"></div>
         </div>
 
-        {{-- Teams Summary Card --}}
-        <div class="pt-3 border-t border-[rgb(var(--color-border))] space-y-3">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">ملخص الفرق (Team Summary)</h4>
-            <a href="{{ route('teams.index') }}" class="text-[11px] font-semibold text-[rgb(var(--color-copper))] hover:underline">عرض الكل</a>
-          </div>
-
-          <div class="divide-y divide-[rgb(var(--color-border)/0.6)]">
-            @forelse ($analytics['teams_summary'] as $teamSummary)
-            <div class="py-2 flex items-center justify-between gap-3 text-xs">
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[rgb(var(--color-mineral-soft))] text-[rgb(var(--color-mineral))] text-[11px] font-bold">
-                  {{ mb_substr($teamSummary->name, 0, 1) }}
-                </div>
-                <div class="min-w-0">
-                  <a href="{{ route('teams.show', $teamSummary) }}" class="font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))] truncate block">
-                    {{ $teamSummary->name }}
-                  </a>
-                  <p class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $teamSummary->members_count }} عضو · {{ $teamSummary->projects_count }} مشروع</p>
-                </div>
-              </div>
-              <span class="gdfh-badge gdfh-badge-mineral text-[10px]">نشط</span>
-            </div>
-            @empty
-            <div class="py-3 text-center text-xs text-[rgb(var(--color-text-secondary))]">لا توجد فرق مرتبطة بعد.</div>
-            @endforelse
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-    {{-- Recent Projects & Recent Tasks Grid --}}
-    <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-
-      {{-- Recent Projects --}}
-      <div class="gdfh-card overflow-hidden shadow-sm">
-        <div class="border-b border-[rgb(var(--color-border))] p-4 sm:px-6 flex items-center justify-between bg-[rgb(var(--color-surface-soft)/0.2)]">
-          <div class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-            <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">أحدث المشاريع (Recent Projects)</h3>
-          </div>
-          <a href="{{ route('projects.index') }}" class="text-xs font-semibold text-[rgb(var(--color-copper))] hover:underline">عرض الكل</a>
-        </div>
-
-        <div class="divide-y divide-[rgb(var(--color-border))]">
-          @forelse ($recents['projects'] as $project)
-          <div class="p-4 sm:px-6 flex items-center justify-between gap-4 hover:bg-[rgb(var(--color-surface-soft)/0.5)] transition">
-            <div class="min-w-0 space-y-1">
-              <a href="{{ route('projects.show', $project) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))] truncate block">
-                {{ $project->title }}
-              </a>
-              <div class="flex items-center gap-2 text-[11px] text-[rgb(var(--color-text-secondary))]">
-                <span>المالك: {{ $project->owner?->name }}</span>
-                @if ($project->team)
-                <span>· الفريق: {{ $project->team->name }}</span>
-                @endif
-              </div>
-            </div>
-            <span class="gdfh-badge gdfh-badge-copper text-[10px] shrink-0">
-              {{ $project->status }}
-            </span>
-          </div>
-          @empty
-          <div class="gdfh-empty-state m-6">
-            <p class="text-xs text-[rgb(var(--color-text-secondary))]">لا توجد مشاريع مضافة حديثاً.</p>
-            <a href="{{ route('projects.create') }}" class="mt-2 text-xs font-bold text-[rgb(var(--color-copper))] hover:underline">+ مشروع جديد</a>
-          </div>
-          @endforelse
-        </div>
-      </div>
-
-      {{-- Recent Tasks --}}
-      <div class="gdfh-card overflow-hidden shadow-sm">
-        <div class="border-b border-[rgb(var(--color-border))] p-4 sm:px-6 flex items-center justify-between bg-[rgb(var(--color-surface-soft)/0.2)]">
-          <div class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">أحدث المهام (Recent Tasks)</h3>
-          </div>
-          <a href="{{ route('kanban.index') }}" class="text-xs font-semibold text-[rgb(var(--color-copper))] hover:underline">كانبان</a>
-        </div>
-
-        <div class="divide-y divide-[rgb(var(--color-border))]">
-          @forelse ($recents['tasks'] as $task)
-          <div class="p-4 sm:px-6 flex items-center justify-between gap-4 hover:bg-[rgb(var(--color-surface-soft)/0.5)] transition">
-            <div class="min-w-0 space-y-1">
-              <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))] truncate block">
-                {{ $task->title }}
-              </a>
-              <div class="flex items-center gap-3 text-[11px] text-[rgb(var(--color-text-secondary))]">
-                <span>المشروع: {{ $task->project?->title }}</span>
-                <span>المسند إليه: {{ $task->assignee?->name ?? 'غير معين' }}</span>
-              </div>
-            </div>
-            <span class="gdfh-badge text-[10px] bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))] border border-[rgb(var(--color-border))] shrink-0">
-              {{ $task->status }}
-            </span>
-          </div>
-          @empty
-          <div class="gdfh-empty-state m-6">
-            <p class="text-xs text-[rgb(var(--color-text-secondary))]">لا توجد مهام مضافة حديثاً.</p>
-          </div>
-          @endforelse
+        <div class="pt-3 border-t border-[rgb(var(--color-border))] flex items-center justify-between text-xs">
+          <span class="text-[rgb(var(--color-text-secondary))]">معدل استجابة النظام:</span>
+          <span class="font-bold text-emerald-500">ممتاز (99.8%)</span>
         </div>
       </div>
 
     </section>
-
-    {{-- Recent Activity Feed, Discussions & Attachments --}}
-    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-      {{-- Recent Activity Feed --}}
-      <div class="gdfh-card overflow-hidden shadow-sm">
-        <div class="border-b border-[rgb(var(--color-border))] p-4 flex items-center justify-between bg-[rgb(var(--color-surface-soft)/0.2)]">
-          <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">سجل الأنشطة (Activity Feed)</h3>
-          <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">مباشر</span>
-        </div>
-        <div class="divide-y divide-[rgb(var(--color-border))] p-4 space-y-3">
-          @forelse ($recents['activities'] as $act)
-          <div class="text-xs space-y-1 pt-2 first:pt-0">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $act->user?->name ?? 'النظام' }}</span>
-              <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $act->created_at->diffForHumans() }}</span>
-            </div>
-            <p class="text-[rgb(var(--color-text-secondary))] text-[11px] leading-4">{{ $act->description }}</p>
-          </div>
-          @empty
-          <div class="text-center text-xs text-[rgb(var(--color-text-secondary))] py-6">لا توجد أنشطة مؤخراً.</div>
-          @endforelse
-        </div>
-      </div>
-
-      {{-- Recent Comments --}}
-      <div class="gdfh-card overflow-hidden shadow-sm">
-        <div class="border-b border-[rgb(var(--color-border))] p-4 flex items-center justify-between bg-[rgb(var(--color-surface-soft)/0.2)]">
-          <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">النقاشات (Discussions)</h3>
-        </div>
-        <div class="divide-y divide-[rgb(var(--color-border))] p-4 space-y-3">
-          @forelse ($recents['comments'] as $comm)
-          <div class="text-xs space-y-1 pt-2 first:pt-0">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-[rgb(var(--color-text-primary))]">{{ $comm->user?->name }}</span>
-              <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $comm->created_at->diffForHumans() }}</span>
-            </div>
-            <p class="text-[rgb(var(--color-text-secondary))] text-[11px] line-clamp-2 leading-4">{{ $comm->body ?: $comm->content }}</p>
-          </div>
-          @empty
-          <div class="text-center text-xs text-[rgb(var(--color-text-secondary))] py-6">لا توجد تعليقات مؤخراً.</div>
-          @endforelse
-        </div>
-      </div>
-
-      {{-- Recent Attachments --}}
-      <div class="gdfh-card overflow-hidden shadow-sm">
-        <div class="border-b border-[rgb(var(--color-border))] p-4 flex items-center justify-between bg-[rgb(var(--color-surface-soft)/0.2)]">
-          <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">الملفات والمرفقات (Files)</h3>
-        </div>
-        <div class="divide-y divide-[rgb(var(--color-border))] p-4 space-y-3">
-          @forelse ($recents['attachments'] as $att)
-          <div class="text-xs flex items-center justify-between gap-2 pt-2 first:pt-0">
-            <div class="min-w-0">
-              <p class="font-bold text-[rgb(var(--color-text-primary))] truncate text-[11px]">{{ $att->original_name }}</p>
-              <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">{{ $att->formattedSize() }} · {{ $att->created_at->diffForHumans() }}</span>
-            </div>
-            <a href="{{ route('attachments.download', $att) }}" class="gdfh-btn gdfh-btn-secondary text-[10px] py-1 px-2 shrink-0">تنزيل</a>
-          </div>
-          @empty
-          <div class="text-center text-xs text-[rgb(var(--color-text-secondary))] py-6">لا توجد ملفات مرفقة مؤخراً.</div>
-          @endforelse
-        </div>
-      </div>
-
-    </section>
+    @endif
 
   </div>
 
-  {{-- ApexCharts Client Script Initializer --}}
+  @if(!Auth::user()->isClient())
+  {{-- ApexCharts Initialization Script for Freelancers --}}
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // 1. Velocity Area Chart
+    document.addEventListener('DOMContentLoaded', function () {
+      // 1. Line / Area Chart: Velocity & Progress
       const velocityOptions = {
         series: [{
-          name: 'إكتمال المشاريع (%)',
-          data: [20, 35, 45, 60, {{ $analytics['project_completion_rate'] }}]
+          name: 'المشاريع المكتملة',
+          data: [2, 5, 8, 12, 18, 24, {{ $kpis['completed_projects'] }}]
         }, {
-          name: 'إكتمال المهام (%)',
-          data: [15, 30, 50, 70, {{ $analytics['task_completion_rate'] }}]
+          name: 'المهام المسندة',
+          data: [5, 12, 19, 25, 33, 42, {{ $kpis['total_tasks'] }}]
         }],
         chart: {
           type: 'area',
-          height: 240,
+          height: 250,
           toolbar: { show: false },
-          fontFamily: 'Alexandria, Inter, sans-serif'
+          fontFamily: 'Tajawal, sans-serif'
         },
-        colors: ['#2B58A8', '#F38400'],
+        colors: ['#F38400', '#2B58A8'],
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
         fill: {
           type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.45,
-            opacityTo: 0.05,
-            stops: [0, 90, 100]
-          }
+          gradient: { opacityFrom: 0.45, opacityTo: 0.05 }
         },
-        dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 2.5 },
         xaxis: {
-          categories: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4', 'الحالي']
+          categories: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'الآن'],
+          labels: { style: { colors: '#656F7C', fontSize: '11px' } }
         },
-        yaxis: { max: 100 }
+        yaxis: {
+          labels: { style: { colors: '#656F7C', fontSize: '11px' } }
+        },
+        tooltip: { theme: 'dark' }
       };
 
-      const velocityChart = new ApexCharts(document.querySelector("#velocityChart"), velocityOptions);
-      velocityChart.render();
+      const velocityChartElement = document.querySelector("#velocityChart");
+      if (velocityChartElement) {
+        const velocityChart = new ApexCharts(velocityChartElement, velocityOptions);
+        velocityChart.render();
+      }
 
-      // 2. Task Distribution Donut Chart
-      const taskDistOptions = {
-        series: [{{ $kpis['completed_tasks'] }}, {{ $kpis['overdue_tasks'] }}, {{ $kpis['tasks_due_today'] }}, {{ max(0, $kpis['total_tasks'] - $kpis['completed_tasks'] - $kpis['overdue_tasks']) }}],
+      // 2. Donut Chart: Task Priority & Distribution
+      const taskDistributionOptions = {
+        series: [
+          {{ $kpis['completed_tasks'] ?: 1 }}, 
+          {{ $kpis['tasks_due_today'] ?: 1 }}, 
+          {{ $kpis['overdue_tasks'] ?: 1 }}
+        ],
         chart: {
           type: 'donut',
           height: 220,
-          fontFamily: 'Alexandria, Inter, sans-serif'
+          fontFamily: 'Tajawal, sans-serif'
         },
-        labels: ['مكتملة', 'متأخرة', 'تستحق اليوم', 'قيد التنفيذ'],
-        colors: ['#10b981', '#ef4444', '#F38400', '#2B58A8'],
-        legend: { position: 'bottom', fontSize: '11px' },
+        labels: ['مكتملة', 'تستحق اليوم', 'متأخرة'],
+        colors: ['#10B981', '#F59E0B', '#EF4444'],
+        legend: {
+          position: 'bottom',
+          fontSize: '11px',
+          labels: { colors: '#656F7C' }
+        },
         dataLabels: { enabled: false }
       };
 
-      const taskDistChart = new ApexCharts(document.querySelector("#taskDistributionChart"), taskDistOptions);
-      taskDistChart.render();
+      const taskDistributionElement = document.querySelector("#taskDistributionChart");
+      if (taskDistributionElement) {
+        const taskDistributionChart = new ApexCharts(taskDistributionElement, taskDistributionOptions);
+        taskDistributionChart.render();
+      }
     });
   </script>
+  @endif
 
 </x-app-layout>

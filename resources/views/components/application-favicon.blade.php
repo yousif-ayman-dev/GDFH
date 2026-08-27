@@ -1,0 +1,1 @@
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23d97706'/><path d='M30 50L45 65L70 35' stroke='white' stroke-width='12' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">

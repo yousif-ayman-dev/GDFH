@@ -24,12 +24,15 @@ class ProposalController extends Controller
         ]);
 
         try {
+            $detector = new \App\Services\Security\OffPlatformDetectorService();
+            $inspection = $detector->inspectAndFilter($request->input('cover_letter'));
+
             $this->proposalService->submitProposal(
                 Auth::user(),
                 $project,
                 (float) $request->input('bid_amount'),
                 (int) $request->input('delivery_days'),
-                $request->input('cover_letter')
+                $inspection['clean_text']
             );
 
             return back()->with('success', 'تم تقديم عرضك على المشروع بنجاح!');

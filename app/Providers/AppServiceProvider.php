@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Services\AI\AIProviderInterface;
 use App\Services\AI\GeminiAIProvider;
+use App\Services\AI\OpenAIAIProvider;
 use App\Services\AI\RuleBasedAIProvider;
+use App\Services\AI\MultiProviderAIAdapter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,14 +17,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AIProviderInterface::class, function ($app) {
-            $apiKey = config('services.gemini.api_key');
-            $fallback = $app->make(RuleBasedAIProvider::class);
+            $ruleBased = $app->make(RuleBasedAIProvider::class);
+            $gemini = new GeminiAIProvider($ruleBased);
+            $openAI = new OpenAIAIProvider($ruleBased);
 
-            if (! empty($apiKey)) {
-                return new GeminiAIProvider($fallback);
-            }
-
-            return $fallback;
+            return new MultiProviderAIAdapter($gemini, $openAI, $ruleBased);
         });
     }
 

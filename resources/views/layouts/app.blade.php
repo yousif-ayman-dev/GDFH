@@ -104,6 +104,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  {{-- Favicon --}}
+  <x-application-favicon />
+
   <meta name="color-scheme" content="light dark">
 
   <title>
@@ -127,13 +130,15 @@
 
     if (isDark) {
       document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   })();
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -159,10 +164,10 @@
     <aside x-cloak x-show="mobileNavigation" x-transition:enter="transition duration-200 ease-out"
       x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
       x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0"
-      x-transition:leave-end="translate-x-full" class="fixed inset-y-0 end-0 z-50 w-[min(88vw,340px)] lg:hidden bg-[rgb(var(--color-navy))] text-slate-100 border-s border-slate-700/60" @keydown.escape.window="mobileNavigation = false">
+      x-transition:leave-end="translate-x-full" class="fixed inset-y-0 end-0 z-50 w-[min(88vw,340px)] lg:hidden bg-white text-slate-800 border-s border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800" @keydown.escape.window="mobileNavigation = false">
       <div class="flex h-20 items-center justify-between px-5">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-          <x-application-logo class="h-9 w-auto" />
+          <x-application-logo size="md" />
         </a>
 
         <button type="button" class="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:text-white" @click="mobileNavigation = false" aria-label="إغلاق القائمة">
@@ -268,25 +273,18 @@
               </div>
             </div>
 
-            {{-- Theme Toggle --}}
-            <div class="flex items-center rounded-xl p-1 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]" aria-label="المظهر">
-              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg transition" :style="$store.theme.mode === 'light' ? 'background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-copper));' : 'color: rgb(var(--color-text-secondary));'" @click="$store.theme.set('light')" aria-label="الوضع الفاتح" title="فاتح">
+            {{-- Theme Toggle (Light / Dark) --}}
+            <div class="flex items-center rounded-xl p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 shadow-sm" aria-label="المظهر">
+              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg transition" :class="!$store.theme.isDark ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'" @click="$store.theme.set('light')" aria-label="الوضع الفاتح" title="الوضع الفاتح">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <circle cx="12" cy="12" r="3.5" />
                   <path stroke-linecap="round" d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" />
                 </svg>
               </button>
 
-              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg transition" :style="$store.theme.mode === 'dark' ? 'background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-copper));' : 'color: rgb(var(--color-text-secondary));'" @click="$store.theme.set('dark')" aria-label="الوضع الداكن" title="داكن">
+              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg transition" :class="$store.theme.isDark ? 'bg-amber-500/20 text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'" @click="$store.theme.set('dark')" aria-label="الوضع الداكن" title="الوضع الداكن">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M20 15.2A8 8 0 0 1 8.8 4a8.2 8.2 0 1 0 11.2 11.2Z" />
-                </svg>
-              </button>
-
-              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg transition" :style="$store.theme.mode === 'system' ? 'background-color: rgb(var(--color-copper-soft)); color: rgb(var(--color-copper));' : 'color: rgb(var(--color-text-secondary));'" @click="$store.theme.set('system')" aria-label="استخدام إعداد النظام" title="النظام">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <rect x="3" y="4" width="18" height="13" rx="2" />
-                  <path stroke-linecap="round" d="M8 21h8M12 17v4" />
                 </svg>
               </button>
             </div>
@@ -357,13 +355,17 @@
             {{-- User Menu --}}
             <div class="relative">
               <button type="button" class="flex h-10 items-center gap-2 rounded-xl px-2.5 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-copper)/0.4)] transition" @click="userMenu = !userMenu" @click.outside="userMenu = false" :aria-expanded="userMenu">
+                @if (Auth::user() && Auth::user()->avatar_url)
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="h-7 w-7 shrink-0 rounded-full object-cover border border-[rgb(var(--color-border))]">
+                @else
                 <span class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold bg-[rgb(var(--color-mineral-soft))] text-[rgb(var(--color-mineral))]">
                   {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
                 </span>
+                @endif
                 <span class="hidden max-w-32 truncate text-xs font-bold sm:block">
                   {{ Auth::user()->name }}
                 </span>
-                <svg class="hidden h-4 w-4 sm:block text-[rgb(var(--color-text-secondary))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <svg class="hidden h-4 w-4 sm:block text-[rgb(var(--color-text-secondary))] transition-transform duration-200" :class="{ 'rotate-180': userMenu }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path stroke-linecap="round" d="m8 10 4 4 4-4" />
                 </svg>
               </button>
@@ -476,7 +478,8 @@
       </div>
 
     </div>
-  </div>
+  {{-- Floating AI Chatbot Widget --}}
+  <x-ai-chatbot-widget />
 
 </body>
 

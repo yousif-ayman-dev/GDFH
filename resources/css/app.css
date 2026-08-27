@@ -81,7 +81,7 @@
     body {
         background-color: rgb(var(--color-background));
         color: rgb(var(--color-text-primary));
-        font-family: "Alexandria", "IBM Plex Sans Arabic", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: "Tajawal", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;

@@ -1,4 +1,55 @@
 @php
+$user = Auth::user();
+$isFreelancerOrAdmin = $user && ($user->isFreelancer() || $user->isAdmin());
+
+$workItems = [
+  [
+    'label' => $user && $user->isClient() ? 'مشاريعي والتوظيف' : 'المشاريع',
+    'route' => 'projects.index',
+    'active' => 'projects.*',
+    'icon' => 'projects',
+  ],
+];
+
+if ($isFreelancerOrAdmin) {
+  $workItems[] = [
+    'label' => 'معرض أعمالي (Portfolio)',
+    'route' => 'portfolio.index',
+    'active' => 'portfolio.*',
+    'icon' => 'portfolio',
+  ];
+  $workItems[] = [
+    'label' => 'الفرق ومجموعات العمل',
+    'route' => 'teams.index',
+    'active' => 'teams.*',
+    'icon' => 'teams',
+  ];
+  $workItems[] = [
+    'label' => 'المهام',
+    'route' => 'tasks.index',
+    'active' => 'tasks.*',
+    'icon' => 'tasks',
+  ];
+  $workItems[] = [
+    'label' => 'لوحة كانبان',
+    'route' => 'kanban.index',
+    'active' => 'kanban.*',
+    'icon' => 'kanban',
+  ];
+  $workItems[] = [
+    'label' => 'مخطط غانت',
+    'route' => 'gantt.index',
+    'active' => 'gantt.*',
+    'icon' => 'gantt',
+  ];
+  $workItems[] = [
+    'label' => 'تتبع الوقت المباشر',
+    'route' => 'time-tracking.index',
+    'active' => 'time-tracking.*',
+    'icon' => 'time-tracking',
+  ];
+}
+
 $navigationSections = [
   [
     'title' => 'الرئيسية',
@@ -13,50 +64,7 @@ $navigationSections = [
   ],
   [
     'title' => 'إدارة العمل',
-    'items' => [
-      [
-        'label' => 'المشاريع',
-        'route' => 'projects.index',
-        'active' => 'projects.*',
-        'icon' => 'projects',
-      ],
-      [
-        'label' => 'الفرق',
-        'route' => 'teams.index',
-        'active' => 'teams.*',
-        'icon' => 'teams',
-      ],
-      [
-        'label' => 'المهام',
-        'route' => 'tasks.index',
-        'active' => 'tasks.*',
-        'icon' => 'tasks',
-      ],
-      [
-        'label' => 'الدعوات',
-        'route' => 'invitations.index',
-        'active' => 'invitations.*',
-        'icon' => 'invitations',
-      ],
-      [
-        'label' => 'لوحة كانبان',
-        'route' => 'kanban.index',
-        'active' => 'kanban.*',
-        'icon' => 'kanban',
-      ],
-      [
-        'label' => 'مخطط غانت',
-        'route' => 'gantt.index',
-        'active' => 'gantt.*',
-        'icon' => 'gantt',
-      ],
-      [
-        'label' => 'تتبع الوقت',
-        'route' => 'time-tracking.index',
-        'active' => 'time-tracking.*',
-        'icon' => 'time-tracking',
-      ],
-    ]
+    'items' => $workItems,
   ],
   [
     'title' => 'الذكاء والتحليلات',
@@ -68,22 +76,10 @@ $navigationSections = [
         'icon' => 'ai',
       ],
       [
-        'label' => 'التقارير والتحليلات',
-        'route' => 'reports.index',
-        'active' => 'reports.*',
-        'icon' => 'reports',
-      ],
-      [
         'label' => 'الإشعارات',
         'route' => 'notifications.index',
         'active' => 'notifications.*',
         'icon' => 'notifications',
-      ],
-      [
-        'label' => 'التقويم',
-        'route' => 'calendar.index',
-        'active' => 'calendar.*',
-        'icon' => 'calendar',
       ],
     ]
   ],
@@ -91,7 +87,7 @@ $navigationSections = [
     'title' => 'الخدمات والتواصل',
     'items' => [
       [
-        'label' => 'السوق والدليل',
+        'label' => 'سوق الخدمات والمستقلين',
         'route' => 'marketplace.index',
         'active' => 'marketplace.*',
         'icon' => 'marketplace',
@@ -113,12 +109,12 @@ $navigationSections = [
 ];
 @endphp
 
-<aside class="fixed inset-y-0 end-0 z-40 hidden w-72 lg:flex lg:flex-col bg-[rgb(var(--color-navy))] text-slate-100 border-s border-slate-700/60 shadow-sm">
+<aside class="fixed inset-y-0 end-0 z-40 hidden w-72 lg:flex lg:flex-col bg-white text-slate-800 border-s border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 shadow-sm transition-colors duration-200">
   
   {{-- Workspace Branding Header --}}
-  <div class="flex h-16 shrink-0 items-center justify-between px-6 border-b border-slate-700/60">
+  <div class="flex h-20 shrink-0 items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700/60">
     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group" aria-label="Tasker Enterprise Workspace">
-      <x-application-logo class="h-9 w-auto" />
+      <x-application-logo size="md" :showText="true" />
     </a>
   </div>
 
@@ -127,7 +123,7 @@ $navigationSections = [
     
     @foreach ($navigationSections as $section)
     <div class="space-y-1">
-      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         {{ $section['title'] }}
       </div>
 
@@ -139,23 +135,24 @@ $navigationSections = [
       <a href="{{ route($item['route']) }}"
         @class([
           'group relative flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150',
-        ])
-        style="{{ $isActive 
-          ? 'background-color: rgba(43, 88, 168, 0.3); color: #60A5FA; font-weight: 700;' 
-          : 'color: #CBD5E1;' 
-        }}">
+          'bg-blue-500/10 text-blue-600 dark:bg-blue-500/25 dark:text-blue-400 font-bold' => $isActive,
+          'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white' => !$isActive,
+        ])>
         
         @if ($isActive)
-        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-[#F38400]"></span>
+        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-amber-500"></span>
         @endif
 
-        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110" @if ($isActive) style="color: #60A5FA;" @endif>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110 {{ $isActive ? 'text-blue-600 dark:text-blue-400' : '' }}">
           @switch($item['icon'])
             @case('home')
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
               @break
             @case('projects')
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              @break
+            @case('portfolio')
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
               @break
             @case('teams')
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -176,7 +173,7 @@ $navigationSections = [
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg>
               @break
             @case('ai')
-              <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+              <svg class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
               @break
             @case('reports')
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -202,7 +199,7 @@ $navigationSections = [
         <span class="truncate">{{ $item['label'] }}</span>
 
         @if ($item['icon'] === 'notifications')
-        <span x-cloak x-show="unreadNotificationsCount > 0" class="ms-auto flex h-4 px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-[rgb(var(--color-copper))] text-white" x-text="unreadNotificationsCount"></span>
+        <span x-cloak x-show="unreadNotificationsCount > 0" class="ms-auto flex h-4 px-1.5 items-center justify-center rounded-full text-[10px] font-bold bg-amber-500 text-white" x-text="unreadNotificationsCount"></span>
         @endif
       </a>
       @endforeach
@@ -215,19 +212,18 @@ $navigationSections = [
   @if (Auth::check() && Auth::user()->isAdmin())
   <div class="px-4 pb-2">
     <div class="space-y-1">
-      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[rgb(var(--color-copper))]">
+      <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-amber-500">
         إدارة النظام
       </div>
       <a href="{{ route('admin.index') }}"
-        class="group relative flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150"
-        style="{{ request()->routeIs('admin.*') ? 'background-color: rgba(var(--color-copper-rgb, 201, 140, 80), 0.15); color: rgb(var(--color-copper));' : 'color: rgb(var(--color-copper));' }}"
+        class="group relative flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150 bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 hover:bg-amber-500/20"
         id="admin-sidebar-link">
         @if (request()->routeIs('admin.*'))
-        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-[rgb(var(--color-copper))]"></span>
+        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-amber-500"></span>
         @endif
         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 00-3 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
           </svg>
         </span>
         <span class="truncate">لوحة تحكم المشرف</span>
@@ -237,34 +233,34 @@ $navigationSections = [
   @endif
 
   {{-- Sidebar User Profile Footer Card --}}
-  <div class="px-4 pb-4 pt-2 border-t border-slate-700/60">
-    <div class="rounded-xl p-2.5 bg-slate-800/50 border border-slate-700/60 space-y-2">
+  <div class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-700/60">
+    <div class="rounded-xl p-2.5 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2">
       <div class="flex items-center gap-3">
         @if (Auth::user() && Auth::user()->avatar_url)
-        <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="h-9 w-9 shrink-0 rounded-full object-cover border border-slate-600">
+        <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="h-9 w-9 shrink-0 rounded-full object-cover border border-slate-300 dark:border-slate-600">
         @else
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold text-xs bg-blue-500/20 text-blue-400">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold text-xs bg-blue-500/15 text-blue-600 dark:bg-blue-500/25 dark:text-blue-400">
           {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
         </div>
         @endif
 
         <div class="min-w-0 flex-1">
-          <div class="truncate text-xs font-bold text-white">
+          <div class="truncate text-xs font-bold text-slate-800 dark:text-white">
             {{ Auth::user()->name }}
           </div>
-          <div class="truncate text-[10px] font-mono text-slate-400">
+          <div class="truncate text-[10px] font-mono text-slate-500 dark:text-slate-400">
             {{ Auth::user()->email }}
           </div>
         </div>
 
-        <a href="{{ route('settings.index') }}" class="text-slate-400 hover:text-[rgb(var(--color-copper))] p-1" title="الإعدادات">
+        <a href="{{ route('settings.index') }}" class="text-slate-400 hover:text-amber-500 dark:text-slate-400 p-1" title="الإعدادات">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </a>
       </div>
 
       <form method="POST" action="{{ route('logout') }}">
         @csrf
-        <button type="submit" class="flex min-h-8 w-full items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold bg-slate-800 text-red-400 border border-slate-700/60 hover:bg-red-500/10 transition">
+        <button type="submit" class="flex min-h-8 w-full items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 transition">
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>

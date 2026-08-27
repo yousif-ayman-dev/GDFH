@@ -87,4 +87,26 @@ class AIController extends Controller
         return redirect()->route('ai.index')
             ->with('success', 'تم حذف المحادثة بنجاح.');
     }
+
+    public function quickChat(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $user = Auth::user();
+        $conversations = $this->aiService->getConversations($user);
+        $conversation = $conversations->first();
+
+        if (! $conversation) {
+            $conversation = $this->aiService->createConversation($user, 'المحادثة السريعة');
+        }
+
+        $assistantMessage = $this->aiService->sendMessage($conversation, $request->input('message'));
+
+        return response()->json([
+            'status' => 'success',
+            'response' => $assistantMessage->content,
+        ]);
+    }
 }

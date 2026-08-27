@@ -106,7 +106,7 @@ class MarketplaceController extends Controller
 
     public function showFreelancer(User $user): View
     {
-        $user->load(['freelancerProfile', 'services']);
+        $user->load(['freelancerProfile', 'services', 'portfolioItems']);
 
         return view('marketplace.freelancers.show', compact('user'));
     }

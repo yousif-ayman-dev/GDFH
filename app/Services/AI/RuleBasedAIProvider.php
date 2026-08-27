@@ -147,6 +147,35 @@ class RuleBasedAIProvider implements AIProviderInterface
             return "أهلاً بك يا {$user->name}! أنا مساعد Tasker الذكي، مستشارك الخاص لإدارة الأعمال والمشاريع. كيف يمكنني مساعدتك اليوم؟ يمكنك سؤالي عن أداء الفريق، المهام المتأخرة، أو نصائح رفع الإنتاجية.";
         }
 
+        if (str_contains($cleanPrompt, 'جاذبية') || str_contains($cleanPrompt, 'نيوتن') || str_contains($cleanPrompt, 'مكتشف')) {
+            return "مكتشف الجاذبية الأرضية هو عالم الفيزياء والرياضيات الإنجليزي **إسحاق نيوتن (Sir Isaac Newton)** عام 1687 عندما صاغ قانون الجاذبية العام وقوانين الحركة الثنائية المشهورة بعد ملاحظته لسقوط التفاحة من الشجرة.";
+        }
+
+        if (str_contains($cleanPrompt, 'برمجة') || str_contains($cleanPrompt, 'كود') || str_contains($cleanPrompt, 'php') || str_contains($cleanPrompt, 'laravel') || str_contains($cleanPrompt, 'javascript') || str_contains($cleanPrompt, 'python')) {
+            return "أنا هنا لمساعدتك في كل ما يتعلق بالبرمجة وتطوير البرمجيات! يمكنك كتابة استفسارك أو الكود الذي تعمل عليه وسأساعدك في تحليله وتطويره خطوة بخطوة.";
+        }
+
+        if (str_contains($cleanPrompt, 'تاسكر') || str_contains($cleanPrompt, 'تطبيق') || str_contains($cleanPrompt, 'استخدمه') || str_contains($cleanPrompt, 'استخدام') || str_contains($cleanPrompt, 'شرح') || str_contains($cleanPrompt, 'طريقة') || str_contains($cleanPrompt, 'tasker')) {
+            return "أهلاً بك يا {$user->name}! منصة **Tasker** هي بيئة متكاملة لإدارة العمل والمشاريع والتوظيف تجمع بين العملاء (Clients) والمستقلين (Freelancers):\n\n" .
+                   "📌 **كيف تستخدم منصة Tasker حسب نوع حسابك:**\n" .
+                   "1️⃣ **إذا كنت عميلاً (Client):**\n" .
+                   "   • **طرح المشاريع:** يمكنك إضافة مشروع جديد وتحديد الميزانية المطلوبة.\n" .
+                   "   • **تصفح المستقلين والخدمات:** البحث عن الكفاءات وتصفح معارض أعمالهم (Portfolio).\n" .
+                   "   • **إدارة العقود:** مراجعة العروض المقدمة وتوثيق العقود وتتبع مخرجات التسليم.\n\n" .
+                   "2️⃣ **إذا كنت مستقلاً (Freelancer):**\n" .
+                   "   • **معرض الأعمال (Portfolio):** رفع وإضافة أعمالك السابقة والملاحظات ليعينك العملاء.\n" .
+                   "   • **تأسيس الفرق (Teams):** تكوين فريق منفذ وتوزيع الأدوار والمهام.\n" .
+                   "   • **نشر الخدمات:** تقديم خدمات مصغرة بأسعار ثابتة وساعات عمل محددة.\n" .
+                   "   • **أدوات التنفيذ:** استخدام لوحة كانبان، مخطط غانت، وتتبع الوقت الحي (Time Tracker).\n\n" .
+                   "💡 **المساعد الذكي:** أنا هنا لمساعدتك دائماً في تحليل بيئة العمل، الإجابة عن أي استفسار، وترشيح التوصيات لتنفيذ المشاريع بكفاءة عالية.";
+        }
+
+        // General questions fallback handling
+        if (str_ends_with(trim($prompt), '؟') || str_ends_with(trim($prompt), '?') || str_contains($cleanPrompt, 'من') || str_contains($cleanPrompt, 'ما') || str_contains($cleanPrompt, 'كيف') || str_contains($cleanPrompt, 'لماذا')) {
+            return "بناءً على استفسارك حول (\"" . Str::limit($prompt, 60) . "\"):\n\n" .
+                   "أنا مساعدك الذكي في منصة Tasker. يسعدني الإجابة عن كافة أسئلتك وإطلاعك على أداء ومؤشرات بيئة العمل للمشاريع والمهام والتوظيف. إذا كان لديك سؤال تقني أو استفسار محدد حول مشروعك، أرحب بتفاصيله فوراً!";
+        }
+
         // Dynamic contextual response utilizing user prompt keywords
         return "بناءً على طلبك حول (\"" . Str::limit($prompt, 50) . "\") وقراءة بيانات بيئة العمل الخاصة بك:\n\n" .
                "• مؤشر الأداء الحالي: {$analysis['health_score']}/100\n" .

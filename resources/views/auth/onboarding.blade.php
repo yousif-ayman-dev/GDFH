@@ -61,7 +61,7 @@
                 مستقل (Freelancer)
               </div>
               <p class="mt-1 text-xs" style="color: rgb(var(--color-text-secondary));">
-                تقديم الخدمات، العمل على المشاريع، والشركات في فرق عمل احترافية.
+                تقديم الخدمات المصغرة، بناء معرض الأعمال (Portfolio)، تأسيس الفرق، والعمل على المشاريع.
               </p>
             </div>
           </label>
@@ -94,7 +94,7 @@
                 عميل (Client)
               </div>
               <p class="mt-1 text-xs" style="color: rgb(var(--color-text-secondary));">
-                طرح المشاريع، البحث عن مستقلين متميزين، وتوظيف الكفاءات.
+                طرح المشاريع، تصفح المستقلين ومعارض أعمالهم (Portfolio)، وتوظيف المبدعين مباشرة.
               </p>
             </div>
           </label>

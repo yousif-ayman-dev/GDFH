@@ -397,6 +397,108 @@
             </div>
           </section>
 
+          {{-- Proposals & Freelancers Applications Section --}}
+          <section class="gdfh-card overflow-hidden">
+            <div class="border-b border-[rgb(var(--color-border))] p-5 flex items-center justify-between">
+              <div>
+                <h2 class="text-base font-bold text-[rgb(var(--color-text-primary))] flex items-center gap-2">
+                  <svg class="h-4 w-4 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5-3h7.5M6 20.25h12A2.25 2.25 0 0020.25 18V6.75A2.25 2.25 0 0018 4.5H6A2.25 2.25 0 003.75 6.75v11.25A2.25 2.25 0 006 20.25z"/></svg>
+                  <span>العروض والتوظيف المباشر (Proposals & Hiring)</span>
+                </h2>
+                <p class="mt-0.5 text-xs text-[rgb(var(--color-text-secondary))]">استعراض عروض المستقلين المتقدمين والتواصل معهم مباشرة.</p>
+              </div>
+
+              <span class="gdfh-badge gdfh-badge-copper text-xs">
+                {{ $project->proposals->count() }} عرض متقدم
+              </span>
+            </div>
+
+            {{-- Submit Proposal Form for Freelancers --}}
+            @if (Auth::user()->isFreelancer() && (int)$project->owner_id !== (int)Auth::id() && !$project->proposals->where('user_id', Auth::id())->first())
+            <div class="p-5 border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface-soft)/0.25)] space-y-4">
+              <h3 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">تقديم عرضك على هذا المشروع</h3>
+              <form method="POST" action="{{ route('projects.proposals.store', $project) }}" class="space-y-4">
+                @csrf
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <x-input-label for="bid_amount" value="قيمة العرض المالي ($)" class="text-xs font-bold" />
+                    <input type="number" step="1" name="bid_amount" id="bid_amount" required value="{{ old('bid_amount', $project->budget_min ?? 50) }}" class="mt-1 w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]">
+                  </div>
+                  <div>
+                    <x-input-label for="delivery_days" value="مدة التسليم باليوم" class="text-xs font-bold" />
+                    <input type="number" name="delivery_days" id="delivery_days" required value="{{ old('delivery_days', 3) }}" class="mt-1 w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]">
+                  </div>
+                </div>
+
+                <div>
+                  <x-input-label for="cover_letter" value="رسالة العرض والتفاصيل (Cover Letter)" class="text-xs font-bold" />
+                  <textarea name="cover_letter" id="cover_letter" required rows="3" placeholder="اشرح مهاراتك ورؤيتك لتنفيذ هذا المشروع بنجاح..." class="mt-1 w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-2.5 text-xs text-[rgb(var(--color-text-primary))]"></textarea>
+                </div>
+
+                <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2.5 px-6 font-bold">
+                  إرسال العرض الآن
+                </button>
+              </form>
+            </div>
+            @endif
+
+            {{-- Proposals List --}}
+            <div class="divide-y divide-[rgb(var(--color-border))]">
+              @forelse ($project->proposals as $prop)
+              <div class="p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:bg-[rgb(var(--color-surface-soft)/0.4)] transition">
+                <div class="flex items-start gap-3 min-w-0 flex-1">
+                  @if ($prop->user?->avatar_url)
+                  <img src="{{ $prop->user->avatar_url }}" alt="{{ $prop->user->name }}" class="h-10 w-10 shrink-0 rounded-full object-cover border border-[rgb(var(--color-border))]">
+                  @else
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold text-xs bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))]">
+                    {{ mb_strtoupper(mb_substr($prop->user?->name ?? 'U', 0, 1)) }}
+                  </div>
+                  @endif
+
+                  <div class="space-y-1 min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="font-bold text-xs text-[rgb(var(--color-text-primary))]">{{ $prop->user?->name }}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        ${{ number_format($prop->bid_amount, 2) }}
+                      </span>
+                      <span class="text-[10px] text-[rgb(var(--color-text-secondary))]">
+                        • التسليم خلال {{ $prop->delivery_days }} أيام
+                      </span>
+                    </div>
+
+                    <p class="text-xs text-[rgb(var(--color-text-primary))] leading-relaxed whitespace-pre-line bg-[rgb(var(--color-surface-soft)/0.5)] p-3 rounded-xl border border-[rgb(var(--color-border))] mt-2">
+                      {{ $prop->cover_letter }}
+                    </p>
+                  </div>
+                </div>
+
+                {{-- Client Action Buttons --}}
+                <div class="flex items-center gap-2 shrink-0 sm:self-center">
+                  {{-- Chat Button --}}
+                  <a href="{{ route('messaging.start', $prop->user) }}" class="gdfh-btn gdfh-btn-secondary text-xs py-2 px-3 flex items-center gap-1.5 shadow-sm">
+                    <svg class="h-3.5 w-3.5 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span>مراسلة شات</span>
+                  </a>
+
+                  {{-- Accept Button --}}
+                  @if ((int)$project->owner_id === (int)Auth::id() && $prop->status === 'pending')
+                  <form method="POST" action="{{ route('proposals.accept', $prop) }}">
+                    @csrf
+                    <button type="submit" class="gdfh-btn gdfh-btn-brand text-xs py-2 px-3 font-bold shadow-sm">
+                      قبول وإصدار عقد
+                    </button>
+                  </form>
+                  @endif
+                </div>
+              </div>
+              @empty
+              <div class="p-8 text-center text-xs text-[rgb(var(--color-text-secondary))]">
+                لا توجد عروض مقدمة على هذا المشروع حتى الآن.
+              </div>
+              @endforelse
+            </div>
+          </section>
+
           {{-- Comments & Discussions Section --}}
           <section class="gdfh-card overflow-hidden" x-data="{ replyingTo: null }">
             <div class="border-b border-[rgb(var(--color-border))] p-5">

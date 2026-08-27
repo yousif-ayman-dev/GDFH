@@ -7,6 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  {{-- Favicon --}}
+  <x-application-favicon />
+
   <meta name="color-scheme" content="light dark">
 
   <title>Tasker</title>
@@ -24,14 +27,15 @@
 
     if (isDark) {
       document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   })();
   </script>
 
-  <link rel="preconnect" href="https://fonts.bunny.net">
-  <link
-    href="https://fonts.bunny.net/css?family=ibm-plex-sans-arabic:400,500,600,700|inter:400,500,600,700&display=swap"
-    rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

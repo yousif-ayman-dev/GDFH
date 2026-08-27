@@ -20,41 +20,117 @@ class GeminiAIProvider implements AIProviderInterface
     public function generateResponse(User $user, string $prompt, array $context = []): string
     {
         $apiKey = config('services.gemini.api_key');
-        $model = config('services.gemini.model', 'gemini-flash-latest');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
 
         if (empty($apiKey)) {
             return $this->fallbackProvider->generateResponse($user, $prompt, $context);
         }
 
         try {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+            $analysis = $this->fallbackProvider->analyzeWorkspace($user);
+            $roleLabel = $user->isClient() ? 'عميل (Client - صاحب عمل)' : 'مستقل (Freelancer - منفذ ومبدع)';
 
-            $response = Http::timeout(30)
-                ->retry(2, 100)
-                ->post($url, [
+            $taskerPlatformContext = <<<SYS
+أنت مساعد الذكاء الاصطناعي المتقدم والتفاعلي لمنصة "Tasker" (Tasker AI Bot).
+المستخدم الحالي: "{$user->name}" — نوع الحساب: [{$roleLabel}].
+
+بيانات وتحليلات بيئة العمل الحية الخاصة بـ {$user->name} حالياً في النظام:
+• إجمالي المشاريع: {$analysis['total_projects']} مشروع
+• إجمالي المهام: {$analysis['total_tasks']} مهمة
+• المهام المتأخرة: {$analysis['overdue_tasks']} مهمة
+• مؤشر صحة الأداء: {$analysis['health_score']}/100
+
+تعليمات الإجابة والتفاعل:
+1. أنت تعمل تماماً مثل ChatGPT و Google Gemini: أجب عن أي سؤال يطرحه المستخدم بذكاء وطلاقة وثقافة عالية في كافة المجالات (برمجة، علوم، تاريخ، كتابة محتوى، نصائح عامة، تخطيط).
+2. عندما يسألك المستخدم عن مشاريعه أو مهامه أو منصة Tasker، استعن بأرقام وبيانات بيئة العمل المذكورة أعلاه لإعطائه إجابات وتحليلات حقيقية ومباشرة.
+SYS;
+
+            $systemInstruction = [
+                'parts' => [
+                    ['text' => $taskerPlatformContext]
+                ]
+            ];
+
+            // Build contents payload with conversation history if available
+            $contents = [];
+            $lastRole = null;
+
+            if (! empty($context['conversation_id'])) {
+                $pastMessages = \App\Models\AIMessage::query()
+                    ->where('conversation_id', $context['conversation_id'])
+                    ->orderBy('id', 'asc')
+                    ->take(10)
+                    ->get();
+
+                foreach ($pastMessages as $msg) {
+                    $role = $msg->role === 'user' ? 'user' : 'model';
+                    // Strict alternating roles check for Gemini REST API
+                    if ($role !== $lastRole && ! empty(trim($msg->content))) {
+                        $contents[] = [
+                            'role' => $role,
+                            'parts' => [
+                                ['text' => $msg->content],
+                            ],
+                        ];
+                        $lastRole = $role;
+                    }
+                }
+            }
+
+            // If last item in history is 'user', remove it so we append the fresh prompt cleanly
+            if (! empty($contents) && end($contents)['role'] === 'user') {
+                array_pop($contents);
+            }
+
+            $contents[] = [
+                'role' => 'user',
+                'parts' => [
+                    ['text' => $prompt],
+                ],
+            ];
+
+            $payload = [
+                'system_instruction' => $systemInstruction,
+                'contents' => $contents,
+            ];
+
+            $modelsToTry = array_unique([$model, 'gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-flash-latest']);
+
+            foreach ($modelsToTry as $currentModel) {
+                $url = "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$apiKey}";
+
+                $response = Http::timeout(20)
+                    ->withoutVerifying()
+                    ->post($url, $payload);
+
+                if ($response->successful()) {
+                    $text = $response->json('candidates.0.content.parts.0.text');
+
+                    if (! empty($text)) {
+                        return trim($text);
+                    }
+                }
+
+                // Fallback to single prompt payload if history payload fails
+                $simplePayload = [
+                    'system_instruction' => $systemInstruction,
                     'contents' => [
                         [
+                            'role' => 'user',
                             'parts' => [
                                 ['text' => $prompt],
                             ],
                         ],
                     ],
-                ]);
+                ];
 
-            if ($response->successful()) {
-                $text = $response->json('candidates.0.content.parts.0.text');
-
-                if (! empty($text)) {
-                    return trim($text);
+                $simpleResponse = Http::timeout(20)->withoutVerifying()->post($url, $simplePayload);
+                if ($simpleResponse->successful()) {
+                    $text = $simpleResponse->json('candidates.0.content.parts.0.text');
+                    if (! empty($text)) {
+                        return trim($text);
+                    }
                 }
-            }
-
-            if ($response->status() === 429) {
-                return 'تنبيه: تم تجاوز حد الاستخدام المسموح لخدمة الذكاء الاصطناعي (Quota Exceeded). يرجى المحاولة لاحقاً.';
-            }
-
-            if ($response->status() === 401 || $response->status() === 403) {
-                return 'عذراً، مفتاح الربط مع خدمة الذكاء الاصطناعي (Gemini API Key) غير صالح أو منتهي الصلاحية.';
             }
 
             return $this->fallbackProvider->generateResponse($user, $prompt, $context);

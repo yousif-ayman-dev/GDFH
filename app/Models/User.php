@@ -119,6 +119,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Portfolio items created by freelancer.
+     */
+    public function portfolioItems(): HasMany
+    {
+        return $this->hasMany(PortfolioItem::class)->latest();
+    }
+
+    /**
      * Project membership records for the user.
      */
     public function projectMemberships(): HasMany

@@ -11,6 +11,7 @@ use App\Http\Controllers\GanttController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\MessagingController;
+use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -276,6 +277,16 @@ Route::middleware('auth')->group(function () {
             [AIController::class, 'destroyConversation']
         )->name('ai.conversations.destroy');
 
+        Route::post(
+            '/ai/quick-chat',
+            [AIController::class, 'quickChat']
+        )->name('ai.quick-chat');
+
+        Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio.index');
+        Route::post('/portfolio', [PortfolioController::class, 'store'])->name('portfolio.store');
+        Route::delete('/portfolio/{portfolioItem}', [PortfolioController::class, 'destroy'])->name('portfolio.destroy');
+        Route::post('/portfolio/profile', [PortfolioController::class, 'updateProfile'])->name('portfolio.profile.update');
+
         Route::get(
             '/search',
             [SearchController::class, 'index']
@@ -320,6 +331,11 @@ Route::middleware('auth')->group(function () {
             '/marketplace/services/{service}/order',
             [MarketplaceController::class, 'orderService']
         )->name('marketplace.services.order');
+
+        // Portfolio Routes
+        Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio.index');
+        Route::post('/portfolio', [PortfolioController::class, 'store'])->name('portfolio.store');
+        Route::delete('/portfolio/{portfolioItem}', [PortfolioController::class, 'destroy'])->name('portfolio.destroy');
 
         Route::get(
             '/marketplace/freelancer/profile/edit',

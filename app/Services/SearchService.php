@@ -196,16 +196,30 @@ class SearchService
             ->where(function (Builder $query) {
                 $query->where('account_type', 'freelancer')
                     ->orWhereHas('freelancerProfile')
+                    ->orWhereHas('portfolioItems')
                     ->orWhereHas('services');
             })
             ->where(function (Builder $query) use ($term) {
                 $query->where('name', 'like', "%{$term}%")
                     ->orWhere('username', 'like', "%{$term}%")
                     ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('bio', 'like', "%{$term}%")
                     ->orWhereHas('freelancerProfile', function (Builder $q) use ($term) {
                         $q->where('title', 'like', "%{$term}%")
                             ->orWhere('bio', 'like', "%{$term}%")
+                            ->orWhere('skills', 'like', "%{$term}%")
                             ->orWhere('location', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('portfolioItems', function (Builder $q) use ($term) {
+                        $q->where('title', 'like', "%{$term}%")
+                            ->orWhere('description', 'like', "%{$term}%")
+                            ->orWhere('category', 'like', "%{$term}%")
+                            ->orWhere('skills', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('services', function (Builder $q) use ($term) {
+                        $q->where('title', 'like', "%{$term}%")
+                            ->orWhere('description', 'like', "%{$term}%")
+                            ->orWhere('category', 'like', "%{$term}%");
                     });
             });
     }

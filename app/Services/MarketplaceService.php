@@ -29,9 +29,23 @@ class MarketplaceService
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', $search)
                   ->orWhere('username', 'like', $search)
+                  ->orWhere('bio', 'like', $search)
                   ->orWhereHas('freelancerProfile', function ($pq) use ($search) {
                       $pq->where('title', 'like', $search)
-                        ->orWhere('bio', 'like', $search);
+                        ->orWhere('bio', 'like', $search)
+                        ->orWhere('skills', 'like', $search)
+                        ->orWhere('location', 'like', $search);
+                  })
+                  ->orWhereHas('portfolioItems', function ($portQ) use ($search) {
+                      $portQ->where('title', 'like', $search)
+                        ->orWhere('description', 'like', $search)
+                        ->orWhere('category', 'like', $search)
+                        ->orWhere('skills', 'like', $search);
+                  })
+                  ->orWhereHas('services', function ($servQ) use ($search) {
+                      $servQ->where('title', 'like', $search)
+                        ->orWhere('description', 'like', $search)
+                        ->orWhere('category', 'like', $search);
                   });
             });
         }

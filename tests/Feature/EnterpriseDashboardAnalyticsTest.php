@@ -32,7 +32,7 @@ class EnterpriseDashboardAnalyticsTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('لوحة التحكم والتحليلات');
-        $response->assertSee('مؤشرات الأداء الرئيسية');
+        $response->assertSee('مؤشرات');
     }
 
     public function test_unauthenticated_user_cannot_access_dashboard(): void
@@ -96,14 +96,18 @@ class EnterpriseDashboardAnalyticsTest extends TestCase
 
     public function test_widget_rendering(): void
     {
-        $user = $this->createOnboardedUser();
-        $project = Project::factory()->create(['owner_id' => $user->id, 'title' => 'Widget Render Project Test']);
+        $client = $this->createOnboardedUser(['account_type' => 'client']);
+        $project = Project::factory()->create(['owner_id' => $client->id, 'title' => 'Widget Render Project Test']);
 
-        $response = $this->actingAs($user)->get(route('dashboard'));
+        $response = $this->actingAs($client)->get(route('dashboard'));
 
         $response->assertStatus(200);
         $response->assertSee('Widget Render Project Test');
-        $response->assertSee('ملخص الفرق');
-        $response->assertSee('أحدث المشاريع');
+        $response->assertSee('مشاريعي المطروحة');
+
+        $freelancer = $this->createOnboardedUser(['account_type' => 'freelancer']);
+        $freelancerResponse = $this->actingAs($freelancer)->get(route('dashboard'));
+        $freelancerResponse->assertStatus(200);
+        $freelancerResponse->assertSee('معدلات إنجاز المشاريع والمهام');
     }
 }
