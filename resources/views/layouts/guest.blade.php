@@ -45,11 +45,8 @@
     style="background-color: rgb(var(--color-background));">
     <div class="w-full max-w-md">
       <div class="mb-8 flex justify-center">
-        <a href="/" aria-label="Tasker" class="flex flex-col items-center gap-2">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl font-black text-xl bg-[#2B58A8] text-white shadow-lg">
-            T
-          </div>
-          <span class="text-xl font-bold tracking-tight text-[rgb(var(--color-text-primary))]">Tasker</span>
+        <a href="/" aria-label="Tasker">
+          <x-application-logo size="lg" :showText="true" :stacked="true" />
         </a>
       </div>
 
