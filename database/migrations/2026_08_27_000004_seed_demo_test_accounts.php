@@ -58,6 +58,22 @@ return new class extends Migration
                 'is_verified' => true,
             ]
         );
+
+        // 4. User Account (yousifdahalan2@gmail.com)
+        User::updateOrCreate(
+            ['email' => 'yousifdahalan2@gmail.com'],
+            [
+                'name' => 'يوسف دحلان',
+                'username' => 'yousif_dahalan2',
+                'password' => Hash::make('password'),
+                'account_type' => 'client',
+                'bio' => 'مستخدم ومنشئ مشاريع في منصة Tasker',
+                'email_verified_at' => now(),
+                'onboarded_at' => now(),
+                'is_admin' => true,
+                'is_verified' => true,
+            ]
+        );
     }
 
     /**
