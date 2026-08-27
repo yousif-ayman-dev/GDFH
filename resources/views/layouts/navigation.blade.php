@@ -109,7 +109,7 @@ $navigationSections = [
 ];
 @endphp
 
-<aside class="fixed inset-y-0 end-0 z-40 hidden w-72 lg:flex lg:flex-col bg-white text-slate-800 border-s border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 shadow-sm transition-colors duration-200">
+<aside class="fixed inset-y-0 start-0 z-40 hidden w-72 lg:flex lg:flex-col bg-white text-slate-800 border-e border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 shadow-sm transition-colors duration-200">
   
   {{-- Workspace Branding Header --}}
   <div class="flex h-20 shrink-0 items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700/60">
@@ -140,7 +140,7 @@ $navigationSections = [
         ])>
         
         @if ($isActive)
-        <span class="absolute inset-y-1 end-0 w-1 rounded-s-full bg-amber-500"></span>
+        <span class="absolute inset-y-1 start-0 w-1 rounded-e-full bg-amber-500"></span>
         @endif
 
         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110 {{ $isActive ? 'text-blue-600 dark:text-blue-400' : '' }}">
