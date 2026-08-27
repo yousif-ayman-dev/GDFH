@@ -220,31 +220,33 @@
       
       {{-- Sticky Glass Topbar --}}
       <header class="sticky top-0 z-30 bg-[rgb(var(--color-background)/0.8)] border-b border-[rgb(var(--color-border))] backdrop-blur-md">
-        <div class="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           
-          {{-- Mobile Hamburger Button --}}
-          <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:hidden bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]" @click="mobileNavigation = true" aria-label="فتح القائمة">
-            <svg class="h-5 w-5 text-[rgb(var(--color-text-primary))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14" />
-            </svg>
-          </button>
+          <div class="flex items-center gap-3 min-w-0">
+            {{-- Mobile Hamburger Button --}}
+            <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:hidden bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]" @click="mobileNavigation = true" aria-label="فتح القائمة">
+              <svg class="h-5 w-5 text-[rgb(var(--color-text-primary))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14" />
+              </svg>
+            </button>
 
-          {{-- Command Palette Trigger Button (Ctrl+K) --}}
-          <button type="button" @click="commandPalette = true; $nextTick(() => $refs.commandInput?.focus())"
-            class="hidden min-h-10 w-full max-w-md items-center gap-3 rounded-xl px-3.5 text-sm sm:flex bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-secondary))] hover:border-[rgb(var(--color-copper)/0.5)] transition shadow-sm" title="البحث الشامل والأوامر السريعة (Ctrl+K)">
-            <svg class="h-4 w-4 shrink-0 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="6" />
-              <path stroke-linecap="round" d="m16 16 4 4" />
-            </svg>
+            {{-- Command Palette Trigger Button (Ctrl+K) --}}
+            <button type="button" @click="commandPalette = true; $nextTick(() => $refs.commandInput?.focus())"
+              class="hidden min-h-10 w-full max-w-md items-center gap-3 rounded-xl px-3.5 text-sm sm:flex bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-secondary))] hover:border-[rgb(var(--color-copper)/0.5)] transition shadow-sm" title="البحث الشامل والأوامر السريعة (Ctrl+K)">
+              <svg class="h-4 w-4 shrink-0 text-[rgb(var(--color-copper))]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="6" />
+                <path stroke-linecap="round" d="m16 16 4 4" />
+              </svg>
 
-            <span class="truncate">ابحث في Tasker أو نفّذ أمراً...</span>
+              <span class="truncate">ابحث في Tasker أو نفّذ أمراً...</span>
 
-            <span class="ms-auto rounded-md px-2 py-0.5 text-[11px] font-mono font-semibold bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))] border border-[rgb(var(--color-border))]">
-              Ctrl K
-            </span>
-          </button>
+              <span class="ms-auto rounded-md px-2 py-0.5 text-[11px] font-mono font-semibold bg-[rgb(var(--color-surface-soft))] text-[rgb(var(--color-text-secondary))] border border-[rgb(var(--color-border))]">
+                Ctrl K
+              </span>
+            </button>
+          </div>
 
-          <div class="ms-auto flex items-center gap-2.5">
+          <div class="flex items-center gap-2.5 shrink-0">
 
             {{-- Quick Create Dropdown Button --}}
             <div class="relative">
