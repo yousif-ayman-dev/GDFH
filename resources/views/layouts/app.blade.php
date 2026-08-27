@@ -164,7 +164,7 @@
     <aside x-cloak x-show="mobileNavigation" x-transition:enter="transition duration-200 ease-out"
       x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
       x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0"
-      x-transition:leave-end="translate-x-full" class="fixed inset-y-0 start-0 z-50 w-[min(88vw,340px)] lg:hidden bg-white text-slate-800 border-e border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800" @keydown.escape.window="mobileNavigation = false">
+      x-transition:leave-end="translate-x-full" class="fixed inset-y-0 left-0 z-50 w-[min(88vw,340px)] lg:hidden bg-white text-slate-800 border-r border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800" @keydown.escape.window="mobileNavigation = false">
       <div class="flex h-20 items-center justify-between px-5">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
           <x-application-logo size="md" />
@@ -216,7 +216,7 @@
     </aside>
 
     {{-- Main Content Area --}}
-    <div class="min-h-screen lg:ps-72">
+    <div class="min-h-screen lg:pl-72">
       
       {{-- Sticky Glass Topbar --}}
       <header class="sticky top-0 z-30 bg-[rgb(var(--color-background)/0.8)] border-b border-[rgb(var(--color-border))] backdrop-blur-md">
