@@ -74,6 +74,26 @@ class AdminController extends Controller
 
         $user->update(['is_admin' => ! $user->is_admin]);
 
+        // Send notification to user on role promotion/demotion
+        try {
+            $notificationService = app(\App\Services\NotificationService::class);
+            if ($user->is_admin) {
+                $notificationService->sendNotification(
+                    $user,
+                    'تمت ترقية حسابك إلى مدير منصة 👑',
+                    'تهانينا! قام المدير (' . $request->user()->name . ') بمنح حسابك صلاحيات الإدارة الشاملة على منصة Tasker.',
+                    route('admin.dashboard')
+                );
+            } else {
+                $notificationService->sendNotification(
+                    $user,
+                    'تحديث صلاحيات الحساب ℹ️',
+                    'تم تعديل صلاحيات حسابك على منصة Tasker بواسطة الإدارة.',
+                    route('dashboard')
+                );
+            }
+        } catch (\Throwable $e) {}
+
         $message = $user->is_admin
             ? "تم منح صلاحية المدير لـ {$user->name} بنجاح."
             : "تم سحب صلاحية المدير من {$user->name} بنجاح.";

@@ -45,6 +45,22 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Send real-time notification to all platform admins
+        try {
+            $admins = User::where('is_admin', true)->get();
+            $notificationService = app(\App\Services\NotificationService::class);
+            $accountTypeText = $user->isClient() ? 'صاحب عمل' : 'مستقل';
+
+            foreach ($admins as $admin) {
+                $notificationService->sendNotification(
+                    $admin,
+                    'مستخدم جديد انضم للمنصة 🚀',
+                    'سجل المستخدم الجديد "' . $user->name . '" (' . $user->email . ') كـ ' . $accountTypeText . '.',
+                    route('admin.users', ['search' => $user->email])
+                );
+            }
+        } catch (\Throwable $e) {}
+
         Auth::login($user);
 
         $request->session()->regenerate();
