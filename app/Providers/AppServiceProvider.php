@@ -37,5 +37,17 @@ class AppServiceProvider extends ServiceProvider
         ) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        // Fail-safe DB connection check
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            if (\Illuminate\Support\Facades::Schema::hasTable('migrations')) {
+                // DB is accessible
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Primary DB connection failed: ' . $e->getMessage() . '. Falling back to SQLite.');
+            config(['database.default' => 'sqlite']);
+            \Illuminate\Support\Facades\DB::purge();
+        }
     }
 }
