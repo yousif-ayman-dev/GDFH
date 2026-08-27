@@ -17,6 +17,12 @@ class GoogleController extends Controller
      */
     public function redirectToGoogle(): RedirectResponse
     {
+        if (empty(config('services.google.client_id')) || empty(config('services.google.client_secret'))) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'خدمة Google OAuth تنقصها مفاتيح GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET في متغيرات السيرفر (Railway Variables).',
+            ]);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
