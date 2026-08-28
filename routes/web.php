@@ -527,3 +527,12 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::post('/ai/suggest-members', [AIFeatureController::class, 'suggestMembers'])->name('ai.suggest-members');
     Route::get('/ai/recommended-projects', [AIFeatureController::class, 'recommendedProjects'])->name('ai.recommended-projects');
 });
+
+// ─── Storage Fallback Route for Uploaded Media ────────────────────────────
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath);
+})->where('path', '.*')->name('storage.fallback');
