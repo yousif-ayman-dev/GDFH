@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-bold text-gray-900">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
             تحديث كلمة المرور
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
             تأكد من استخدام كلمة مرور طويلة وعشوائية للحفاظ على أمان حسابك.
         </p>
     </header>
@@ -14,20 +14,20 @@
         @method('put')
 
         <div>
-            <x-input-label for="update_password_current_password" value="كلمة المرور الحالية" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+            <x-input-label for="update_password_current_password" value="كلمة المرور الحالية" class="dark:text-gray-200" />
+            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" autocomplete="current-password" />
             <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
         </div>
 
         <div>
-            <x-input-label for="update_password_password" value="كلمة المرور الجديدة" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-input-label for="update_password_password" value="كلمة المرور الجديدة" class="dark:text-gray-200" />
+            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
         </div>
 
         <div>
-            <x-input-label for="update_password_password_confirmation" value="تأكيد كلمة المرور الجديدة" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-input-label for="update_password_password_confirmation" value="تأكيد كلمة المرور الجديدة" class="dark:text-gray-200" />
+            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
         </div>
 
@@ -40,7 +40,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-green-600 font-semibold"
+                    class="text-sm text-green-600 dark:text-green-400 font-semibold"
                 >تم تحديث كلمة المرور بنجاح.</p>
             @endif
         </div>

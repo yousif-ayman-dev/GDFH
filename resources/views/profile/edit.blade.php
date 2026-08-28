@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-xl text-[rgb(var(--color-text-primary))] leading-tight">
-            {{ __('Profile') }}
+            إعدادات الملف الشخصي
         </h2>
     </x-slot>
 
