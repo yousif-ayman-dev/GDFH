@@ -111,11 +111,27 @@
 
   <title>
     @isset($title)
-    {{ $title }} — Tasker Enterprise
+    {{ $title }} — منصة تاسكر Enterprise
     @else
-    Tasker Enterprise SaaS
+    منصة تاسكر Enterprise | المنصة المتكاملة لإدارة المشاريع والخدمات المصغرة
     @endisset
   </title>
+
+  <!-- SEO & Social Open Graph Meta Tags -->
+  <meta name="description" content="منصة تاسكر (Tasker Enterprise) - المنصة العربية الرقمية الفائقة لإدارة المشاريع، فرق العمل، والخدمات المصغرة وساعات العمل الذكية.">
+  
+  <!-- Open Graph / Facebook / WhatsApp / Telegram -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://gdfh.online">
+  <meta property="og:title" content="منصة تاسكر Enterprise | المنصة المتكاملة لإدارة المشاريع والخدمات المصغرة">
+  <meta property="og:description" content="منصة تاسكر (Tasker Enterprise) - المنصة العربية الرقمية الفائقة لإدارة المشاريع، فرق العمل، والخدمات المصغرة وساعات العمل الذكية.">
+  <meta property="og:image" content="https://gdfh.online/favicon.svg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://gdfh.online">
+  <meta property="twitter:title" content="منصة تاسكر Enterprise | المنصة المتكاملة لإدارة المشاريع والخدمات المصغرة">
+  <meta property="twitter:description" content="منصة تاسكر (Tasker Enterprise) - المنصة العربية الرقمية الفائقة لإدارة المشاريع، فرق العمل، والخدمات المصغرة وساعات العمل الذكية.">
 
   <script>
   (() => {

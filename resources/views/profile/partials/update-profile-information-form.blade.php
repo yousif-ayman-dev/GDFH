@@ -1,11 +1,11 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+        <h2 class="text-lg font-bold text-gray-900">
+            المعلومات الشخصية
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            قم بتحديث معلومات حسابك الشخصي وعنوان البريد الإلكتروني.
         </p>
     </header>
 
@@ -19,7 +19,7 @@
 
         {{-- Avatar Image Upload --}}
         <div>
-            <x-input-label for="avatar" value="الصورة الشخصية (Profile Picture)" />
+            <x-input-label for="avatar" value="الصورة الشخصية" />
             <div class="mt-3 flex items-center gap-4">
                 @if ($user->avatar_url)
                     <div class="relative shrink-0">
@@ -33,7 +33,7 @@
                 <div class="flex-1 min-w-0">
                     <input type="file" name="avatar" id="avatar" accept="image/jpeg,image/png,image/jpg,image/webp" class="block w-full text-xs text-gray-500 file:me-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
                     <div class="mt-1 flex items-center justify-between gap-2">
-                        <p class="text-[11px] text-gray-500">الصيغ المسموحة: PNG, JPG, WEBP (حجم أقصى 2MB)</p>
+                        <p class="text-[11px] text-gray-500">الصيغ المسموحة: PNG, JPG, WEBP (حجم أقصى 10MB)</p>
                         @if ($user->avatar_url)
                             <button type="button" onclick="document.getElementById('delete-avatar-form').submit();" class="text-[11px] text-red-600 hover:text-red-800 font-semibold underline">
                                 حذف الصورة الحالية
@@ -46,29 +46,29 @@
         </div>
 
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="name" value="الاسم الكامل" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label for="email" value="البريد الإلكتروني" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
                     <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
+                        عنوان بريدك الإلكتروني غير مفعّل.
 
                         <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
+                            انقر هنا لإعادة إرسال رابط التفعيل.
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
                         <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                            تم إرسال رابط تفعيل جديد إلى عنوان بريدك الإلكتروني.
                         </p>
                     @endif
                 </div>
@@ -76,7 +76,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button>حفظ التغييرات</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -84,8 +84,8 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
+                    class="text-sm text-green-600 font-semibold"
+                >تم الحفظ بنجاح.</p>
             @endif
     </form>
 
