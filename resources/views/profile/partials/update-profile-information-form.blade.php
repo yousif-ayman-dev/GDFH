@@ -22,15 +22,24 @@
             <x-input-label for="avatar" value="الصورة الشخصية (Profile Picture)" />
             <div class="mt-3 flex items-center gap-4">
                 @if ($user->avatar_url)
-                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-14 w-14 shrink-0 rounded-full object-cover border-2 border-indigo-500 shadow-md">
+                    <div class="relative shrink-0">
+                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-16 w-16 rounded-full object-cover border-2 border-indigo-500 shadow-md">
+                    </div>
                 @else
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold bg-indigo-100 text-indigo-700 border-2 border-indigo-300 shadow-sm overflow-hidden select-none whitespace-nowrap leading-none">
+                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold bg-indigo-100 text-indigo-700 border-2 border-indigo-300 shadow-sm overflow-hidden select-none whitespace-nowrap leading-none">
                         {{ mb_substr(trim($user->name), 0, 1) }}
                     </div>
                 @endif
                 <div class="flex-1 min-w-0">
                     <input type="file" name="avatar" id="avatar" accept="image/jpeg,image/png,image/jpg,image/webp" class="block w-full text-xs text-gray-500 file:me-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
-                    <p class="mt-1 text-[11px] text-gray-500">الصيغ المسموحة: PNG, JPG, WEBP (حجم أقصى 2MB)</p>
+                    <div class="mt-1 flex items-center justify-between gap-2">
+                        <p class="text-[11px] text-gray-500">الصيغ المسموحة: PNG, JPG, WEBP (حجم أقصى 2MB)</p>
+                        @if ($user->avatar_url)
+                            <button type="button" onclick="document.getElementById('delete-avatar-form').submit();" class="text-[11px] text-red-600 hover:text-red-800 font-semibold underline">
+                                حذف الصورة الحالية
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
@@ -78,6 +87,10 @@
                     class="text-sm text-gray-600"
                 >{{ __('Saved.') }}</p>
             @endif
-        </div>
+    </form>
+
+    <form id="delete-avatar-form" method="post" action="{{ route('profile.avatar.destroy') }}" class="hidden">
+        @csrf
+        @method('delete')
     </form>
 </section>
