@@ -77,6 +77,10 @@ class User extends Authenticatable
             return $this->avatar_path;
         }
 
+        if (str_starts_with($this->avatar_path, 'uploads/')) {
+            return asset($this->avatar_path);
+        }
+
         return asset('storage/' . ltrim($this->avatar_path, '/'));
     }
 

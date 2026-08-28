@@ -33,12 +33,24 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             if ($file && $file->isValid()) {
-                if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
-                    Storage::disk('public')->delete($user->avatar_path);
+                if ($user->avatar_path) {
+                    $oldPath = public_path($user->avatar_path);
+                    if (file_exists($oldPath) && is_file($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                    if (Storage::disk('public')->exists($user->avatar_path)) {
+                        Storage::disk('public')->delete($user->avatar_path);
+                    }
                 }
 
-                $path = $file->store('avatars', 'public');
-                $user->avatar_path = $path;
+                $destinationPath = public_path('uploads/avatars');
+                if (! file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+
+                $filename = time() . '_' . \Illuminate\Support\Str::random(12) . '.' . strtolower($file->getClientOriginalExtension());
+                $file->move($destinationPath, $filename);
+                $user->avatar_path = 'uploads/avatars/' . $filename;
             }
         }
 
@@ -64,8 +76,14 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
-            Storage::disk('public')->delete($user->avatar_path);
+        if ($user->avatar_path) {
+            $oldPath = public_path($user->avatar_path);
+            if (file_exists($oldPath) && is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+            if (Storage::disk('public')->exists($user->avatar_path)) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
         }
 
         $user->avatar_path = null;

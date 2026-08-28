@@ -23,7 +23,7 @@
             <div class="mt-3 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 @if ($user->avatar_url)
                     <div class="relative shrink-0">
-                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-16 w-16 rounded-full object-cover border-2 border-indigo-500 shadow-md">
+                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-16 w-16 rounded-full object-cover border-2 border-indigo-500 shadow-md" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&color=4F46E5&background=EEF2FF&size=128';">
                     </div>
                 @else
                     <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-2 border-indigo-300 dark:border-indigo-700 shadow-sm overflow-hidden select-none whitespace-nowrap leading-none">
