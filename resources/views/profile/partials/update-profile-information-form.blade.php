@@ -20,12 +20,12 @@
         {{-- Avatar Image Upload --}}
         <div>
             <x-input-label for="avatar" value="الصورة الشخصية (Profile Picture)" />
-            <div class="mt-3 flex items-center gap-4 dir-rtl">
+            <div class="mt-3 flex items-center gap-4">
                 @if ($user->avatar_url)
-                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-16 w-16 shrink-0 rounded-full object-cover border-2 border-indigo-500 shadow-md">
+                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-14 w-14 shrink-0 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                 @else
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold bg-indigo-50 text-indigo-600 border-2 border-indigo-200 shadow-sm">
-                        {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold bg-indigo-100 text-indigo-700 border-2 border-indigo-300 shadow-sm overflow-hidden select-none whitespace-nowrap leading-none">
+                        {{ mb_substr(trim($user->name), 0, 1) }}
                     </div>
                 @endif
                 <div class="flex-1 min-w-0">
