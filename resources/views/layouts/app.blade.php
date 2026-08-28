@@ -194,37 +194,37 @@
       </div>
 
       <nav class="px-4 py-3 space-y-1">
-        <a href="{{ route('dashboard') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('dashboard') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('dashboard') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('dashboard') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           الرئيسية
         </a>
-        <a href="{{ route('projects.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('projects.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('projects.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('projects.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           المشاريع
         </a>
-        <a href="{{ route('teams.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('teams.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('teams.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('teams.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           الفرق
         </a>
-        <a href="{{ route('tasks.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('tasks.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('tasks.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('tasks.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           المهام
         </a>
-        <a href="{{ route('kanban.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('kanban.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('kanban.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('kanban.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           لوحة كانبان
         </a>
-        <a href="{{ route('gantt.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('gantt.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('gantt.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('gantt.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           مخطط غانت
         </a>
-        <a href="{{ route('ai.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('ai.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('ai.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('ai.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           المساعد الذكي
         </a>
-        <a href="{{ route('reports.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('reports.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('reports.index') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('reports.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           التقارير
         </a>
-        <a href="{{ route('profile.edit') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition" style="{{ request()->routeIs('profile.*') ? 'background-color: rgba(43, 88, 168, 0.15); color: #1E3A8A; font-weight: 800;' : 'color: #0F172A;' }}">
+        <a href="{{ route('profile.edit') }}" class="flex min-h-11 items-center rounded-xl px-4 text-sm font-bold transition {{ request()->routeIs('profile.*') ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-extrabold' : 'text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70' }}">
           الحساب والإعدادات
         </a>
 
         <form method="POST" action="{{ route('logout') }}" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/60">
           @csrf
-          <button type="submit" class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition">
+          <button type="submit" class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 hover:bg-red-100 dark:hover:bg-red-900/50 transition">
             <span>تسجيل الخروج</span>
           </button>
         </form>
