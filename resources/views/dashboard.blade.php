@@ -456,15 +456,16 @@
           {{ $charts['completed_tasks'] }}, 
           {{ $charts['in_progress_tasks'] }}, 
           {{ $charts['tasks_due_today'] }}, 
-          {{ $charts['overdue_tasks'] }}
+          {{ $charts['overdue_tasks'] }},
+          {{ $charts['pending_tasks'] }}
         ],
         chart: {
           type: 'donut',
           height: 220,
           fontFamily: 'Tajawal, sans-serif'
         },
-        labels: ['مكتملة', 'قيد التنفيذ', 'تستحق اليوم', 'متأخرة'],
-        colors: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
+        labels: ['مكتملة', 'قيد التنفيذ', 'تستحق اليوم', 'متأخرة', 'قيد الانتظار'],
+        colors: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#6B7280'],
         legend: {
           position: 'bottom',
           fontSize: '11px',
