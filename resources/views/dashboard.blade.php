@@ -398,17 +398,16 @@
             $totalTasksInDonut = $charts['completed_tasks'] + $charts['in_progress_tasks'] + $charts['tasks_due_today'] + $charts['overdue_tasks'] + $charts['pending_tasks'];
           @endphp
 
-          @if($totalTasksInDonut > 0)
-            <div id="taskDistributionChart" class="w-full h-56 my-2"></div>
-          @else
-            <div class="flex flex-col items-center justify-center h-56 my-2 text-center p-4 rounded-xl bg-[rgb(var(--color-surface-soft))] border border-[rgb(var(--color-border))]">
-              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] mb-2">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-              </div>
-              <h4 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">لا توجد مهام مسندة بعد</h4>
-              <p class="text-[11px] text-[rgb(var(--color-text-secondary))] mt-1">عند إنشاء مهام جديدة، ستظهر نسب توزيع الحالات هنا مباشرة.</p>
-            </div>
-          @endif
+          <div id="taskDistributionChart" class="w-full h-56 my-2"></div>
+
+          {{-- Color Guide Legend --}}
+          <div class="mt-2 pt-2 border-t border-[rgb(var(--color-border)/0.6)] flex flex-wrap items-center justify-center gap-2.5 text-[10px] text-[rgb(var(--color-text-secondary))] font-medium">
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#10B981]"></span>مكتملة</span>
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#3B82F6]"></span>قيد التنفيذ</span>
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#F59E0B]"></span>تستحق اليوم</span>
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#EF4444]"></span>متأخرة</span>
+            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#9CA3AF]"></span>لا توجد مهام (رمادي)</span>
+          </div>
         </div>
 
         <div class="pt-3 border-t border-[rgb(var(--color-border))] flex items-center justify-between text-xs">
@@ -464,7 +463,7 @@
         velocityChart.render();
       }
 
-      // 2. Donut Chart: Task Priority & Distribution (100% Real DB Data)
+      // 2. Donut Chart: Task Priority & Distribution
       @if($totalTasksInDonut > 0)
       const taskDistributionOptions = {
         series: [
@@ -488,13 +487,37 @@
         },
         dataLabels: { enabled: false }
       };
+      @else
+      const taskDistributionOptions = {
+        series: [1],
+        chart: {
+          type: 'donut',
+          height: 220,
+          fontFamily: 'Tajawal, sans-serif'
+        },
+        labels: ['لا توجد مهام حالياً (0)'],
+        colors: ['#9CA3AF'],
+        legend: {
+          position: 'bottom',
+          fontSize: '11px',
+          labels: { colors: '#656F7C' }
+        },
+        tooltip: {
+          y: {
+            formatter: function () {
+              return 'لا توجد مهام حقيقية مسجلة بعد';
+            }
+          }
+        },
+        dataLabels: { enabled: false }
+      };
+      @endif
 
       const taskDistributionElement = document.querySelector("#taskDistributionChart");
       if (taskDistributionElement) {
         const taskDistributionChart = new ApexCharts(taskDistributionElement, taskDistributionOptions);
         taskDistributionChart.render();
       }
-      @endif
     });
   </script>
   @endif
