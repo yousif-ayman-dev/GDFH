@@ -409,17 +409,17 @@
   </div>
 
   @if(!Auth::user()->isClient())
-  {{-- ApexCharts Initialization Script for Freelancers --}}
+  {{-- ApexCharts Initialization Script --}}
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // 1. Line / Area Chart: Velocity & Progress
+      // 1. Line / Area Chart: Velocity & Progress (100% Real DB Data)
       const velocityOptions = {
         series: [{
           name: 'المشاريع المكتملة',
-          data: [2, 5, 8, 12, 18, 24, {{ $kpis['completed_projects'] }}]
+          data: @json($charts['monthly_completed_projects'])
         }, {
           name: 'المهام المسندة',
-          data: [5, 12, 19, 25, 33, 42, {{ $kpis['total_tasks'] }}]
+          data: @json($charts['monthly_assigned_tasks'])
         }],
         chart: {
           type: 'area',
@@ -435,7 +435,7 @@
           gradient: { opacityFrom: 0.45, opacityTo: 0.05 }
         },
         xaxis: {
-          categories: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'الآن'],
+          categories: @json($charts['months']),
           labels: { style: { colors: '#656F7C', fontSize: '11px' } }
         },
         yaxis: {
@@ -450,20 +450,21 @@
         velocityChart.render();
       }
 
-      // 2. Donut Chart: Task Priority & Distribution
+      // 2. Donut Chart: Task Priority & Distribution (100% Real DB Data)
       const taskDistributionOptions = {
         series: [
-          {{ $kpis['completed_tasks'] ?: 1 }}, 
-          {{ $kpis['tasks_due_today'] ?: 1 }}, 
-          {{ $kpis['overdue_tasks'] ?: 1 }}
+          {{ $charts['completed_tasks'] }}, 
+          {{ $charts['in_progress_tasks'] }}, 
+          {{ $charts['tasks_due_today'] }}, 
+          {{ $charts['overdue_tasks'] }}
         ],
         chart: {
           type: 'donut',
           height: 220,
           fontFamily: 'Tajawal, sans-serif'
         },
-        labels: ['مكتملة', 'تستحق اليوم', 'متأخرة'],
-        colors: ['#10B981', '#F59E0B', '#EF4444'],
+        labels: ['مكتملة', 'قيد التنفيذ', 'تستحق اليوم', 'متأخرة'],
+        colors: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
         legend: {
           position: 'bottom',
           fontSize: '11px',

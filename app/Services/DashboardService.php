@@ -237,6 +237,33 @@ class DashboardService
             ->limit(5)
             ->get();
 
+        // 6. Dynamic Real DB Analytics for Charts (Last 6 Months up to Today)
+        $chartMonths = [];
+        $monthlyCompletedProjects = [];
+        $monthlyAssignedTasks = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $carbonDate = now()->subMonths($i);
+            $monthName = $carbonDate->translatedFormat('F');
+            $endOfMonth = $carbonDate->copy()->endOfMonth();
+
+            $chartMonths[] = $monthName;
+
+            $cProj = (clone $projectsQuery)
+                ->where('status', 'completed')
+                ->where('created_at', '<=', $endOfMonth)
+                ->count();
+
+            $tTask = (clone $tasksQuery)
+                ->where('created_at', '<=', $endOfMonth)
+                ->count();
+
+            $monthlyCompletedProjects[] = $cProj;
+            $monthlyAssignedTasks[] = $tTask;
+        }
+
+        $inProgressTasks = (clone $tasksQuery)->whereIn('status', ['in_progress', 'doing', 'review'])->count();
+
         return [
             'stats' => [
                 'active_projects' => $activeProjectsCount,
@@ -263,6 +290,15 @@ class DashboardService
                 'client_proposals_count' => $clientProposalsCount,
                 'client_contracts_count' => $clientContractsCount,
                 'client_total_budget' => $clientTotalBudget,
+            ],
+            'charts' => [
+                'months' => $chartMonths,
+                'monthly_completed_projects' => $monthlyCompletedProjects,
+                'monthly_assigned_tasks' => $monthlyAssignedTasks,
+                'completed_tasks' => $completedTasks,
+                'in_progress_tasks' => $inProgressTasks,
+                'tasks_due_today' => $tasksDueToday,
+                'overdue_tasks' => $overdueTasksCount,
             ],
             'analytics' => [
                 'project_completion_rate' => $projectCompletionRate,
