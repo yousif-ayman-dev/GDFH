@@ -402,8 +402,8 @@
         </div>
 
         <div class="pt-3 border-t border-[rgb(var(--color-border))] flex items-center justify-between text-xs">
-          <span class="text-[rgb(var(--color-text-secondary))]">معدل استجابة النظام:</span>
-          <span class="font-bold text-emerald-500">ممتاز (99.8%)</span>
+          <span class="text-[rgb(var(--color-text-secondary))]">معدل إنجاز المهام العام:</span>
+          <span class="font-bold text-emerald-500">{{ $analytics['task_completion_rate'] }}%</span>
         </div>
       </div>
 
