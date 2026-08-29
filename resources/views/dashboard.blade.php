@@ -394,7 +394,21 @@
             <span class="gdfh-badge gdfh-badge-mineral text-[10px]">مباشر</span>
           </div>
 
-          <div id="taskDistributionChart" class="w-full h-56 my-2"></div>
+          @php
+            $totalTasksInDonut = $charts['completed_tasks'] + $charts['in_progress_tasks'] + $charts['tasks_due_today'] + $charts['overdue_tasks'] + $charts['pending_tasks'];
+          @endphp
+
+          @if($totalTasksInDonut > 0)
+            <div id="taskDistributionChart" class="w-full h-56 my-2"></div>
+          @else
+            <div class="flex flex-col items-center justify-center h-56 my-2 text-center p-4 rounded-xl bg-[rgb(var(--color-surface-soft))] border border-[rgb(var(--color-border))]">
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgb(var(--color-copper-soft))] text-[rgb(var(--color-copper))] mb-2">
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              </div>
+              <h4 class="text-xs font-bold text-[rgb(var(--color-text-primary))]">لا توجد مهام مسندة بعد</h4>
+              <p class="text-[11px] text-[rgb(var(--color-text-secondary))] mt-1">عند إنشاء مهام جديدة، ستظهر نسب توزيع الحالات هنا مباشرة.</p>
+            </div>
+          @endif
         </div>
 
         <div class="pt-3 border-t border-[rgb(var(--color-border))] flex items-center justify-between text-xs">
@@ -451,6 +465,7 @@
       }
 
       // 2. Donut Chart: Task Priority & Distribution (100% Real DB Data)
+      @if($totalTasksInDonut > 0)
       const taskDistributionOptions = {
         series: [
           {{ $charts['completed_tasks'] }}, 
@@ -479,6 +494,7 @@
         const taskDistributionChart = new ApexCharts(taskDistributionElement, taskDistributionOptions);
         taskDistributionChart.render();
       }
+      @endif
     });
   </script>
   @endif
