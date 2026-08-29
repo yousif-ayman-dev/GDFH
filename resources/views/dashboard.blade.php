@@ -399,15 +399,6 @@
           @endphp
 
           <div id="taskDistributionChart" class="w-full h-56 my-2"></div>
-
-          {{-- Color Guide Legend --}}
-          <div class="mt-2 pt-2 border-t border-[rgb(var(--color-border)/0.6)] flex flex-wrap items-center justify-center gap-2.5 text-[10px] text-[rgb(var(--color-text-secondary))] font-medium">
-            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#10B981]"></span>مكتملة</span>
-            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#3B82F6]"></span>قيد التنفيذ</span>
-            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#F59E0B]"></span>تستحق اليوم</span>
-            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#EF4444]"></span>متأخرة</span>
-            <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-[#9CA3AF]"></span>لا توجد مهام (رمادي)</span>
-          </div>
         </div>
 
         <div class="pt-3 border-t border-[rgb(var(--color-border))] flex items-center justify-between text-xs">
