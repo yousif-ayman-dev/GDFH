@@ -35,6 +35,11 @@ class Project extends Model
         });
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('id', $value)->orWhere('slug', $value)->firstOrFail();
+    }
+
     protected $fillable = [
         'team_id',
         'owner_id',

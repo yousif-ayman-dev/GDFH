@@ -211,7 +211,7 @@
           @foreach($recents['projects'] as $project)
           <div class="p-3.5 rounded-xl bg-[rgb(var(--color-surface-soft))] border border-[rgb(var(--color-border))] flex items-center justify-between">
             <div>
-              <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))]">
+              <a href="{{ route('projects.show', $project) }}" class="text-xs font-bold text-[rgb(var(--color-text-primary))] hover:text-[rgb(var(--color-copper))]">
                 {{ $project->title }}
               </a>
               <div class="flex items-center gap-2 mt-1 text-[11px] text-[rgb(var(--color-text-secondary))]">
@@ -220,7 +220,7 @@
                 <span>الميزانية: ${{ number_format($project->budget, 2) }}</span>
               </div>
             </div>
-            <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" class="gdfh-btn gdfh-btn-secondary text-[11px]">التفاصيل</a>
+            <a href="{{ route('projects.show', $project) }}" class="gdfh-btn gdfh-btn-secondary text-[11px]">التفاصيل</a>
           </div>
           @endforeach
         </div>
