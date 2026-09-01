@@ -1189,3 +1189,59 @@ html[dir="ltr"] body {
     direction: ltr;
     text-align: left;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Modern Custom Styled Datepicker Inputs
+|--------------------------------------------------------------------------
+*/
+
+input[type="date"] {
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(var(--color-text-primary));
+    background-color: rgb(var(--color-surface-soft));
+    border: 1px solid rgb(var(--color-border));
+    border-radius: var(--radius-md);
+    padding: 0.65rem 1rem;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] input[type="date"],
+.dark input[type="date"] {
+    color-scheme: dark;
+    background-color: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #f8fafc;
+}
+
+input[type="date"]:hover {
+    border-color: rgb(var(--color-copper));
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: rgb(var(--color-copper));
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
+}
+
+/* Custom Calendar Picker Icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px;
+    filter: invert(0.6) sepia(1) saturate(5) hue-rotate(5deg);
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    transform: scale(1.15);
+    filter: invert(0.75) sepia(1) saturate(7) hue-rotate(10deg);
+}
+

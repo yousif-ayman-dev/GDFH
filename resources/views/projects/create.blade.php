@@ -547,5 +547,46 @@
       btnText.textContent = 'تحليل الوصف بالذكاء الاصطناعي 🤖';
     }
   }
+
+  // Dynamic Real-time Date Enforcement
+  document.addEventListener('DOMContentLoaded', function () {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const startDateInput = document.getElementById('start_date');
+    const deadlineInput = document.getElementById('deadline') || document.getElementById('due_date');
+
+    if (startDateInput) {
+      startDateInput.min = todayStr;
+      if (startDateInput.value && startDateInput.value < todayStr) {
+        startDateInput.value = todayStr;
+      }
+
+      startDateInput.addEventListener('change', function () {
+        if (this.value && this.value < todayStr) {
+          alert('تاريخ بداية المشروع لا يمكن أن يكون قبل تاريخ اليوم!');
+          this.value = todayStr;
+        }
+
+        if (deadlineInput) {
+          deadlineInput.min = this.value || todayStr;
+          if (deadlineInput.value && deadlineInput.value < this.value) {
+            deadlineInput.value = this.value;
+          }
+        }
+      });
+    }
+
+    if (deadlineInput) {
+      const initialMin = (startDateInput && startDateInput.value) ? startDateInput.value : todayStr;
+      deadlineInput.min = initialMin;
+
+      deadlineInput.addEventListener('change', function () {
+        const currentMin = (startDateInput && startDateInput.value) ? startDateInput.value : todayStr;
+        if (this.value && this.value < currentMin) {
+          alert('تاريخ التسليم يجب أن يكون بنفس يوم البداية أو بعده!');
+          this.value = currentMin;
+        }
+      });
+    }
+  });
   </script>
 </x-app-layout>
