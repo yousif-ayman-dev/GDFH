@@ -51,8 +51,8 @@ class StoreTaskRequest extends FormRequest
                     $fail('The selected parent task must belong to the same project.');
                 }
             }],
-            'start_at' => ['nullable', 'date'],
-            'due_at' => ['nullable', 'date', 'after_or_equal:start_at'],
+            'start_at' => ['nullable', 'date', 'after_or_equal:today'],
+            'due_at' => ['nullable', 'date', 'after_or_equal:today', 'after_or_equal:start_at'],
             'completed_at' => ['nullable', 'date'],
             'assigned_to' => ['nullable', 'integer', 'exists:users,id', function (string $attribute, mixed $value, \Closure $fail): void {
                 $project = $this->route('project');

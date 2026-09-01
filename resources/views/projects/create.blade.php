@@ -443,7 +443,7 @@
                   تاريخ البداية
                 </label>
 
-                <input id="start_date" name="start_date" type="date" value="{{ old('start_date') }}" class="gdfh-input">
+                <input id="start_date" name="start_date" type="date" min="{{ date('Y-m-d') }}" value="{{ old('start_date') }}" class="gdfh-input">
 
                 @error('start_date')
                 <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">
@@ -457,7 +457,7 @@
                   الموعد النهائي
                 </label>
 
-                <input id="deadline" name="deadline" type="date" value="{{ old('deadline') }}" class="gdfh-input">
+                <input id="deadline" name="deadline" type="date" min="{{ date('Y-m-d') }}" value="{{ old('deadline') }}" class="gdfh-input">
 
                 @error('deadline')
                 <p class="mt-2 text-xs font-medium" style="color: rgb(var(--color-error));">

@@ -26,8 +26,16 @@ class UpdateProjectRequest extends FormRequest
             'budget_max' => ['sometimes', 'nullable', 'numeric', 'min:0', 'gte:budget_min'],
             'currency' => ['sometimes', 'nullable', 'string', 'size:3'],
             'start_date' => ['sometimes', 'nullable', 'date'],
-            'due_date' => ['sometimes', 'nullable', 'date'],
+            'due_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
             'deadline' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'due_date.after_or_equal' => 'تاريخ تسليم المشروع لا يمكن أن يكون قبل تاريخ البداية.',
+            'deadline.after_or_equal' => 'الموعد النهائي للمشروع لا يمكن أن يكون قبل تاريخ البداية.',
         ];
     }
 }
