@@ -51,4 +51,49 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertRedirect('/');
     }
+
+    public function test_login_does_not_redirect_to_polling_route_if_intended(): void
+    {
+        $user = User::factory()->create(['onboarded_at' => now()]);
+
+        $this->withSession(['url.intended' => route('notifications.poll')]);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_login_preserves_legitimate_intended_url(): void
+    {
+        $user = User::factory()->create(['onboarded_at' => now()]);
+
+        $this->withSession(['url.intended' => '/settings']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect('/settings');
+    }
+
+    public function test_login_preserves_legitimate_urls_containing_poll_or_json_substrings(): void
+    {
+        $user = User::factory()->create(['onboarded_at' => now()]);
+
+        $this->withSession(['url.intended' => '/projects?filter=poll-json']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect('/projects?filter=poll-json');
+    }
 }

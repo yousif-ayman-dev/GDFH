@@ -28,6 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if ($intended = $request->session()->get('url.intended')) {
+            if (str_contains($intended, '/notifications/poll')) {
+                $request->session()->forget('url.intended');
+            }
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

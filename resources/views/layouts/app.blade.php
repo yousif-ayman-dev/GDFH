@@ -12,7 +12,12 @@
         selectedIndex: 0,
         async fetchNotifications() {
             try {
-                const res = await fetch('{{ route('notifications.poll') }}');
+                const res = await fetch('{{ route('notifications.poll') }}', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 if (res.ok) {
                     const data = await res.json();
                     this.unreadNotificationsCount = data.unread_count;
