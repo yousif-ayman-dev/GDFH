@@ -13,6 +13,15 @@ class UpdateProjectRequest extends FormRequest
 
     public function rules(): array
     {
+        $project = $this->route('project');
+        $currentStartDate = $project instanceof \App\Models\Project ? $project->start_date?->format('Y-m-d') : null;
+        $newStartDate = $this->input('start_date');
+
+        $startDateRules = ['sometimes', 'nullable', 'date'];
+        if ($newStartDate && $newStartDate !== $currentStartDate) {
+            $startDateRules[] = 'after_or_equal:today';
+        }
+
         return [
             'team_id' => ['sometimes', 'nullable', 'integer', 'exists:teams,id'],
             'title' => ['sometimes', 'required', 'string', 'max:255'],
@@ -25,7 +34,7 @@ class UpdateProjectRequest extends FormRequest
             'budget_min' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'budget_max' => ['sometimes', 'nullable', 'numeric', 'min:0', 'gte:budget_min'],
             'currency' => ['sometimes', 'nullable', 'string', 'size:3'],
-            'start_date' => ['sometimes', 'nullable', 'date'],
+            'start_date' => $startDateRules,
             'due_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
             'deadline' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
         ];

@@ -526,6 +526,7 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::post('/ai/analyze-project', [AIFeatureController::class, 'analyzeProject'])->name('ai.analyze-project');
     Route::post('/ai/suggest-members', [AIFeatureController::class, 'suggestMembers'])->name('ai.suggest-members');
     Route::get('/ai/recommended-projects', [AIFeatureController::class, 'recommendedProjects'])->name('ai.recommended-projects');
+    Route::post('/projects/{project}/ai-generate-tasks', [AIFeatureController::class, 'generateTaskBreakdown'])->name('projects.ai-generate-tasks');
 });
 
 // ─── Storage Fallback Route for Uploaded Media ────────────────────────────

@@ -289,4 +289,89 @@ class EnterpriseAIFeaturesTest extends TestCase
         $response = $this->actingAs($user)->getJson(route('ai.recommended-projects'));
         $response->assertStatus(302);
     }
+
+    public function test_ai_generate_tasks_decomposes_project_and_creates_tasks(): void
+    {
+        $this->mockAIProvider(json_encode([
+            [
+                'title' => 'إعداد البيئة وتجهيز قواعد البيانات',
+                'description' => 'تهيئة بيئة العمل وبناء جداول قواعد البيانات',
+                'priority' => 'high',
+                'estimated_minutes' => 120,
+            ],
+            [
+                'title' => 'تطوير واجهة التوثيق والبرمجيات',
+                'description' => 'بناء مسارات التوثيق وتسجيل الدخول',
+                'priority' => 'medium',
+                'estimated_minutes' => 180,
+            ],
+        ]));
+
+        $user = $this->createOnboardedUser();
+        $project = Project::factory()->create([
+            'owner_id' => $user->id,
+            'title' => 'متجر إلكتروني ذكي',
+            'description' => 'بناء نظام تجارة إلكترونية كامل يدعم الدفع والذكاء الاصطناعي',
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('projects.ai-generate-tasks', $project));
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('tasks', [
+            'project_id' => $project->id,
+            'title' => 'إعداد البيئة وتجهيز قواعد البيانات',
+        ]);
+        $this->assertEquals(2, $project->tasks()->count());
+    }
+
+    public function test_ai_generate_tasks_denies_unauthorized_user(): void
+    {
+        $owner = $this->createOnboardedUser();
+        $otherUser = $this->createOnboardedUser();
+
+        $project = Project::factory()->create([
+            'owner_id' => $owner->id,
+        ]);
+
+        $response = $this->actingAs($otherUser)->postJson(route('projects.ai-generate-tasks', $project));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_ai_sanitizer_scrubs_passwords_cards_and_private_paths(): void
+    {
+        $sanitizer = new \App\Services\AI\AISanitizer();
+
+        $dirtyText = "My password: SecretPass123! Card: 4111 2222 3333 4444 Path: storage/app/private/verifications/id.pdf";
+        $cleanText = $sanitizer->sanitize($dirtyText);
+
+        $this->assertStringNotContainsString('SecretPass123!', $cleanText);
+        $this->assertStringNotContainsString('4111 2222 3333 4444', $cleanText);
+        $this->assertStringNotContainsString('storage/app/private/verifications/id.pdf', $cleanText);
+        $this->assertStringContainsString('[REDACTED_SECRET]', $cleanText);
+        $this->assertStringContainsString('[REDACTED_CARD_NUMBER]', $cleanText);
+        $this->assertStringContainsString('[REDACTED_PRIVATE_DOCUMENT_PATH]', $cleanText);
+    }
+
+    public function test_gemini_provider_falls_back_gracefully_on_http_error(): void
+    {
+        \Illuminate\Support\Facades\Http::fake([
+            'generativelanguage.googleapis.com/*' => \Illuminate\Support\Facades\Http::response('Internal Server Error', 500),
+        ]);
+
+        config(['services.gemini.api_key' => 'fake_gemini_key']);
+
+        $fallback = new \App\Services\AI\RuleBasedAIProvider();
+        $gemini = new \App\Services\AI\GeminiAIProvider($fallback);
+        $user = $this->createOnboardedUser();
+
+        $response = $gemini->generateResponse($user, 'كيف أبدأ مشروعي؟');
+
+        $this->assertNotEmpty($response);
+        $this->assertIsString($response);
+    }
 }
+
+

@@ -251,9 +251,19 @@
               </div>
 
               @can('create', [App\Models\Task::class, $project])
-              <a href="{{ route('projects.tasks.create', $project) }}" class="gdfh-btn gdfh-btn-brand text-xs">
-                + إضافة مهمة
-              </a>
+              <div class="flex items-center gap-2">
+                <form method="POST" action="{{ route('projects.ai-generate-tasks', $project) }}" class="inline">
+                  @csrf
+                  <button type="submit" class="gdfh-btn text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="h-3.5 w-3.5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+                    تفكيك بالذكاء الاصطناعي ✨
+                  </button>
+                </form>
+
+                <a href="{{ route('projects.tasks.create', $project) }}" class="gdfh-btn gdfh-btn-brand text-xs">
+                  + إضافة مهمة
+                </a>
+              </div>
               @endcan
             </div>
 
@@ -301,9 +311,19 @@
                 <h3 class="text-sm font-bold text-[rgb(var(--color-text-primary))]">لا توجد مهام في هذا المشروع بعد</h3>
                 <p class="text-xs text-[rgb(var(--color-text-secondary))] max-w-sm mx-auto">ابدأ بإضافة مهام لتنفيذ المشروع وتتبع تقدم الإنجاز تلقائياً.</p>
                 @can('create', [App\Models\Task::class, $project])
-                <a href="{{ route('projects.tasks.create', $project) }}" class="inline-flex gdfh-btn gdfh-btn-brand text-xs mt-2">
-                  إضافة أول مهمة
-                </a>
+                <div class="flex items-center justify-center gap-3 mt-3">
+                  <form method="POST" action="{{ route('projects.ai-generate-tasks', $project) }}" class="inline">
+                    @csrf
+                    <button type="submit" class="gdfh-btn text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition flex items-center gap-1.5 shadow-sm py-2 px-4">
+                      <svg class="h-4 w-4 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+                      توليد المهام بالذكاء الاصطناعي ✨
+                    </button>
+                  </form>
+
+                  <a href="{{ route('projects.tasks.create', $project) }}" class="inline-flex gdfh-btn gdfh-btn-brand text-xs py-2 px-4">
+                    إضافة أول مهمة
+                  </a>
+                </div>
                 @endcan
               </div>
               @endforelse

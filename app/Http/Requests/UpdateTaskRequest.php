@@ -71,8 +71,27 @@ class UpdateTaskRequest extends FormRequest
                     $fail('The selected parent task must belong to the same project.');
                 }
             }],
-            'start_at' => ['sometimes', 'nullable', 'date'],
-            'due_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_at'],
+            'start_at' => ['sometimes', 'nullable', 'date', function (string $attribute, mixed $value, \Closure $fail): void {
+                $task = $this->route('task');
+                $project = $this->route('project');
+                $currentStart = $task?->start_at?->format('Y-m-d');
+
+                if ($value && $value !== $currentStart && \Carbon\Carbon::parse($value)->startOfDay()->lt(now()->startOfDay())) {
+                    $fail('تاريخ بداية المهمة لا يمكن أن يكون في الماضي.');
+                }
+
+                if ($value && $project && $project->start_date && \Carbon\Carbon::parse($value)->startOfDay()->lt($project->start_date->startOfDay())) {
+                    $fail('تاريخ بداية المهمة لا يمكن أن يكون قبل تاريخ بداية المشروع (' . $project->start_date->format('Y-m-d') . ').');
+                }
+            }],
+            'due_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_at', function (string $attribute, mixed $value, \Closure $fail): void {
+                $project = $this->route('project');
+                $projectDueDate = $project?->getTargetDueDate();
+
+                if ($value && $projectDueDate && \Carbon\Carbon::parse($value)->startOfDay()->gt($projectDueDate->startOfDay())) {
+                    $fail('تاريخ استحقاق المهمة لا يمكن أن يتجاوز تاريخ نهاية المشروع (' . $projectDueDate->format('Y-m-d') . ').');
+                }
+            }],
             'completed_at' => ['sometimes', 'nullable', 'date'],
             'estimated_minutes' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'sort_order' => ['sometimes', 'nullable', 'integer', 'min:0'],

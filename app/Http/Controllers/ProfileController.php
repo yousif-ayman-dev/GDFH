@@ -43,14 +43,9 @@ class ProfileController extends Controller
                     }
                 }
 
-                $destinationPath = public_path('uploads/avatars');
-                if (! file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0777, true);
-                }
-
                 $filename = time() . '_' . \Illuminate\Support\Str::random(12) . '.' . strtolower($file->getClientOriginalExtension());
-                $file->move($destinationPath, $filename);
-                $user->avatar_path = 'uploads/avatars/' . $filename;
+                $path = Storage::disk('public')->putFileAs('uploads/avatars', $file, $filename);
+                $user->avatar_path = $path;
             }
         }
 

@@ -200,6 +200,71 @@ class TaskCrudTest extends TestCase
         $response->assertSessionHasErrors('team_id');
     }
 
+    public function test_task_dates_must_be_valid_and_within_project_bounds(): void
+    {
+        $owner = User::factory()->create(['onboarded_at' => now(), 'username' => 'owner_user', 'account_type' => 'client']);
+        $project = Project::create([
+            'owner_id' => $owner->id,
+            'title' => 'Project With Date Bounds',
+            'slug' => 'project-dates-' . uniqid(),
+            'description' => 'Description',
+            'start_date' => now()->addDays(2)->format('Y-m-d'),
+            'deadline' => now()->addDays(10)->format('Y-m-d'),
+            'visibility' => 'private',
+            'status' => 'draft',
+        ]);
+
+        // Task start date before project start date should fail validation
+        $response = $this->actingAs($owner)->post(route('projects.tasks.store', $project), [
+            'title' => 'Invalid Start Task',
+            'start_at' => now()->addDay()->format('Y-m-d'), // Before project start (now + 2 days)
+            'due_at' => now()->addDays(5)->format('Y-m-d'),
+        ]);
+        $response->assertSessionHasErrors(['start_at']);
+
+        // Task due date after project deadline should fail validation
+        $response = $this->actingAs($owner)->post(route('projects.tasks.store', $project), [
+            'title' => 'Invalid Due Task',
+            'start_at' => now()->addDays(3)->format('Y-m-d'),
+            'due_at' => now()->addDays(15)->format('Y-m-d'), // After project deadline (now + 10 days)
+        ]);
+        $response->assertSessionHasErrors(['due_at']);
+
+        // Valid task within bounds should succeed
+        $response = $this->actingAs($owner)->post(route('projects.tasks.store', $project), [
+            'title' => 'Valid Task',
+            'start_at' => now()->addDays(3)->format('Y-m-d'),
+            'due_at' => now()->addDays(8)->format('Y-m-d'),
+        ]);
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('tasks', ['title' => 'Valid Task', 'project_id' => $project->id]);
+    }
+
+    public function test_historical_task_dates_are_preserved(): void
+    {
+        $owner = User::factory()->create(['onboarded_at' => now(), 'username' => 'historical_owner', 'account_type' => 'client']);
+        $project = $this->createProject($owner);
+
+        // Historical task created in the past
+        $task = Task::create([
+            'project_id' => $project->id,
+            'created_by' => $owner->id,
+            'title' => 'Historical Task',
+            'start_at' => now()->subDays(10)->format('Y-m-d'),
+            'due_at' => now()->subDays(2)->format('Y-m-d'),
+            'status' => 'completed',
+        ]);
+
+        // Updating title without changing past dates should succeed
+        $response = $this->actingAs($owner)->put(route('projects.tasks.update', [$project, $task]), [
+            'title' => 'Updated Historical Task Title',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $task->refresh();
+        $this->assertSame('Updated Historical Task Title', $task->title);
+    }
+
     private function createProject(User $owner, string $title = 'Test Project'): Project
     {
         return Project::create([

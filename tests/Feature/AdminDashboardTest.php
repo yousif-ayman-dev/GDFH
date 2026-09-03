@@ -265,4 +265,47 @@ class AdminDashboardTest extends TestCase
         $admin = $this->createAdmin();
         $this->assertTrue($admin->isAdmin());
     }
+
+    public function test_admin_dashboard_calculates_real_database_kpis_and_configurable_commission(): void
+    {
+        $admin = $this->createAdmin();
+        $client = $this->createUser(['account_type' => 'client', 'is_verified' => true]);
+        $freelancer = $this->createUser(['account_type' => 'freelancer', 'is_verified' => false]);
+
+        $project = Project::factory()->create([
+            'owner_id' => $client->id,
+            'title' => 'مشروع تحليلات الأدمن',
+            'category' => 'برمجة مواقع',
+            'status' => 'completed',
+            'budget' => 1000.00,
+        ]);
+
+        \App\Models\Contract::create([
+            'project_id' => $project->id,
+            'client_id' => $client->id,
+            'freelancer_id' => $freelancer->id,
+            'title' => 'عقد تنفيذ تطوير مواقع',
+            'amount' => 1000.00,
+            'status' => 'completed',
+            'start_date' => now(),
+        ]);
+
+        config(['monetization.commission_rate' => 0.15]); // 15% configurable rate test
+
+        $response = $this->actingAs($admin)->get(route('admin.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('stats');
+        $response->assertViewHas('monthlyRegistrations');
+        $response->assertViewHas('monthlyProjects');
+        $response->assertViewHas('topCategories');
+
+        $stats = $response->viewData('stats');
+        $this->assertGreaterThanOrEqual(3, $stats['total_users']);
+        $this->assertGreaterThanOrEqual(1, $stats['verified_users']);
+        $this->assertGreaterThanOrEqual(1, $stats['total_projects']);
+        $this->assertEquals(1000.00, $stats['total_contract_value']);
+        $this->assertEquals(0.15, $stats['commission_rate']);
+        $this->assertEquals(150.00, $stats['platform_commission']); // 15% of 1000.00 = 150.00
+    }
 }

@@ -9,8 +9,11 @@ use Throwable;
 class GeminiAIProvider implements AIProviderInterface
 {
     public function __construct(
-        protected RuleBasedAIProvider $fallbackProvider
-    ) {}
+        protected RuleBasedAIProvider $fallbackProvider,
+        protected ?AISanitizer $sanitizer = null
+    ) {
+        $this->sanitizer = $sanitizer ?? new AISanitizer();
+    }
 
     /**
      * Generate text response using Google Gemini REST API.
@@ -19,6 +22,9 @@ class GeminiAIProvider implements AIProviderInterface
      */
     public function generateResponse(User $user, string $prompt, array $context = []): string
     {
+        $prompt = $this->sanitizer->sanitize($prompt);
+        $context = $this->sanitizer->sanitizeContext($context);
+
         $apiKey = config('services.gemini.api_key');
         $model = config('services.gemini.model', 'gemini-2.5-flash');
 

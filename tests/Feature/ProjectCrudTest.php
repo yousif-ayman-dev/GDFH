@@ -11,6 +11,15 @@ class ProjectCrudTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function createUser(array $attributes = []): User
+    {
+        return User::factory()->create(array_merge([
+            'onboarded_at' => now(),
+            'username' => 'user_' . strtolower(\Illuminate\Support\Str::random(8)),
+            'account_type' => 'client',
+        ], $attributes));
+    }
+
     public function test_guest_cannot_access_projects(): void
     {
         $response = $this->get(route('projects.index'));
@@ -20,7 +29,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_authenticated_user_can_view_projects_index(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this
             ->actingAs($user)
@@ -32,7 +41,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_user_can_create_a_project(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this
             ->actingAs($user)
@@ -45,8 +54,8 @@ class ProjectCrudTest extends TestCase
                 'budget_min' => 500,
                 'budget_max' => 1000,
                 'currency' => 'USD',
-                'start_date' => '2026-08-01',
-                'deadline' => '2026-09-01',
+                'start_date' => now()->addDay()->format('Y-m-d'),
+                'deadline' => now()->addDays(30)->format('Y-m-d'),
             ]);
 
         $project = Project::first();
@@ -66,7 +75,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_creation_requires_valid_data(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this
             ->actingAs($user)
@@ -101,7 +110,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_owner_can_view_their_project(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $project = $this->createProject($user);
 
@@ -116,8 +125,8 @@ class ProjectCrudTest extends TestCase
 
     public function test_user_cannot_view_another_users_project(): void
     {
-        $owner = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $owner = $this->createUser();
+        $otherUser = $this->createUser();
 
         $project = $this->createProject($owner);
 
@@ -130,7 +139,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_owner_can_update_their_project(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $project = $this->createProject($user);
 
@@ -147,8 +156,8 @@ class ProjectCrudTest extends TestCase
                 'budget_min' => 20,
                 'budget_max' => 50,
                 'currency' => 'USD',
-                'start_date' => '2026-08-10',
-                'deadline' => '2026-10-01',
+                'start_date' => now()->addDays(5)->format('Y-m-d'),
+                'deadline' => now()->addDays(40)->format('Y-m-d'),
             ]);
 
         $project->refresh();
@@ -163,10 +172,35 @@ class ProjectCrudTest extends TestCase
         $this->assertNotSame($oldSlug, $project->slug);
     }
 
+    public function test_historical_project_update_without_modifying_past_start_date_succeeds(): void
+    {
+        $user = $this->createUser();
+        $pastDate = now()->subMonth()->format('Y-m-d');
+
+        $project = Project::create([
+            'owner_id' => $user->id,
+            'title' => 'Historical Project',
+            'slug' => 'historical-proj-' . uniqid(),
+            'description' => 'Description',
+            'start_date' => $pastDate,
+            'visibility' => 'private',
+            'status' => 'in_progress',
+        ]);
+
+        $response = $this->actingAs($user)->put(route('projects.update', $project), [
+            'title' => 'Renamed Historical Project',
+            'start_date' => $pastDate, // Unchanged historical date
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $project->refresh();
+        $this->assertSame('Renamed Historical Project', $project->title);
+    }
+
     public function test_user_cannot_update_another_users_project(): void
     {
-        $owner = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $owner = $this->createUser();
+        $otherUser = $this->createUser();
 
         $project = $this->createProject($owner);
 
@@ -186,7 +220,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_owner_can_delete_their_project(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $project = $this->createProject($user);
 
@@ -203,8 +237,8 @@ class ProjectCrudTest extends TestCase
 
     public function test_user_cannot_delete_another_users_project(): void
     {
-        $owner = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $owner = $this->createUser();
+        $otherUser = $this->createUser();
 
         $project = $this->createProject($owner);
 
