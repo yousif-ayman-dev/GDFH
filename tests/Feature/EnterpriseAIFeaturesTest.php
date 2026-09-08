@@ -340,6 +340,55 @@ class EnterpriseAIFeaturesTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_ai_generate_tasks_respects_project_date_bounds(): void
+    {
+        $this->mockAIProvider(json_encode([
+            [
+                'title' => 'مهمة مخصصة بجدول زمني',
+                'description' => 'وصف المهمة للتأكد من التواريخ',
+                'priority' => 'high',
+                'estimated_minutes' => 120,
+            ],
+        ]));
+
+        $user = $this->createOnboardedUser();
+        $project = Project::factory()->create([
+            'owner_id' => $user->id,
+            'title' => 'مشروع محدد بوقت',
+            'start_date' => now()->addDay(),
+            'due_date' => now()->addDays(10),
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('projects.ai-generate-tasks', $project));
+
+        $response->assertStatus(200);
+
+        $task = $project->tasks()->first();
+        $this->assertNotNull($task);
+        $this->assertNotNull($task->start_at);
+        $this->assertNotNull($task->due_at);
+        $this->assertTrue($task->due_at->gte($task->start_at));
+        $this->assertTrue($task->due_at->lte($project->getTargetDueDate()->endOfDay()));
+    }
+
+    public function test_ai_generate_tasks_handles_provider_error_gracefully(): void
+    {
+        $mock = Mockery::mock(AIProviderInterface::class);
+        $mock->shouldReceive('generateResponse')->andThrow(new \Exception('AI Provider Error'));
+        $this->app->instance(AIProviderInterface::class, $mock);
+
+        $user = $this->createOnboardedUser();
+        $project = Project::factory()->create(['owner_id' => $user->id]);
+
+        $response = $this->actingAs($user)->postJson(route('projects.ai-generate-tasks', $project));
+
+        $response->assertStatus(500);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'تعذر توليد المهام بالذكاء الاصطناعي حالياً. يرجى المحاولة لاحقاً.',
+        ]);
+    }
+
     public function test_ai_sanitizer_scrubs_passwords_cards_and_private_paths(): void
     {
         $sanitizer = new \App\Services\AI\AISanitizer();

@@ -7,7 +7,9 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\AI\AIProviderInterface;
+use App\Services\AI\AISanitizer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -222,7 +224,7 @@ PROMPT;
      * Requirement / AI Feature — Automatically generate task breakdown for a project.
      * POST /projects/{project}/ai-generate-tasks
      */
-    public function generateTaskBreakdown(Request $request, Project $project): JsonResponse
+    public function generateTaskBreakdown(Request $request, Project $project): JsonResponse|RedirectResponse
     {
         $user = Auth::user();
 
@@ -238,11 +240,26 @@ PROMPT;
             return redirect()->back()->with('error', 'غير مصرح لك بتوليد المهام لهذا المشروع.');
         }
 
-        $prompt = <<<PROMPT
+        try {
+            $sanitizer = new AISanitizer();
+            $cleanTitle = $sanitizer->sanitize($project->title);
+            $cleanDescription = $sanitizer->sanitize($project->description ?? '');
+            $cleanCategory = $sanitizer->sanitize($project->category ?? 'عام');
+
+            $startDateStr = $project->start_date ? $project->start_date->format('Y-m-d') : 'غير محدد';
+            $dueDateObj = $project->getTargetDueDate();
+            $dueDateStr = $dueDateObj ? $dueDateObj->format('Y-m-d') : 'غير محدد';
+            $budgetStr = $project->budget ? ($project->budget . ' ' . ($project->currency ?? 'USD')) : 'غير محدد';
+
+            $prompt = <<<PROMPT
 أنت مهندس مدير مشاريع خبير. قم بتفكيك هذا المشروع إلى 4 إلى 6 مهام عملية، واضحة ومحددة.
 
-عنوان المشروع: {$project->title}
-وصف المشروع: {$project->description}
+عنوان المشروع: {$cleanTitle}
+وصف المشروع: {$cleanDescription}
+التصنيف: {$cleanCategory}
+تاريخ البداية: {$startDateStr}
+الموعد النهائي: {$dueDateStr}
+الميزانية: {$budgetStr}
 
 أعد الرد بصيغة JSON فقط مصفوفة من الكائنات بالشكل التالي دون أي نص إضافي:
 [
@@ -255,76 +272,103 @@ PROMPT;
 ]
 PROMPT;
 
-        $aiText = $this->aiProvider->generateResponse($user, $prompt, [
-            'context' => 'task_breakdown',
-            'project_id' => $project->id,
-        ]);
-
-        // Attempt to parse JSON response
-        $tasksData = null;
-        if (preg_match('/\[.*\]/s', $aiText, $matches)) {
-            $tasksData = json_decode($matches[0], true);
-        }
-
-        if (! is_array($tasksData) || empty($tasksData)) {
-            $tasksData = [
-                [
-                    'title' => 'تحليل المتطلبات وتجهيز الخطة التكتيكية',
-                    'description' => 'دراسة وصف المشروع وتحديد المهام التقنية وتوزيع الأدوار.',
-                    'priority' => 'high',
-                    'estimated_minutes' => 180,
-                ],
-                [
-                    'title' => 'تصميم الهيكلية والنموذج الأولي للواجهات',
-                    'description' => 'تجهيز وتصميم مخططات وتجربة المستخدم الرئيسية للمشروع.',
-                    'priority' => 'medium',
-                    'estimated_minutes' => 360,
-                ],
-                [
-                    'title' => 'تطوير البرمجيات والربط البرمجي',
-                    'description' => 'تنفيذ الأكواد الرئيسية والمنطق العملياتي وقواعد البيانات.',
-                    'priority' => 'urgent',
-                    'estimated_minutes' => 720,
-                ],
-                [
-                    'title' => 'الاختبار والمراجعة وضمان الجودة',
-                    'description' => 'فحص الأخطاء والتأكد من توافق الميزات وتكامل النظام.',
-                    'priority' => 'medium',
-                    'estimated_minutes' => 240,
-                ],
-            ];
-        }
-
-        $createdTasks = [];
-        $sortOrder = (int) ($project->tasks()->max('sort_order') ?? 0);
-
-        foreach ($tasksData as $data) {
-            $sortOrder += 10;
-            $created = $project->tasks()->create([
-                'title' => $data['title'] ?? 'مهمة جديدة',
-                'description' => $data['description'] ?? null,
-                'priority' => in_array($data['priority'] ?? 'medium', ['low', 'medium', 'high', 'urgent'], true) ? $data['priority'] : 'medium',
-                'status' => 'todo',
-                'created_by' => $user->id,
-                'team_id' => $project->team_id,
-                'estimated_minutes' => (int) ($data['estimated_minutes'] ?? 120),
-                'sort_order' => $sortOrder,
-                'due_at' => now()->addDays(count($createdTasks) + 2),
+            $aiText = $this->aiProvider->generateResponse($user, $prompt, [
+                'context' => 'task_breakdown',
+                'project_id' => $project->id,
             ]);
-            $createdTasks[] = $created;
+
+            // Attempt to parse JSON response
+            $tasksData = null;
+            if (preg_match('/\[.*\]/s', $aiText, $matches)) {
+                $tasksData = json_decode($matches[0], true);
+            }
+
+            if (! is_array($tasksData) || empty($tasksData)) {
+                $tasksData = [
+                    [
+                        'title' => 'تحليل المتطلبات وتجهيز الخطة التكتيكية',
+                        'description' => 'دراسة وصف المشروع وتحديد المهام التقنية وتوزيع الأدوار.',
+                        'priority' => 'high',
+                        'estimated_minutes' => 180,
+                    ],
+                    [
+                        'title' => 'تصميم الهيكلية والنموذج الأولي للواجهات',
+                        'description' => 'تجهيز وتصميم مخططات وتجربة المستخدم الرئيسية للمشروع.',
+                        'priority' => 'medium',
+                        'estimated_minutes' => 360,
+                    ],
+                    [
+                        'title' => 'تطوير البرمجيات والربط البرمجي',
+                        'description' => 'تنفيذ الأكواد الرئيسية والمنطق العملياتي وقواعد البيانات.',
+                        'priority' => 'urgent',
+                        'estimated_minutes' => 720,
+                    ],
+                    [
+                        'title' => 'الاختبار والمراجعة وضمان الجودة',
+                        'description' => 'فحص الأخطاء والتأكد من توافق الميزات وتكامل النظام.',
+                        'priority' => 'medium',
+                        'estimated_minutes' => 240,
+                    ],
+                ];
+            }
+
+            $createdTasks = [];
+            $sortOrder = (int) ($project->tasks()->max('sort_order') ?? 0);
+
+            // Date boundary helpers
+            $today = now()->startOfDay();
+            $minStartDate = ($project->start_date && $project->start_date->startOfDay()->gt($today))
+                ? $project->start_date->startOfDay()
+                : $today;
+            $maxDueDate = $dueDateObj ? $dueDateObj->endOfDay() : null;
+
+            foreach ($tasksData as $index => $data) {
+                $sortOrder += 10;
+
+                // Calculate task due date safely within project bounds
+                $taskDueDate = (clone $minStartDate)->addDays(($index + 1) * 2);
+                if ($maxDueDate && $taskDueDate->gt($maxDueDate)) {
+                    $taskDueDate = clone $maxDueDate;
+                }
+
+                $created = $project->tasks()->create([
+                    'title' => $data['title'] ?? 'مهمة جديدة',
+                    'description' => $data['description'] ?? null,
+                    'priority' => in_array($data['priority'] ?? 'medium', ['low', 'medium', 'high', 'urgent'], true) ? $data['priority'] : 'medium',
+                    'status' => 'todo',
+                    'created_by' => $user->id,
+                    'team_id' => $project->team_id,
+                    'estimated_minutes' => (int) ($data['estimated_minutes'] ?? 120),
+                    'sort_order' => $sortOrder,
+                    'start_at' => $minStartDate,
+                    'due_at' => $taskDueDate,
+                ]);
+                $createdTasks[] = $created;
+            }
+
+            $message = 'تم إنشاء ' . count($createdTasks) . ' مهام تلقائياً بنجاح بواسطة الذكاء الاصطناعي ✨';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'tasks' => $createdTasks,
+                ]);
+            }
+
+            return redirect()->back()->with('success', $message);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('AI Task Breakdown Error: ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'تعذر توليد المهام بالذكاء الاصطناعي حالياً. يرجى المحاولة لاحقاً.',
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'تعذر توليد المهام بالذكاء الاصطناعي حالياً. يرجى المحاولة لاحقاً.');
         }
-
-        $message = 'تم إنشاء ' . count($createdTasks) . ' مهام تلقائياً بنجاح بواسطة الذكاء الاصطناعي ✨';
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'tasks' => $createdTasks,
-            ]);
-        }
-
-        return redirect()->back()->with('success', $message);
     }
 }
 
