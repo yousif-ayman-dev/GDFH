@@ -48,6 +48,10 @@ class ContractService
                 $contract->project->update(['status' => 'completed']);
             }
 
+            if ($contract->freelancer?->freelancerProfile) {
+                $contract->freelancer->freelancerProfile->increment('completed_projects_count');
+            }
+
             $otherUser = (int) $contract->client_id === (int) $user->id ? $contract->freelancer : $contract->client;
 
             if ($otherUser) {

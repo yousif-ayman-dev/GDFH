@@ -9,6 +9,9 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminController extends Controller
@@ -150,7 +153,7 @@ class AdminController extends Controller
             return back()->with('error', 'لا يمكنك تغيير صلاحياتك الخاصة.');
         }
 
-        $user->update(['is_admin' => ! $user->is_admin]);
+        $user->forceFill(['is_admin' => ! $user->is_admin])->save();
 
         // Send notification to user on role promotion/demotion
         try {
@@ -192,7 +195,19 @@ class AdminController extends Controller
             return back()->with('error', 'لا يمكنك حظر حساب مدير آخر للنظام.');
         }
 
-        $user->update(['is_banned' => ! $user->is_banned]);
+        $user->forceFill(['is_banned' => ! $user->is_banned])->save();
+
+        if ($user->is_banned) {
+            $user->setRememberToken(Str::random(60));
+            $user->save();
+
+            try {
+                $sessionTable = config('session.table', 'sessions');
+                if (\Illuminate\Support\Facades\Schema::hasTable($sessionTable)) {
+                    DB::table($sessionTable)->where('user_id', $user->id)->delete();
+                }
+            } catch (\Throwable $e) {}
+        }
 
         $message = $user->is_banned
             ? "تم حظر حساب {$user->name} بنجاح."
@@ -224,5 +239,61 @@ class AdminController extends Controller
         $projects = $query->paginate(20)->withQueryString();
 
         return view('admin.projects', compact('projects'));
+    }
+
+    /**
+     * Send password reset link to user email securely without revealing plaintext passwords or tokens to admin.
+     */
+    public function sendPasswordResetLink(Request $request, User $user): RedirectResponse
+    {
+        if (empty($user->email)) {
+            return back()->with('error', 'هذا الحساب لا يملك عنوان بريد إلكتروني فاصل.');
+        }
+
+        try {
+            $status = Password::broker()->sendResetLink(['email' => $user->email]);
+
+            if ($status === Password::RESET_LINK_SENT) {
+                return back()->with('success', "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريد ({$user->email}) بنجاح.");
+            }
+
+            return back()->with('error', 'تعذر إرسال رابط إعادة تعيين كلمة المرور حالياً.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'حدث خطأ أثناء محاولة إرسال رابط إعادة التعيين.');
+        }
+    }
+
+    /**
+     * Force logout user across all live sessions and invalidate remember tokens.
+     */
+    public function forceLogout(Request $request, User $user): RedirectResponse
+    {
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', 'لا يمكنك تسجيل خروج نفسك فورياً من هذه الأداة.');
+        }
+
+        // 1. Invalidate remember_token
+        $user->setRememberToken(Str::random(60));
+        $user->save();
+
+        // 2. Clear database session records if using database session driver
+        try {
+            $sessionTable = config('session.table', 'sessions');
+            if (\Illuminate\Support\Facades\Schema::hasTable($sessionTable)) {
+                DB::table($sessionTable)->where('user_id', $user->id)->delete();
+            }
+        } catch (\Throwable $e) {}
+
+        // 3. Notify user
+        try {
+            app(\App\Services\NotificationService::class)->sendNotification(
+                $user,
+                'تنبيه أمان - تسجيل الخروج الإجباري 🛡️',
+                'قام مدير النظام بإنهاء جميع جلساتك الحية لحماية حسابك.',
+                route('login')
+            );
+        } catch (\Throwable $e) {}
+
+        return back()->with('success', "تم تسجيل خروج المستخدم ({$user->name}) من جميع الجلسات الحية وإبطال التذكر بنجاح.");
     }
 }

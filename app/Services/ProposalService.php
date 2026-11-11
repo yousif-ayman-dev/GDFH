@@ -73,6 +73,14 @@ class ProposalService
             throw new InvalidArgumentException('غير مصرح لك بقبول العروض لهذا المشروع.');
         }
 
+        if ($project->status !== 'open') {
+            throw new InvalidArgumentException('لا يمكن قبول عرض لمشروع غير مفتوح أو تم التعاقد عليه مسبقاً.');
+        }
+
+        if ($proposal->status !== 'pending') {
+            throw new InvalidArgumentException('لا يمكن قبول عرض غير معلق.');
+        }
+
         return DB::transaction(function () use ($client, $proposal, $project) {
             // 1. Mark proposal accepted
             $proposal->update(['status' => 'accepted']);

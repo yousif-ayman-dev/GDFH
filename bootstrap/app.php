@@ -13,9 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureUserIsNotBanned::class,
+        ]);
+
         $middleware->alias([
-            'onboarded' => \App\Http\Middleware\EnsureOnboardingCompleted::class,
-            'admin'     => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'onboarded'  => \App\Http\Middleware\EnsureOnboardingCompleted::class,
+            'admin'      => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'not_banned' => \App\Http\Middleware\EnsureUserIsNotBanned::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

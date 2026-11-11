@@ -114,6 +114,26 @@
                       </button>
                     </form>
 
+                    {{-- Send Password Reset Link --}}
+                    <form method="POST" action="{{ route('admin.users.send-password-reset', $u) }}" onsubmit="return confirm('إرسال رابط إعادة تعيين كلمة المرور إلى بريد {{ $u->email }}؟')">
+                      @csrf
+                      <button type="submit"
+                        class="text-[10px] font-semibold px-2 py-1 rounded-lg border border-sky-400/40 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition"
+                        title="إرسال رابط إعادة تعيين كلمة المرور للمستخدم">
+                        إعادة كـلمة المرور
+                      </button>
+                    </form>
+
+                    {{-- Force Logout --}}
+                    <form method="POST" action="{{ route('admin.users.force-logout', $u) }}" onsubmit="return confirm('تسجيل خروج إجباري للمستخدم {{ $u->name }} من جميع الجلسات الحية؟')">
+                      @csrf
+                      <button type="submit"
+                        class="text-[10px] font-semibold px-2 py-1 rounded-lg border border-orange-400/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition"
+                        title="طرد وإلغاء جميع الجلسات الحية للمستخدم">
+                        طرد الجلسات
+                      </button>
+                    </form>
+
                     {{-- Toggle Ban --}}
                     @if (!$u->is_admin)
                     <form method="POST" action="{{ route('admin.users.toggle-ban', $u) }}">

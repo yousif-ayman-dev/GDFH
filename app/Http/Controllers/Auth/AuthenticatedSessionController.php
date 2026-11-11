@@ -29,7 +29,8 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         if ($intended = $request->session()->get('url.intended')) {
-            if (str_contains($intended, '/notifications/poll')) {
+            $path = parse_url($intended, PHP_URL_PATH) ?? $intended;
+            if ($path === '/notifications/poll' || preg_match('#^/chat/\d+/poll$#', $path)) {
                 $request->session()->forget('url.intended');
             }
         }

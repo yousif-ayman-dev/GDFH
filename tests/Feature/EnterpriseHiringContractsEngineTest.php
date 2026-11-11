@@ -193,4 +193,48 @@ class EnterpriseHiringContractsEngineTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_client_cannot_accept_proposal_on_non_open_project(): void
+    {
+        $client = $this->createOnboardedUser(['account_type' => 'client']);
+        $freelancer = $this->createOnboardedUser(['account_type' => 'freelancer']);
+
+        $project = Project::factory()->create([
+            'owner_id' => $client->id,
+            'status' => 'in_progress', // Not 'open'
+        ]);
+
+        $proposal = Proposal::factory()->create([
+            'project_id' => $project->id,
+            'freelancer_id' => $freelancer->id,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($client)->post(route('proposals.accept', $proposal));
+
+        $response->assertSessionHasErrors('proposal');
+        $this->assertEquals('pending', $proposal->fresh()->status);
+    }
+
+    public function test_cannot_accept_already_processed_proposal(): void
+    {
+        $client = $this->createOnboardedUser(['account_type' => 'client']);
+        $freelancer = $this->createOnboardedUser(['account_type' => 'freelancer']);
+
+        $project = Project::factory()->create([
+            'owner_id' => $client->id,
+            'status' => 'open',
+        ]);
+
+        $proposal = Proposal::factory()->create([
+            'project_id' => $project->id,
+            'freelancer_id' => $freelancer->id,
+            'status' => 'rejected', // Not 'pending'
+        ]);
+
+        $response = $this->actingAs($client)->post(route('proposals.accept', $proposal));
+
+        $response->assertSessionHasErrors('proposal');
+        $this->assertEquals('rejected', $proposal->fresh()->status);
+    }
 }

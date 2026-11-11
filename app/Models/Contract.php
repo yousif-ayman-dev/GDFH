@@ -20,6 +20,7 @@ class Contract extends Model
         'title',
         'amount',
         'status',
+        'payment_status',
         'start_date',
         'end_date',
         'completed_at',
@@ -59,6 +60,21 @@ class Contract extends Model
         return $this->belongsTo(User::class, 'freelancer_id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'contract_id');
+    }
+
+    public function latestPayment()
+    {
+        return $this->hasOne(Payment::class, 'contract_id')->latestOfMany();
+    }
+
+    public function commission()
+    {
+        return $this->hasOne(PlatformCommission::class, 'contract_id');
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';
@@ -67,5 +83,15 @@ class Contract extends Model
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    public function isUnpaid(): bool
+    {
+        return in_array($this->payment_status, ['unpaid', 'failed']);
     }
 }

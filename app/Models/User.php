@@ -27,11 +27,6 @@ class User extends Authenticatable
         'avatar_path',
         'bio',
         'notification_preferences',
-        'is_admin',
-        'is_banned',
-        'is_verified',
-        'verification_badge_at',
-        'connects_balance',
     ];
 
     protected $hidden = [

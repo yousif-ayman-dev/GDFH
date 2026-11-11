@@ -30,7 +30,25 @@ use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamProjectController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\AIFeatureController;
+use App\Http\Controllers\SeoController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\LegalController;
 use Illuminate\Support\Facades\Route;
+
+// ─── Public SEO & Discoverability Routes ──────────────────────────────────
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/about', [SeoController::class, 'about'])->name('public.about');
+Route::get('/features', [SeoController::class, 'features'])->name('public.features');
+Route::get('/faq', [SeoController::class, 'faq'])->name('public.faq');
+
+// ─── Public Legal & Policy Pages ──────────────────────────────────────────
+Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/payment-policy', [LegalController::class, 'paymentPolicy'])->name('legal.payment-policy');
+Route::get('/refund-policy', [LegalController::class, 'refundPolicy'])->name('legal.refund-policy');
+Route::get('/marketplace-rules', [LegalController::class, 'marketplaceRules'])->name('legal.marketplace-rules');
+
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -387,6 +405,21 @@ Route::middleware('auth')->group(function () {
             [ContractController::class, 'complete']
         )->name('contracts.complete');
 
+        Route::post(
+            '/contracts/{contract}/pay',
+            [PaymentController::class, 'initiate']
+        )->name('payments.initiate');
+
+        Route::get(
+            '/payments/{payment}/checkout',
+            [PaymentController::class, 'checkout']
+        )->name('payments.checkout');
+
+        Route::post(
+            '/payments/{payment}/callback',
+            [PaymentController::class, 'callback']
+        )->name('payments.callback');
+
         Route::get(
             '/chat',
             [MessagingController::class, 'index']
@@ -518,7 +551,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::post('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('users.toggle-admin');
     Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('users.toggle-ban');
+    Route::post('/users/{user}/send-password-reset', [AdminController::class, 'sendPasswordResetLink'])->name('users.send-password-reset');
+    Route::post('/users/{user}/force-logout', [AdminController::class, 'forceLogout'])->name('users.force-logout');
     Route::get('/projects', [AdminController::class, 'projects'])->name('projects');
+    Route::get('/payments', [PaymentController::class, 'adminIndex'])->name('payments');
 });
 
 // ─── AI Feature Endpoints ─────────────────────────────────────────────────
@@ -531,9 +567,36 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
 
 // ─── Storage Fallback Route for Uploaded Media ────────────────────────────
 Route::get('/storage/{path}', function ($path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath) || is_dir($fullPath)) {
+    $normalizedPath = str_replace('\\', '/', ltrim($path, '/\\'));
+
+    // 1. Block directory traversal and hidden/sensitive files
+    if (str_contains($normalizedPath, '..') || str_starts_with($normalizedPath, '.') || str_contains($normalizedPath, "\0")) {
+        abort(403, 'مسار غير صالح.');
+    }
+
+    // 2. Explicitly forbid direct public access to private project and task attachments
+    if (str_starts_with($normalizedPath, 'attachments/') || $normalizedPath === 'attachments') {
+        abort(403, 'غير مصرح بالوصول المباشر للمرفقات والملفات الخاصة. يرجى استخدام رابط التحميل المصرح.');
+    }
+
+    // 3. Allow only legitimate public asset directories
+    $allowedPrefixes = ['avatars/', 'teams/', 'services/', 'portfolios/', 'uploads/'];
+    $isAllowed = false;
+    foreach ($allowedPrefixes as $prefix) {
+        if (str_starts_with($normalizedPath, $prefix)) {
+            $isAllowed = true;
+            break;
+        }
+    }
+
+    if (! $isAllowed) {
+        abort(403, 'مسار غير مصرح به.');
+    }
+
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+    if (! $disk->exists($normalizedPath)) {
         abort(404);
     }
-    return response()->file($fullPath);
+
+    return response()->file($disk->path($normalizedPath));
 })->where('path', '.*')->name('storage.fallback');

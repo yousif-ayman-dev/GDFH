@@ -106,7 +106,6 @@ SYS;
                 $url = "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$apiKey}";
 
                 $response = Http::timeout(20)
-                    ->withoutVerifying()
                     ->post($url, $payload);
 
                 if ($response->successful()) {
@@ -130,7 +129,7 @@ SYS;
                     ],
                 ];
 
-                $simpleResponse = Http::timeout(20)->withoutVerifying()->post($url, $simplePayload);
+                $simpleResponse = Http::timeout(20)->post($url, $simplePayload);
                 if ($simpleResponse->successful()) {
                     $text = $simpleResponse->json('candidates.0.content.parts.0.text');
                     if (! empty($text)) {

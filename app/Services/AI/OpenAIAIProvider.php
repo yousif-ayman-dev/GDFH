@@ -66,7 +66,6 @@ SYS;
             }
 
             $response = Http::timeout(25)
-                ->withoutVerifying()
                 ->withToken($apiKey)
                 ->post("{$baseUrl}/chat/completions", [
                     'model' => $model,

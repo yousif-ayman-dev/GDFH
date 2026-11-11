@@ -255,7 +255,7 @@
                   this.successMessage = '';
 
                   try {
-                      const token = document.querySelector('meta[name=&quot;csrf-token&quot;]')?.getAttribute('content') || '';
+                      const token = document.querySelector("meta[name='csrf-token']")?.getAttribute('content') || '';
                       const res = await fetch('{{ route('projects.ai-generate-tasks', $project) }}', {
                           method: 'POST',
                           headers: {

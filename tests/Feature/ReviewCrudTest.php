@@ -120,7 +120,7 @@ class ReviewCrudTest extends TestCase
             'slug' => 'review-project-' . uniqid(),
             'description' => 'Project used for review tests.',
             'visibility' => 'private',
-            'status' => 'draft',
+            'status' => 'completed',
             'currency' => 'USD',
         ]);
     }

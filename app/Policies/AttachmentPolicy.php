@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Attachment;
+use App\Models\Comment;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -24,11 +25,23 @@ class AttachmentPolicy
             return $user->can('view', $subject);
         }
 
+        if ($subject instanceof Comment) {
+            $parent = $subject->commentable ?: $subject->task;
+            while ($parent instanceof Comment) {
+                $parent = $parent->commentable ?: $parent->task;
+            }
+
+            if ($parent instanceof Project || $parent instanceof Task) {
+                return $user->can('view', $parent);
+            }
+        }
+
+        // Standalone or unattached attachments fallback to uploader-only access
         if ($attachment->user_id === $user->id || $attachment->uploaded_by === $user->id) {
             return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -44,6 +57,10 @@ class AttachmentPolicy
      */
     public function update(User $user, Attachment $attachment): bool
     {
+        if (! $this->view($user, $attachment)) {
+            return false;
+        }
+
         if ($attachment->user_id === $user->id || $attachment->uploaded_by === $user->id) {
             return true;
         }
@@ -52,6 +69,14 @@ class AttachmentPolicy
 
         if ($subject instanceof Project) {
             return $user->can('update', $subject);
+        }
+
+        if ($subject instanceof Task) {
+            return $user->can('update', $subject);
+        }
+
+        if ($subject instanceof Comment) {
+            return (int) $subject->user_id === (int) $user->id;
         }
 
         return false;
@@ -62,6 +87,10 @@ class AttachmentPolicy
      */
     public function delete(User $user, Attachment $attachment): bool
     {
+        if (! $this->view($user, $attachment)) {
+            return false;
+        }
+
         if ($attachment->user_id === $user->id || $attachment->uploaded_by === $user->id) {
             return true;
         }
@@ -70,6 +99,14 @@ class AttachmentPolicy
 
         if ($subject instanceof Project) {
             return $user->can('update', $subject);
+        }
+
+        if ($subject instanceof Task) {
+            return $user->can('update', $subject);
+        }
+
+        if ($subject instanceof Comment) {
+            return (int) $subject->user_id === (int) $user->id;
         }
 
         return false;

@@ -50,6 +50,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (Auth::user()?->isBanned()) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'تم حظر هذا الحساب من قِبل إدارة المنصة. يرجى التواصل مع الدعم الفني.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

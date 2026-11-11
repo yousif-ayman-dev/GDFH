@@ -96,4 +96,42 @@ class AuthenticationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect('/projects?filter=poll-json');
     }
+
+    public function test_login_does_not_redirect_to_chat_polling_route_if_intended(): void
+    {
+        $user = User::factory()->create(['onboarded_at' => now()]);
+
+        $this->withSession(['url.intended' => '/chat/5/poll']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_chat_polling_unauthenticated_returns_json_unauthorized_and_does_not_set_intended_url(): void
+    {
+        $response = $this->getJson('/chat/1/poll');
+
+        $response->assertStatus(401);
+        $this->assertNull(session('url.intended'));
+    }
+
+    public function test_legitimate_chat_page_is_preserved_as_intended_url(): void
+    {
+        $user = User::factory()->create(['onboarded_at' => now()]);
+
+        $this->withSession(['url.intended' => '/chat/5']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect('/chat/5');
+    }
 }

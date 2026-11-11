@@ -70,8 +70,6 @@ class OnboardingController extends Controller
             'onboarded_at' => now(),
         ]);
 
-        $request->session()->regenerateToken();
-
         return redirect()
             ->route('dashboard')
             ->with('success', 'تم إكمال إعداد حسابك بنجاح! مرحباً بك في Tasker.');

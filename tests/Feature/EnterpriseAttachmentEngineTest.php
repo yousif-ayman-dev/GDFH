@@ -19,6 +19,7 @@ class EnterpriseAttachmentEngineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('private');
         Storage::fake('public');
     }
 

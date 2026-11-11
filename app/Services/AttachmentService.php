@@ -65,13 +65,13 @@ class AttachmentService
     /**
      * Upload and attach a file to a polymorphic model.
      */
-    public function upload(User $user, Model $attachable, UploadedFile $file, string $disk = 'public'): Attachment
+    public function upload(User $user, Model $attachable, UploadedFile $file, string $disk = 'private'): Attachment
     {
         $this->validateAttachment($file);
 
         return DB::transaction(function () use ($user, $attachable, $file, $disk) {
             $path = $file->store('attachments', $disk);
-            $hash = md5_file($file->getRealPath());
+            $hash = hash_file('sha256', $file->getRealPath());
 
             $attachment = Attachment::create([
                 'user_id' => $user->id,
@@ -105,20 +105,21 @@ class AttachmentService
     /**
      * Replace an existing attachment file.
      */
-    public function replace(Attachment $attachment, UploadedFile $newFile, string $disk = 'public'): Attachment
+    public function replace(Attachment $attachment, UploadedFile $newFile, string $disk = 'private'): Attachment
     {
         $this->validateAttachment($newFile);
 
-        $newHash = md5_file($newFile->getRealPath());
+        $newHash = hash_file('sha256', $newFile->getRealPath());
 
         if ($attachment->checksum === $newHash) {
             throw new \InvalidArgumentException('الملف الجديد مطابق تماماً للملف الحالي (مرفق مكرر).');
         }
 
         return DB::transaction(function () use ($attachment, $newFile, $disk, $newHash) {
-            // Delete old file from storage
-            if (Storage::disk($attachment->disk)->exists($attachment->path)) {
-                Storage::disk($attachment->disk)->delete($attachment->path);
+            // Delete old file from its recorded disk
+            $oldDisk = $attachment->disk ?: 'private';
+            if (Storage::disk($oldDisk)->exists($attachment->path)) {
+                Storage::disk($oldDisk)->delete($attachment->path);
             }
 
             $newPath = $newFile->store('attachments', $disk);
@@ -154,11 +155,14 @@ class AttachmentService
      */
     public function download(Attachment $attachment)
     {
-        if (! Storage::disk($attachment->disk)->exists($attachment->path)) {
+        $disk = $attachment->disk ?: 'private';
+
+        if (! Storage::disk($disk)->exists($attachment->path)) {
+            \Illuminate\Support\Facades\Log::warning("Attachment file missing from storage disk [{$disk}]: {$attachment->path} (ID: {$attachment->id})");
             abort(404, 'الملف غير موجود في خادم التخزين.');
         }
 
-        return Storage::disk($attachment->disk)->download(
+        return Storage::disk($disk)->download(
             $attachment->path,
             $attachment->original_name
         );
@@ -171,9 +175,12 @@ class AttachmentService
     {
         DB::transaction(function () use ($attachment) {
             $subject = $attachment->attachable;
+            $disk = $attachment->disk ?: 'private';
 
-            if (Storage::disk($attachment->disk)->exists($attachment->path)) {
-                Storage::disk($attachment->disk)->delete($attachment->path);
+            if (Storage::disk($disk)->exists($attachment->path)) {
+                Storage::disk($disk)->delete($attachment->path);
+            } else {
+                \Illuminate\Support\Facades\Log::warning("Deleting attachment record {$attachment->id}, but file was missing from disk [{$disk}]: {$attachment->path}");
             }
 
             if ($subject) {

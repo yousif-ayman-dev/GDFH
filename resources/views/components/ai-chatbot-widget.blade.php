@@ -17,15 +17,21 @@
         });
 
         try {
+            const token = document.querySelector("meta[name='csrf-token']")?.getAttribute('content') || '';
             const res = await fetch('{{ route('ai.quick-chat') }}', {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': token,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({ message: msg })
             });
+
+            if (res.status === 401 || res.status === 419) {
+                window.location.reload();
+                return;
+            }
 
             if (res.ok) {
                 const data = await res.json();

@@ -169,15 +169,21 @@
           this.newMessageContent = '';
 
           try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const response = await fetch('/chat/' + this.activeConversationId + '/messages-json', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': token
               },
               body: JSON.stringify({ content: text })
             });
+
+            if (response.status === 401 || response.status === 419) {
+              window.location.reload();
+              return;
+            }
 
             if (response.ok) {
               const data = await response.json();
@@ -194,7 +200,18 @@
         async pollMessages() {
           if (!this.activeConversationId) return;
           try {
-            const response = await fetch('/chat/' + this.activeConversationId + '/poll');
+            const response = await fetch('/chat/' + this.activeConversationId + '/poll', {
+              headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+
+            if (response.status === 401 || response.status === 419) {
+              window.location.reload();
+              return;
+            }
+
             if (response.ok) {
               const data = await response.json();
               if (data.messages && data.messages.length > 0) {

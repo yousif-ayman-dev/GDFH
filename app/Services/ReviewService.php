@@ -28,12 +28,31 @@ class ReviewService
         ?string $comment = null,
         ?int $targetRevieweeId = null
     ): Review {
+        $isOwner = (int) $reviewer->id === (int) $project->owner_id;
+        $isMember = $project->members()->where('user_id', $reviewer->id)->exists();
+        $hasContract = Contract::where('project_id', $project->id)
+            ->where(function ($q) use ($reviewer) {
+                $q->where('freelancer_id', $reviewer->id)
+                  ->orWhere('client_id', $reviewer->id);
+            })->exists();
+
+        if (! $isOwner && ! $isMember && ! $hasContract) {
+            throw new InvalidArgumentException('غير مصرح لك بإضافة تقييم لهذا المشروع لأنك لست طرفاً فيه.');
+        }
+
+        $isCompleted = $project->status === 'completed'
+            || Contract::where('project_id', $project->id)->where('status', 'completed')->exists();
+
+        if (! $isCompleted) {
+            throw new InvalidArgumentException('لا يمكن إضافة تقييم إلا بعد إتمام المشروع واكتماله.');
+        }
+
         $revieweeId = $targetRevieweeId;
 
         if (! $revieweeId) {
             $contract = Contract::where('project_id', $project->id)->first();
 
-            if ((int) $reviewer->id === (int) $project->owner_id) {
+            if ($isOwner) {
                 $revieweeId = $contract?->freelancer_id;
 
                 if (! $revieweeId) {
@@ -47,6 +66,10 @@ class ReviewService
 
         if (! $revieweeId) {
             throw new InvalidArgumentException('لم يتم العثور على شريك لتقييمه.');
+        }
+
+        if ((int) $reviewer->id === (int) $revieweeId) {
+            throw new InvalidArgumentException('لا يمكنك تقييم نفسك.');
         }
 
         $existing = Review::where('project_id', $project->id)

@@ -1,113 +1,134 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"
-  x-data="{
-        mobileNavigation: false,
-        userMenu: false,
-        quickCreateMenu: false,
-        notificationsMenu: false,
-        unreadNotificationsCount: {{ Auth::user() ? Auth::user()->unreadNotificationsCount() : 0 }},
-        notificationsList: [],
-        commandPalette: false,
-        searchQuery: '',
-        selectedIndex: 0,
-        async fetchNotifications() {
-            try {
-                const res = await fetch('{{ route('notifications.poll') }}', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    this.unreadNotificationsCount = data.unread_count;
-                    this.notificationsList = data.notifications;
-                }
-            } catch(e) {}
-        },
-        async markAllNotificationsRead() {
-            try {
-                const res = await fetch('{{ route('notifications.read-all-json') }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-                if (res.ok) {
-                    this.unreadNotificationsCount = 0;
-                    this.notificationsList = [];
-                }
-            } catch(e) {}
-        },
-        async markNotificationRead(id, actionUrl) {
-            try {
-                await fetch('/notifications/' + id + '/read-json', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-                this.fetchNotifications();
-                if (actionUrl) {
-                    window.location.href = actionUrl;
-                }
-            } catch(e) {}
-        },
-        initNotificationsPolling() {
-            this.fetchNotifications();
-            setInterval(() => this.fetchNotifications(), 20000);
-        },
-        items: [
-            { title: 'بوابة البحث الشاملة (Search Portal)', type: 'بحث', url: '{{ route('search.index') }}', category: 'البحث' },
-            { title: 'الرئيسية (Dashboard)', type: 'صفحة', url: '{{ route('dashboard') }}', category: 'التنقل الرئيسي' },
-            { title: 'المشاريع (Projects)', type: 'صفحة', url: '{{ route('projects.index') }}', category: 'إدارة العمل' },
-            { title: 'إنشاء مشروع جديد (New Project)', type: 'إجراء سريع', url: '{{ route('projects.create') }}', category: 'اختصارات' },
-            { title: 'الفرق (Teams)', type: 'صفحة', url: '{{ route('teams.index') }}', category: 'إدارة العمل' },
-            { title: 'جميع المهام (Tasks)', type: 'صفحة', url: '{{ route('tasks.index') }}', category: 'إدارة العمل' },
-            { title: 'إنشاء فريق جديد (New Team)', type: 'إجراء سريع', url: '{{ route('teams.create') }}', category: 'اختصارات' },
-            { title: 'لوحة كانبان (Kanban Board)', type: 'أداة', url: '{{ route('kanban.index') }}', category: 'الأدوات' },
-            { title: 'مخطط غانت (Gantt Chart)', type: 'أداة', url: '{{ route('gantt.index') }}', category: 'الأدوات' },
-            { title: 'تتبع الوقت (Time Tracking)', type: 'أداة', url: '{{ route('time-tracking.index') }}', category: 'الأدوات' },
-            { title: 'مساعد الذكاء الاصطناعي (AI Assistant)', type: 'ذكاء اصطناعي', url: '{{ route('ai.index') }}', category: 'الذكاء الاصطناعي' },
-            { title: 'التقارير والتحليلات (Reports)', type: 'تحليلات', url: '{{ route('reports.index') }}', category: 'التقارير' },
-            { title: 'مركز الدعوات (Invitations)', type: 'صفحة', url: '{{ route('invitations.index') }}', category: 'التنقل' },
-            { title: 'الحساب والإعدادات (Settings)', type: 'إعدادات', url: '{{ route('profile.edit') }}', category: 'النظام' }
-        ],
-        get filteredItems() {
-            if (!this.searchQuery.trim()) return this.items;
-            const q = this.searchQuery.toLowerCase().trim();
-            return this.items.filter(i => i.title.toLowerCase().includes(q) || i.type.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
-        },
-        navigate() {
-            const list = this.filteredItems;
-            if (list.length > 0 && list[this.selectedIndex]) {
-                window.location.href = list[this.selectedIndex].url;
-            } else if (this.searchQuery.trim()) {
-                window.location.href = '{{ route('search.index') }}?q=' + encodeURIComponent(this.searchQuery.trim());
-            }
-        }
-    }"
-  @keydown.window="(e) => {
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
-            e.preventDefault();
-            commandPalette = !commandPalette;
-            if (commandPalette) {
-                searchQuery = '';
-                selectedIndex = 0;
-                $nextTick(() => $refs.commandInput?.focus());
-            }
-        }
-    }"
-  :class="{ 'dark': $store.theme.isDark }">
+<html lang="ar" dir="rtl" x-data="appLayout()" :class="{ 'dark': $store.theme.isDark }">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <script>
+  function appLayout() {
+      return {
+          mobileNavigation: false,
+          userMenu: false,
+          quickCreateMenu: false,
+          notificationsMenu: false,
+          unreadNotificationsCount: {{ Auth::user() ? Auth::user()->unreadNotificationsCount() : 0 }},
+          notificationsList: [],
+          commandPalette: false,
+          searchQuery: '',
+          selectedIndex: 0,
+          init() {
+              this.initNotificationsPolling();
+              window.addEventListener('keydown', (e) => {
+                  if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+                      e.preventDefault();
+                      this.commandPalette = !this.commandPalette;
+                      if (this.commandPalette) {
+                          this.searchQuery = '';
+                          this.selectedIndex = 0;
+                          this.$nextTick(() => this.$refs.commandInput?.focus());
+                      }
+                  }
+              });
+          },
+          async fetchNotifications() {
+              try {
+                  const res = await fetch("{{ route('notifications.poll') }}", {
+                      headers: {
+                          'Accept': 'application/json',
+                          'X-Requested-With': 'XMLHttpRequest'
+                      }
+                  });
+                  if (res.status === 401 || res.status === 419) {
+                      window.location.reload();
+                      return;
+                  }
+                  if (res.ok) {
+                      const data = await res.json();
+                      this.unreadNotificationsCount = data.unread_count;
+                      this.notificationsList = data.notifications;
+                  }
+              } catch(e) {}
+          },
+          async markAllNotificationsRead() {
+              try {
+                  const token = document.querySelector("meta[name='csrf-token']")?.getAttribute('content') || '';
+                  const res = await fetch("{{ route('notifications.read-all-json') }}", {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRF-TOKEN': token,
+                          'Content-Type': 'application/json',
+                          'Accept': 'application/json'
+                      }
+                  });
+                  if (res.status === 401 || res.status === 419) {
+                      window.location.reload();
+                      return;
+                  }
+                  if (res.ok) {
+                      this.unreadNotificationsCount = 0;
+                      this.notificationsList = [];
+                  }
+              } catch(e) {}
+          },
+          async markNotificationRead(id, actionUrl) {
+              try {
+                  const token = document.querySelector("meta[name='csrf-token']")?.getAttribute('content') || '';
+                  const res = await fetch('/notifications/' + id + '/read-json', {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRF-TOKEN': token,
+                          'Content-Type': 'application/json',
+                          'Accept': 'application/json'
+                      }
+                  });
+                  if (res.status === 401 || res.status === 419) {
+                      window.location.reload();
+                      return;
+                  }
+                  this.fetchNotifications();
+                  if (actionUrl) {
+                      window.location.href = actionUrl;
+                  }
+              } catch(e) {}
+          },
+          initNotificationsPolling() {
+              this.fetchNotifications();
+              setInterval(() => this.fetchNotifications(), 20000);
+          },
+          items: [
+              { title: 'بوابة البحث الشاملة (Search Portal)', type: 'بحث', url: "{{ route('search.index') }}", category: 'البحث' },
+              { title: 'الرئيسية (Dashboard)', type: 'صفحة', url: "{{ route('dashboard') }}", category: 'التنقل الرئيسي' },
+              { title: 'المشاريع (Projects)', type: 'صفحة', url: "{{ route('projects.index') }}", category: 'إدارة العمل' },
+              { title: 'إنشاء مشروع جديد (New Project)', type: 'إجراء سريع', url: "{{ route('projects.create') }}", category: 'اختصارات' },
+              { title: 'الفرق (Teams)', type: 'صفحة', url: "{{ route('teams.index') }}", category: 'إدارة العمل' },
+              { title: 'جميع المهام (Tasks)', type: 'صفحة', url: "{{ route('tasks.index') }}", category: 'إدارة العمل' },
+              { title: 'إنشاء فريق جديد (New Team)', type: 'إجراء سريع', url: "{{ route('teams.create') }}", category: 'اختصارات' },
+              { title: 'لوحة كانبان (Kanban Board)', type: 'أداة', url: "{{ route('kanban.index') }}", category: 'الأدوات' },
+              { title: 'مخطط غانت (Gantt Chart)', type: 'أداة', url: "{{ route('gantt.index') }}", category: 'الأدوات' },
+              { title: 'تتبع الوقت (Time Tracking)', type: 'أداة', url: "{{ route('time-tracking.index') }}", category: 'الأدوات' },
+              { title: 'مساعد الذكاء الاصطناعي (AI Assistant)', type: 'ذكاء اصطناعي', url: "{{ route('ai.index') }}", category: 'الذكاء الاصطناعي' },
+              { title: 'التقارير والتحليلات (Reports)', type: 'تحليلات', url: "{{ route('reports.index') }}", category: 'التقارير' },
+              { title: 'مركز الدعوات (Invitations)', type: 'صفحة', url: "{{ route('invitations.index') }}", category: 'التنقل' },
+              { title: 'الحساب والإعدادات (Settings)', type: 'إعدادات', url: "{{ route('profile.edit') }}", category: 'النظام' }
+          ],
+          get filteredItems() {
+              if (!this.searchQuery.trim()) return this.items;
+              const q = this.searchQuery.toLowerCase().trim();
+              return this.items.filter(i => i.title.toLowerCase().includes(q) || i.type.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
+          },
+          navigate() {
+              const list = this.filteredItems;
+              if (list.length > 0 && list[this.selectedIndex]) {
+                  window.location.href = list[this.selectedIndex].url;
+              } else if (this.searchQuery.trim()) {
+                  window.location.href = "{{ route('search.index') }}?q=" + encodeURIComponent(this.searchQuery.trim());
+              }
+          }
+      };
+  }
+  </script>
 
   {{-- Favicon --}}
   <x-application-favicon />

@@ -253,10 +253,6 @@ class MarketplaceService
 
             $service->increment('sales_count');
 
-            if ($service->user?->freelancerProfile) {
-                $service->user->freelancerProfile->increment('completed_projects_count');
-            }
-
             $notificationService = app(NotificationService::class);
             $notificationService->sendNotification(
                 $service->user,
